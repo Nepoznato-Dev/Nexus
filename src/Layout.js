@@ -19,6 +19,14 @@ const getFakeTitle = () => {
 };
 
 export default function Layout({ children, currentPageName }) {
+  // Generate unique sessionId on mount
+  const sessionIdRef = useRef(sessionStorage.getItem('nexus_session_id'));
+  if (!sessionIdRef.current) {
+    sessionIdRef.current = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    sessionStorage.setItem('nexus_session_id', sessionIdRef.current);
+  }
+  const sessionId = sessionIdRef.current;
+
   const [searchInput, setSearchInput] = useState('');
   const [searchMode, setSearchMode] = useState('browser'); // 'browser' or 'ai'
   const [lastActivity, setLastActivity] = useState(Date.now());
