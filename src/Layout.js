@@ -218,6 +218,7 @@ export default function Layout({ children, currentPageName }) {
     const checkKickStatus = () => {
       try {
         const kickList = JSON.parse(localStorage.getItem('nexus_kick_list') || '[]');
+        const sessionId = session.get?.();
         const kicked = kickList.find(k => k.sessionId === sessionId);
         
         if (kicked) {
@@ -233,7 +234,7 @@ export default function Layout({ children, currentPageName }) {
     
     const checkBanStatus = () => {
       try {
-        const accessCode = session.getAccessCode();
+        const accessCode = session.get?.();
         if (!accessCode) return;
         
         // Check if user got banned during their session
@@ -260,7 +261,8 @@ export default function Layout({ children, currentPageName }) {
       try {
         const sessions = JSON.parse(localStorage.getItem('nexus_active_sessions') || '[]');
         const email = localStorage.getItem('nexus_user_email') || sessionStorage.getItem('nexus_user_email') || 'Anonymous';
-        const role = sessionStorage.getItem('nexus_role') || 'guest';
+        const role = session.getRole?.() || 'guest';
+        const sessionId = session.get?.();
         
         // Remove old session entries for this sessionId
         const filtered = sessions.filter(s => s.sessionId !== sessionId);
@@ -313,7 +315,7 @@ export default function Layout({ children, currentPageName }) {
       clearInterval(timeoutInterval);
       clearInterval(heartbeatInterval);
     };
-  }, [sessionId, navigate]);
+  }, [navigate]);
   
   // Don't show search bar on Browser or StudyTools page
   const isBrowserPage = location.pathname.includes('/browser');
