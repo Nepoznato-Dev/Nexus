@@ -48,9 +48,11 @@
 
         // Prevent app from mounting in this tab; show a simple notice
         window.__NEXUS_SKIP_APP__ = true;
-        document.write('<!DOCTYPE html><html><body style="font-family:Arial;padding:24px;background:#0a0a0f;color:#fff;">' +
+        document.write(
+          '<!DOCTYPE html><html><body style="font-family:Arial;padding:24px;background:#0a0a0f;color:#fff;">' +
           '<h2>Nexus opened in a new window.</h2><p>You can close this tab.</p>' +
-          '</body></html>');
+          '</body></html>'
+        );
         document.close();
       })();
     </script>
