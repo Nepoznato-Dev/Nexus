@@ -151,7 +151,7 @@ export function generateResponse(userMessage, personality = { professionalism: 0
   if (matchesKeywords(lower, ['tight', 'concise', 'verbose', 'wordy', 'trim'])) {
     return buildResponse(
       knowledgeBase.writingHelp.tightening,
-      'Tight writing is more powerful. Here's how to trim the fat:',
+      "Tight writing is more powerful. Here's how to trim the fat:",
       personality
     );
   }
@@ -175,7 +175,7 @@ export function generateResponse(userMessage, personality = { professionalism: 0
   if (matchesKeywords(lower, ['fraction', 'divide', 'multiply'])) {
     return buildResponse(
       knowledgeBase.mathBasics.fractions,
-      'Fractions are easier than they look. Here's the deal:',
+      "Fractions are easier than they look. Here's the deal:",
       personality
     );
   }
@@ -183,7 +183,7 @@ export function generateResponse(userMessage, personality = { professionalism: 0
   if (matchesKeywords(lower, ['percent', '%', 'discount'])) {
     return buildResponse(
       knowledgeBase.mathBasics.percentages,
-      'Percentages are just fractions out of 100. Here's how:',
+      "Percentages are just fractions out of 100. Here's how:",
       personality
     );
   }
@@ -239,7 +239,7 @@ export function generateResponse(userMessage, personality = { professionalism: 0
   if (matchesKeywords(lower, ['debug', 'error', 'fix', 'bug', 'problem'])) {
     return buildResponse(
       knowledgeBase.codingBasics.debugging,
-      'Debugging is a skill. Here's a solid approach:',
+      "Debugging is a skill. Here's a solid approach:",
       personality
     );
   }
@@ -247,7 +247,7 @@ export function generateResponse(userMessage, personality = { professionalism: 0
   if (matchesKeywords(lower, ['error', 'message', 'exception', 'crash'])) {
     return buildResponse(
       knowledgeBase.codingBasics.readingErrors,
-      'Error messages are your friend—they tell you what's wrong:',
+      "Error messages are your friend—they tell you what's wrong:",
       personality
     );
   }
@@ -255,7 +255,7 @@ export function generateResponse(userMessage, personality = { professionalism: 0
   if (matchesKeywords(lower, ['boss', 'stealth', 'disguise', 'hide', 'panic'])) {
     return buildResponse(
       knowledgeBase.nexusFeatures.stealth,
-      'Nexus has solid stealth features. Here's what you can do:',
+      "Nexus has solid stealth features. Here's what you can do:",
       personality
     );
   }
@@ -295,7 +295,7 @@ export function generateResponse(userMessage, personality = { professionalism: 0
   if (matchesKeywords(lower, ['illegal', 'hack', 'cheat', 'exam', 'harm', 'hurt'])) {
     return buildResponse(
       knowledgeBase.boundaries.harmful,
-      'I can't help with that.',
+      "I can't help with that.",
       personality,
       true
     );
@@ -304,7 +304,7 @@ export function generateResponse(userMessage, personality = { professionalism: 0
   if (matchesKeywords(lower, ['doctor', 'sick', 'health', 'medicine', 'medical'])) {
     return buildResponse(
       knowledgeBase.boundaries.medical,
-      'I'm not a doctor. For health questions, see a professional.',
+      "I'm not a doctor. For health questions, see a professional.",
       personality,
       true
     );
