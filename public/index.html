@@ -4,8 +4,9 @@
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
+    <meta name="theme-color" content="#000000" />    <meta name="author" content="Nepoznato-Dev" />
+    <meta name="copyright" content="Copyright 2026 Nepoznato-Dev. All Rights Reserved." />
+    <meta name="license" content="Proprietary - All Rights Reserved" />    <meta
       name="description"
       content="Nexus - Privacy-first, local-only student hub"
     />
@@ -13,18 +14,47 @@
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <title>Nexus - Student Hub</title>
     <script>
-      // Anti-direct-access protection: redirect to launcher with about:blank
+      // Default to launching the app inside about:blank unless already embedded
       (function() {
         const params = new URLSearchParams(window.location.search);
-        const isEmbedded = params.has('embedded');
-        
-        // If accessed directly (not embedded), redirect to launcher
-        // The launcher will handle about:blank embedding
-        if (!isEmbedded) {
-          window.location.replace(window.location.origin + '/fake-404.html');
+        const isEmbedded = params.get('embedded') === 'true';
+
+        if (isEmbedded) {
+          window.__NEXUS_EMBEDDED__ = true;
+          return;
         }
+
+        // Not embedded: attempt to open about:blank and load embedded app
+        const aboutBlank = window.open('about:blank', '_blank');
+        if (!aboutBlank) {
+          window.__NEXUS_SKIP_APP__ = true;
+          document.write('<!DOCTYPE html><html><body style="font-family:Arial;padding:24px;background:#0a0a0f;color:#fff;">' +
+            '<h2>Popup blocked</h2><p>Allow popups to launch Nexus in about:blank.</p>' +
+            '</body></html>');
+          document.close();
+          return;
+        }
+
+        // Write a lightweight loader into the about:blank window
+        aboutBlank.document.open();
+        aboutBlank.document.write(
+          '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Nexus</title>' +
+          '<style>html,body,iframe{margin:0;padding:0;width:100%;height:100%;border:0;overflow:hidden;background:#000;}</style>' +
+          '</head><body>' +
+          '<iframe src="' + window.location.origin + '/index.html?embedded=true" allow="fullscreen; clipboard-read; clipboard-write"></iframe>' +
+          '</body></html>'
+        );
+        aboutBlank.document.close();
+
+        // Prevent app from mounting in this tab; show a simple notice
+        window.__NEXUS_SKIP_APP__ = true;
+        document.write('<!DOCTYPE html><html><body style="font-family:Arial;padding:24px;background:#0a0a0f;color:#fff;">' +
+          '<h2>Nexus opened in a new window.</h2><p>You can close this tab.</p>' +
+          '</body></html>');
+        document.close();
       })();
     </script>
+    <!-- Removed legacy redirect script to allow normal app loading -->
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

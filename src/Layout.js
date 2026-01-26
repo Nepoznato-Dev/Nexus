@@ -9,7 +9,14 @@ import Sidebar from './Components/UI/Sidebar.js';
 import { useNotifications, NotificationCenter, NotificationToast } from './Components/Notifications/NotificationCenter.js';
 import ScheduleTracker from './Components/Schedule/ScheduleTracker.js';
 import DecoyScreen from './Components/Stealth/DecoyScreen.js';
+import LoadingScreen from './Components/LoadingScreen/LoadingScreen.js';
 import { AnimatePresence } from 'framer-motion';
+import PerformancePanel from './Components/Performance/PerformancePanel.js';
+
+const getFakeTitle = () => {
+  const titles = ['Math Homework', 'Study Session', 'Project Notes', 'Research Dashboard'];
+  return titles[Math.floor(Math.random() * titles.length)];
+};
 
 export default function Layout({ children, currentPageName }) {
   const [searchInput, setSearchInput] = useState('');
@@ -20,62 +27,60 @@ export default function Layout({ children, currentPageName }) {
   const [activeToasts, setActiveToasts] = useState([]);
   const [showDecoy, setShowDecoy] = useState(false);
   const [decoyReason, setDecoyReason] = useState('idle');
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  const [pageLoadStartTime, setPageLoadStartTime] = useState(Date.now());
+  const [pageStatus, setPageStatus] = useState(null); // null | 'Thinking' | 'Saving' etc.
+  const [pageReady, setPageReady] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarWidth, setSidebarWidth] = useState(72);
+  const [showPerformancePanel, setShowPerformancePanel] = useState(false);
   const notifications = useNotifications();
-
-  // Expose notifications globally
+  
+  const MIN_LOADING_TIME = 800; // Minimum hangover time in ms
+  const MAX_LOADING_TIME = 5000; // Timeout if page never signals ready
+  
+  // Expose setPageStatus and pageReady globally for other components
   useEffect(() => {
+    window.nexusPageStatus = setPageStatus;
+    window.nexusPageReady = () => {
+      setPageReady(true);
+    };
+    return () => {
+      delete window.nexusPageStatus;
+      delete window.nexusPageReady;
+    };
+  }, []);
+
+  // Expose notifications globally and manage tab title/favicon
+  useEffect(() => {
+    const baseTitle = currentPageName ? `Nexus — ${currentPageName}` : 'Nexus';
+    const title = pageStatus ? `${baseTitle} — ${pageStatus}` : baseTitle;
+    document.title = title;
+    
     window.nexusNotifications = {
       show: (notification) => {
         const newNotif = notifications.addNotification(notification);
-        setActiveToasts(prev => [...prev, newNotif]);
-      }
-    };
-    return () => {
-      delete window.nexusNotifications;
-    };
-  }, [notifications]);
-
-  const [sessionId] = useState(() => {
-    // Generate unique session ID
-    const existing = sessionStorage.getItem('nexus_session_id');
-    if (existing) return existing;
-    const newId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-    sessionStorage.setItem('nexus_session_id', newId);
-    return newId;
-  });
-
-  // Tab title and favicon morphing for stealth
-  useEffect(() => {
-    const getFakeTitle = () => {
-      try {
-        const settings = JSON.parse(localStorage.getItem('nexus_settings') || '{}');
-        return settings.accessibility?.fakeTabName || 'IXL - Math Practice';
-      } catch {
-        return 'IXL - Math Practice';
+        setActiveToasts((prev) => [...prev, newNotif]);
       }
     };
 
-    const originalTitle = 'Nexus - Student Hub';
     const originalFavicon = '/favicon.ico';
     
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // Tab is not active - disguise it
         const fakeTitle = getFakeTitle();
         document.title = fakeTitle;
         // Change favicon to neutral study icon
         const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
         link.rel = 'icon';
-        link.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="70" font-size="70" text-anchor="middle" fill="%23333">📚</text></svg>';
+        link.href = 'data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><text x=\"50\" y=\"70\" font-size=\"70\" text-anchor=\"middle\" fill=\"%23333\">📚</text></svg>';
         if (!document.querySelector("link[rel*='icon']")) {
           document.head.appendChild(link);
         }
       } else {
         // Tab is active - show real title
-        document.title = originalTitle;
+        document.title = pageStatus ? `${baseTitle} — ${pageStatus}` : baseTitle;
         const link = document.querySelector("link[rel*='icon']");
         if (link) {
           link.href = originalFavicon;
@@ -84,8 +89,61 @@ export default function Layout({ children, currentPageName }) {
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
+    const openNotifications = () => setNotificationCenterOpen(true);
+    window.addEventListener('nexus:open-notifications', openNotifications);
+    return () => {
+      delete window.nexusNotifications;
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('nexus:open-notifications', openNotifications);
+    };
+  }, [notifications, currentPageName, pageStatus]);
+
+  // Dynamic loading: wait for both min time AND page readiness
+  useEffect(() => {
+    setIsPageLoading(true);
+    setPageStatus('Loading');
+    setPageReady(false);
+    setPageLoadStartTime(Date.now());
+
+    let minTimeElapsed = false;
+    let maxTimeoutReached = false;
+
+    // Minimum display timer (hangover)
+    const minTimer = setTimeout(() => {
+      minTimeElapsed = true;
+      checkDismiss();
+    }, MIN_LOADING_TIME);
+
+    // Maximum timeout fallback
+    const maxTimer = setTimeout(() => {
+      maxTimeoutReached = true;
+      checkDismiss();
+    }, MAX_LOADING_TIME);
+
+    function checkDismiss() {
+      // Dismiss if: (min time elapsed AND page ready) OR max timeout reached
+      if ((minTimeElapsed && pageReady) || maxTimeoutReached) {
+        setIsPageLoading(false);
+        setPageStatus(null);
+      }
+    }
+
+    return () => {
+      clearTimeout(minTimer);
+      clearTimeout(maxTimer);
+    };
+  }, [location.pathname]);
+
+  // Check dismissal when pageReady changes
+  useEffect(() => {
+    if (pageReady && !isPageLoading) return; // Already dismissed
+    
+    const elapsed = Date.now() - pageLoadStartTime;
+    if (elapsed >= MIN_LOADING_TIME && pageReady) {
+      setIsPageLoading(false);
+      setPageStatus(null);
+    }
+  }, [pageReady, pageLoadStartTime, isPageLoading]);
 
   // Boss Key Handler
   useEffect(() => {
@@ -114,8 +172,10 @@ export default function Layout({ children, currentPageName }) {
     if (!stealthSettings.idleDecoyEnabled || showDecoy) return;
 
     let idleTimeout;
+    
     const resetIdleTimer = () => {
       setLastActivity(Date.now());
+      lastActivityRef.current = Date.now();
       clearTimeout(idleTimeout);
       
       const timeoutMinutes = stealthSettings.idleDecoyTimeout || 3;
@@ -125,7 +185,7 @@ export default function Layout({ children, currentPageName }) {
       }, timeoutMinutes * 60 * 1000);
     };
 
-    // Activity listeners
+    // Activity listeners - consolidated set
     const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
     activityEvents.forEach(event => {
       window.addEventListener(event, resetIdleTimer);
@@ -144,18 +204,8 @@ export default function Layout({ children, currentPageName }) {
   
   // Monitor for admin kicks, bans, and timeouts
   useEffect(() => {
-    // Track user activity
-    const handleActivity = () => {
-      const now = Date.now();
-      lastActivityRef.current = now;
-      setLastActivity(now);
-    };
-    
-    // Listen for user activity
-    window.addEventListener('mousemove', handleActivity);
-    window.addEventListener('keydown', handleActivity);
-    window.addEventListener('click', handleActivity);
-    window.addEventListener('scroll', handleActivity);
+    // Note: Activity tracking is now consolidated in the Idle Decoy Mode effect above
+    // This ensures we don't have duplicate listeners
     
     const checkKickStatus = () => {
       try {
@@ -236,8 +286,8 @@ export default function Layout({ children, currentPageName }) {
       }
     };
 
-    // Check for kicks every second
-    const kickInterval = setInterval(checkKickStatus, 1000);
+    // Check for kicks every 5 seconds (reduced from 1s for performance)
+    const kickInterval = setInterval(checkKickStatus, 5000);
     
     // Check for bans every 5 seconds
     const banInterval = setInterval(checkBanStatus, 5000);
@@ -254,10 +304,6 @@ export default function Layout({ children, currentPageName }) {
       clearInterval(banInterval);
       clearInterval(timeoutInterval);
       clearInterval(heartbeatInterval);
-      window.removeEventListener('mousemove', handleActivity);
-      window.removeEventListener('keydown', handleActivity);
-      window.removeEventListener('click', handleActivity);
-      window.removeEventListener('scroll', handleActivity);
     };
   }, [sessionId, navigate]);
   
@@ -283,86 +329,92 @@ export default function Layout({ children, currentPageName }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#2a2a3e]" style={{ paddingLeft: shouldHideUI ? 0 : sidebarWidth }}>
-      {/* Global Keyboard Shortcuts Handler */}
+    <div className="min-h-screen bg-[#2a2a3e] flex flex-col">
+      <LoadingScreen isLoading={isPageLoading} showDuration={900} />
+
       {!shouldHideUI && <KeyboardHandler />}
-      {/* Opera-style Sidebar */}
-      {!shouldHideUI && <Sidebar onWidthChange={setSidebarWidth} />}
-      {/* Sidebar Widgets Overlay (only when not docked) */}
-      {!shouldHideUI && <WidgetsOverlay />}
-      
-      {/* Universal Search Bar */}
-      {!shouldHideUI && !isBrowserPage && !isStudyToolsPage && (
-        <div className="sticky top-0 z-50 bg-black/40 backdrop-blur-md border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-4 py-2">
-            <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto flex items-center gap-2">
-              {/* Mode Toggle */}
-              <button
-                type="button"
-                onClick={() => setSearchMode(searchMode === 'browser' ? 'ai' : 'browser')}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                  searchMode === 'ai' 
-                    ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' 
-                    : 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-                }`}
-                title={`Switch to ${searchMode === 'browser' ? 'AI' : 'Browser'} mode`}
-              >
-                {searchMode === 'browser' ? (
-                  <Search className="w-4 h-4" />
-                ) : (
-                  <Sparkles className="w-4 h-4" />
-                )}
-                <span className="text-sm font-medium hidden sm:inline">
-                  {searchMode === 'browser' ? 'Browser' : 'AI'}
-                </span>
-              </button>
-              
-              {/* Search Input */}
-              <div className="relative flex-1">
-                {searchMode === 'browser' ? (
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400/50" />
-                ) : (
-                  <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400/50" />
-                )}
-                <input
-                  type="text"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  placeholder={
-                    searchMode === 'browser' 
-                      ? "Search or enter URL..." 
-                      : "Ask AI anything..."
-                  }
-                  className={`w-full pl-10 pr-4 py-2 bg-white/5 border rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
-                    searchMode === 'ai'
-                      ? 'border-purple-500/30 focus:ring-purple-500/50'
-                      : 'border-cyan-500/30 focus:ring-cyan-500/50'
-                  }`}
-                />
+
+      <div className="flex min-h-screen flex-1">
+        {!shouldHideUI && (
+          <Sidebar
+            onWidthChange={setSidebarWidth}
+            onTogglePerformance={() => setShowPerformancePanel((v) => !v)}
+            performanceOpen={showPerformancePanel}
+          />
+        )}
+
+        {!shouldHideUI && (
+          <PerformancePanel visible={showPerformancePanel} sidebarWidth={sidebarWidth} />
+        )}
+
+        <div className="flex-1 flex flex-col min-h-screen">
+          {!shouldHideUI && <WidgetsOverlay />}
+
+          {!shouldHideUI && !isBrowserPage && !isStudyToolsPage && (
+            <div className="z-10 backdrop-blur-sm border-b border-white/10">
+              <div className="max-w-7xl mx-auto px-4 py-3">
+                <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSearchMode(searchMode === 'browser' ? 'ai' : 'browser')}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+                      searchMode === 'ai'
+                        ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                        : 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                    }`}
+                    title={`Switch to ${searchMode === 'browser' ? 'AI' : 'Browser'} mode`}
+                  >
+                    {searchMode === 'browser' ? <Search className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+                    <span className="text-sm font-medium hidden sm:inline">
+                      {searchMode === 'browser' ? 'Browser' : 'AI'}
+                    </span>
+                  </button>
+
+                  <div className="relative flex-1">
+                    {searchMode === 'browser' ? (
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400/50" />
+                    ) : (
+                      <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400/50" />
+                    )}
+                    <input
+                      type="text"
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      placeholder={searchMode === 'browser' ? 'Search or enter URL...' : 'Ask AI anything...'}
+                      className={`w-full pl-10 pr-4 py-2 bg-white/5 border rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                        searchMode === 'ai'
+                          ? 'border-purple-500/30 focus:ring-purple-500/50'
+                          : 'border-cyan-500/30 focus:ring-cyan-500/50'
+                      }`}
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setNotificationCenterOpen(true)}
+                    className="relative p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
+                    title="Notifications"
+                  >
+                    <Bell className="w-5 h-5 text-white" />
+                    {notifications.unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        {notifications.unreadCount > 9 ? '9+' : notifications.unreadCount}
+                      </span>
+                    )}
+                  </button>
+                </form>
               </div>
+            </div>
+          )}
 
-              {/* Schedule Tracker */}
-              <ScheduleTracker />
-
-              {/* Notification Bell */}
-              <button
-                type="button"
-                onClick={() => setNotificationCenterOpen(true)}
-                className="relative p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
-                title="Notifications"
-              >
-                <Bell className="w-5 h-5 text-white" />
-                {notifications.unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                    {notifications.unreadCount > 9 ? '9+' : notifications.unreadCount}
-                  </span>
-                )}
-              </button>
-            </form>
+          <div className="relative max-w-7xl mx-auto px-4 pb-16 w-full flex-1">
+            {children}
           </div>
+
+          <ScheduleTracker />
         </div>
-      )}
-      
+      </div>
+
       <style>{`
         :root {
           --background: 0 0% 3.9%;
@@ -422,8 +474,7 @@ export default function Layout({ children, currentPageName }) {
           animation: pulse-glow 2s ease-in-out infinite;
         }
       `}</style>
-      
-      {/* Notification Center Modal */}
+
       <NotificationCenter
         isOpen={notificationCenterOpen}
         onClose={() => setNotificationCenterOpen(false)}
@@ -433,31 +484,26 @@ export default function Layout({ children, currentPageName }) {
         onDelete={notifications.deleteNotification}
         onClearAll={notifications.clearAll}
       />
-      
-      {/* Toast Notifications (bottom right) */}
+
       <div className="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none">
         <div className="pointer-events-auto">
           <AnimatePresence>
-            {activeToasts.map(toast => (
+            {activeToasts.map((toast) => (
               <NotificationToast
                 key={toast.id}
                 notification={toast}
-                onDismiss={() => setActiveToasts(prev => prev.filter(t => t.id !== toast.id))}
+                onDismiss={() => setActiveToasts((prev) => prev.filter((t) => t.id !== toast.id))}
               />
             ))}
           </AnimatePresence>
         </div>
       </div>
-      
-      {/* Decoy Screen Overlay (Boss Key or Idle) */}
-      {showDecoy && (
-        <DecoyScreen 
-          onDismiss={() => setShowDecoy(false)} 
-          reason={decoyReason}
-        />
-      )}
-      
-      {children}
+
+      <AnimatePresence>
+        {showDecoy && (
+          <DecoyScreen onDismiss={() => setShowDecoy(false)} reason={decoyReason} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

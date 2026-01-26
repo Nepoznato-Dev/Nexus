@@ -46,6 +46,47 @@ import DiscordVerification from '../Components/Settings/DiscordVerification.js';
 
 const BUILD_VERSION = 'v0.10.0-beta';
 
+// Validation utility functions
+const validateTimeFormat = (time) => {
+  // Validates HH:MM format (24-hour)
+  const timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d$/;
+  return timeRegex.test(time);
+};
+
+const parseTimeToMinutes = (timeStr) => {
+  // Converts "HH:MM" to minutes since midnight
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return hours * 60 + minutes;
+};
+
+const checkPeriodsOverlap = (periods) => {
+  // Returns array of overlap messages, empty if no overlaps
+  const overlaps = [];
+  
+  for (let i = 0; i < periods.length; i++) {
+    for (let j = i + 1; j < periods.length; j++) {
+      const period1 = periods[i];
+      const period2 = periods[j];
+      
+      if (!period1.enabled || !period2.enabled) continue;
+      
+      const start1 = parseTimeToMinutes(period1.startTime);
+      const end1 = parseTimeToMinutes(period1.endTime);
+      const start2 = parseTimeToMinutes(period2.startTime);
+      const end2 = parseTimeToMinutes(period2.endTime);
+      
+      // Check if periods overlap
+      if ((start1 < end2 && end1 > start2)) {
+        overlaps.push(
+          `"${period1.name}" (${period1.startTime}-${period1.endTime}) overlaps with "${period2.name}" (${period2.startTime}-${period2.endTime})`
+        );
+      }
+    }
+  }
+  
+  return overlaps;
+};
+
 export default function Settings() {
   const [settings, setSettings] = useState({
     theme: { 
@@ -168,6 +209,7 @@ export default function Settings() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [saveNotification, setSaveNotification] = useState('');
+  const [periodValidationWarnings, setPeriodValidationWarnings] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -1236,6 +1278,10 @@ export default function Settings() {
                               };
                               const newPeriods = [...(settings.schedule?.periods || []), newPeriod];
                               updateSetting('schedule.periods', newPeriods);
+                              
+                              // Check for overlaps
+                              const overlaps = checkPeriodsOverlap(newPeriods);
+                              setPeriodValidationWarnings(overlaps);
                             }}
                             className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 transition-colors"
                           >
@@ -1243,6 +1289,21 @@ export default function Settings() {
                             Add Period
                           </button>
                         </div>
+
+                        {/* Validation Warnings */}
+                        {periodValidationWarnings.length > 0 && (
+                          <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 space-y-1">
+                            <div className="flex items-center gap-2 text-yellow-400 text-sm font-medium">
+                              <AlertCircle className="w-4 h-4" />
+                              Period Overlaps Detected
+                            </div>
+                            {periodValidationWarnings.map((warning, idx) => (
+                              <div key={idx} className="text-yellow-400/80 text-xs pl-6">
+                                • {warning}
+                              </div>
+                            ))}
+                          </div>
+                        )}
 
                         {(settings.schedule?.periods || []).map((period, idx) => (
                           <div key={period.id} className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
@@ -1262,6 +1323,9 @@ export default function Settings() {
                                 onClick={() => {
                                   const newPeriods = settings.schedule.periods.filter((_, i) => i !== idx);
                                   updateSetting('schedule.periods', newPeriods);
+                                  // Check for overlaps after deletion
+                                  const overlaps = checkPeriodsOverlap(newPeriods);
+                                  setPeriodValidationWarnings(overlaps);
                                 }}
                                 className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 transition-colors"
                               >
@@ -1276,9 +1340,16 @@ export default function Settings() {
                                   type="time"
                                   value={period.startTime}
                                   onChange={(e) => {
-                                    const newPeriods = [...settings.schedule.periods];
-                                    newPeriods[idx].startTime = e.target.value;
-                                    updateSetting('schedule.periods', newPeriods);
+                                    const value = e.target.value;
+                                    // Validate time format
+                                    if (value && validateTimeFormat(value)) {
+                                      const newPeriods = [...settings.schedule.periods];
+                                      newPeriods[idx].startTime = value;
+                                      updateSetting('schedule.periods', newPeriods);
+                                      // Check for overlaps
+                                      const overlaps = checkPeriodsOverlap(newPeriods);
+                                      setPeriodValidationWarnings(overlaps);
+                                    }
                                   }}
                                   className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-cyan-500/50 transition-colors"
                                 />
@@ -1289,9 +1360,16 @@ export default function Settings() {
                                   type="time"
                                   value={period.endTime}
                                   onChange={(e) => {
-                                    const newPeriods = [...settings.schedule.periods];
-                                    newPeriods[idx].endTime = e.target.value;
-                                    updateSetting('schedule.periods', newPeriods);
+                                    const value = e.target.value;
+                                    // Validate time format
+                                    if (value && validateTimeFormat(value)) {
+                                      const newPeriods = [...settings.schedule.periods];
+                                      newPeriods[idx].endTime = value;
+                                      updateSetting('schedule.periods', newPeriods);
+                                      // Check for overlaps
+                                      const overlaps = checkPeriodsOverlap(newPeriods);
+                                      setPeriodValidationWarnings(overlaps);
+                                    }
                                   }}
                                   className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-cyan-500/50 transition-colors"
                                 />

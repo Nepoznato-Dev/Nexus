@@ -25,7 +25,8 @@ export default function ChatWindow({ channel, currentUser }) {
 
   useEffect(() => {
     loadMessages();
-    const interval = setInterval(loadMessages, 1000); // Poll every second for new messages
+    // Reduced polling from 1s to 5s for better performance
+    const interval = setInterval(loadMessages, 5000);
     return () => clearInterval(interval);
   }, [channel.id]);
 
@@ -36,14 +37,25 @@ export default function ChatWindow({ channel, currentUser }) {
   useEffect(() => {
     // Monitor typing indicators
     const interval = setInterval(() => {
-      const typingData = JSON.parse(localStorage.getItem(TYPING_KEY) || '{}');
-      const channelTyping = typingData[channel.id] || [];
-      const now = Date.now();
-      const activeTyping = channelTyping
-        .filter(t => now - t.timestamp < 3000 && t.userId !== currentUser.id)
-        .map(t => t.username);
-      setTyping(activeTyping);
-    }, 500);
+      try {
+        const typingData = JSON.parse(localStorage.getItem(TYPING_KEY) || '{}');
+        const channelTyping = typingData[channel.id] || [];
+        const now = Date.now();
+        const activeTyping = channelTyping
+          .filter(t => {
+            // Validate timestamp is a number
+            if (typeof t.timestamp !== 'number' || isNaN(t.timestamp)) {
+              return false;
+            }
+            return now - t.timestamp < 3000 && t.userId !== currentUser.id;
+          })
+          .map(t => t.username);
+        setTyping(activeTyping);
+      } catch (err) {
+        console.error('Failed to load typing indicators:', err);
+        setTyping([]);
+      }
+    }, 2000); // Reduced from 500ms to 2s for better performance
     return () => clearInterval(interval);
   }, [channel.id, currentUser.id]);
 

@@ -5,12 +5,16 @@ import NeonButton from '../Components/UI/NeonButton.js';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils.js';
 import { useSettings } from '../hooks/useSettings.js';
+import { usePageReady } from '../hooks/usePageReady.js';
 
 export default function Landing() {
   const [loading, setLoading] = useState(false);
   const [showReturnNotice, setShowReturnNotice] = useState(false);
   const navigate = useNavigate();
   const { settings } = useSettings();
+  
+  // Signal page is ready after settings load
+  usePageReady(!settings.loading);
 
   React.useEffect(() => {
     // Check if user used panic button and wants to return
@@ -22,7 +26,24 @@ export default function Landing() {
       const parsed = JSON.parse(panicDataStr);
       const panicData = typeof parsed === 'string' ? { url: parsed, timestamp: null } : parsed;
 
-      if (panicData.url && panicData.url.includes(window.location.origin)) {
+      if (panicData.url) {
+        // Validate URL is from same origin (not substring match!)
+        try {
+          const panicUrl = new URL(panicData.url);
+          const currentUrl = new URL(window.location);
+          
+          // Only allow redirects to same origin
+          if (panicUrl.origin !== currentUrl.origin) {
+            // Invalid origin, clear it
+            localStorage.removeItem('nexus-panic-return');
+            return;
+          }
+        } catch (err) {
+          // Invalid URL format, clear it
+          localStorage.removeItem('nexus-panic-return');
+          return;
+        }
+
         const timeoutMinutes = settings.accessibility?.panicReturnTimeout ?? 60;
         const disabled = timeoutMinutes <= 0 || timeoutMinutes >= 485;
 
@@ -56,9 +77,25 @@ export default function Landing() {
     if (panicDataStr) {
       try {
         const panicData = JSON.parse(panicDataStr);
-        if (panicData.url) {
-          localStorage.removeItem('nexus-panic-return');
-          window.location.href = panicData.url;
+        const url = typeof panicData === 'string' ? panicData : panicData.url;
+        
+        if (url) {
+          // Validate origin before redirecting
+          try {
+            const panicUrl = new URL(url);
+            const currentUrl = new URL(window.location);
+            
+            if (panicUrl.origin === currentUrl.origin) {
+              localStorage.removeItem('nexus-panic-return');
+              window.location.href = url;
+            } else {
+              // Invalid origin, don't redirect
+              localStorage.removeItem('nexus-panic-return');
+            }
+          } catch (err) {
+            // Invalid URL, clear it
+            localStorage.removeItem('nexus-panic-return');
+          }
         }
       } catch (err) {
         localStorage.removeItem('nexus-panic-return');

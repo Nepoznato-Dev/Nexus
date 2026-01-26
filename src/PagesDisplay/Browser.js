@@ -17,6 +17,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { createPageUrl } from 'utils';
 import { useNavigateBack } from '../hooks/useNavigateBack.js';
 import { useSettings } from '../hooks/useSettings.js';
+import { storage } from '../Components/Storage/clientStorage.js';
 import AnimatedBackground from '../Components/UI/AnimatedBackground.js';
 import GlassCard from '../Components/UI/GlassCard.js';
 import NeonButton from '../Components/UI/NeonButton.js';
@@ -88,7 +89,6 @@ export default function Browser() {
 
   const loadBrowserState = async () => {
     try {
-      const { storage } = await import('../Components/Storage/clientStorage.js');
       await storage.init();
       const saved = await storage.loadBrowserState();
       if (saved && saved.tabs && saved.tabs.length > 0) {
@@ -103,7 +103,6 @@ export default function Browser() {
 
   const saveBrowserState = async () => {
     try {
-      const { storage } = await import('../Components/Storage/clientStorage.js');
       await storage.init();
       await storage.saveBrowserState({
         tabs,
@@ -157,6 +156,15 @@ export default function Browser() {
         const searchUrl = searchEngines[searchEngine] || searchEngines.startpage;
         finalUrl = `${searchUrl}${encodeURIComponent(url)}`;
       }
+    }
+
+    // Validate URL before loading
+    try {
+      new URL(finalUrl);
+    } catch (err) {
+      console.error('Invalid URL:', err);
+      alert('Invalid URL. Please try again.');
+      return;
     }
 
     setTabs(prev => prev.map(t => 

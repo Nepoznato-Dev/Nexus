@@ -124,8 +124,10 @@ export default function Social() {
   };
 
   const loadCurrentUser = () => {
-    const user = session.getUser();
-    if (!user) {
+    // Get user info from localStorage (set during auth)
+    const userName = localStorage.getItem('nexus_user_email') || sessionStorage.getItem('nexus_user_email');
+    
+    if (!userName) {
       // Create anonymous user
       const anonId = 'anon-' + Math.random().toString(36).substr(2, 9);
       const anonUser = {
@@ -138,13 +140,13 @@ export default function Social() {
       updatePresence(anonUser);
     } else {
       setCurrentUser({
-        id: user.email || user.username,
-        username: user.username,
-        avatar: user.avatar || null
+        id: userName,
+        username: userName,
+        avatar: null
       });
       updatePresence({
-        id: user.email || user.username,
-        username: user.username
+        id: userName,
+        username: userName
       });
     }
   };
@@ -164,7 +166,23 @@ export default function Social() {
     try {
       const presence = JSON.parse(localStorage.getItem('nexus_presence') || '[]');
       const now = Date.now();
-      const online = presence.filter(p => now - p.lastSeen < 10000);
+      
+      // Filter out stale entries (inactive for more than 15 minutes)
+      const STALE_THRESHOLD = 15 * 60 * 1000; // 15 minutes
+      const cleaned = presence.filter(p => {
+        // Validate lastSeen is a valid number
+        if (typeof p.lastSeen !== 'number' || isNaN(p.lastSeen)) {
+          return false; // Remove corrupted entries
+        }
+        // Keep entries that were seen within last 15 minutes
+        return now - p.lastSeen < STALE_THRESHOLD;
+      });
+      
+      // Update localStorage with cleaned array
+      localStorage.setItem('nexus_presence', JSON.stringify(cleaned));
+      
+      // Show only users who are currently online (within 10 seconds)
+      const online = cleaned.filter(p => now - p.lastSeen < 10000);
       setOnlineUsers(online);
     } catch (err) {
       console.error('Failed to monitor users:', err);

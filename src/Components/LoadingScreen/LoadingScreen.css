@@ -1,0 +1,222 @@
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.6s ease-out;
+}
+
+.loading-screen.fade-in {
+  opacity: 1;
+}
+
+.loading-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* Circuit Board SVG */
+.circuit-board {
+  width: 200px;
+  height: 240px;
+  filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.3));
+}
+
+/* Wires (circuit lines) */
+.wire {
+  stroke: url(#wireGradient);
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: wireFlow 2.5s ease-in-out infinite;
+  opacity: 0.8;
+}
+
+.wire-1 { animation-delay: 0s; }
+.wire-2 { animation-delay: 0.3s; }
+.wire-3 { animation-delay: 0.6s; }
+.wire-4 { animation-delay: 0.3s; }
+.wire-5 { animation-delay: 0.6s; }
+
+@keyframes wireFlow {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+/* Junction points (glowing circles) */
+.junction {
+  fill: #00f0ff;
+  opacity: 0;
+  filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.8));
+}
+
+.junction-1 { animation: junctionPulse 2.5s ease-in-out infinite 0s; }
+.junction-2 { animation: junctionPulse 2.5s ease-in-out infinite 0.3s; }
+.junction-3 { animation: junctionPulse 2.5s ease-in-out infinite 0.3s; }
+.junction-4 { animation: junctionPulse 2.5s ease-in-out infinite 0.6s; }
+.junction-5 { animation: junctionPulse 2.5s ease-in-out infinite 0.6s; }
+
+@keyframes junctionPulse {
+  0% { opacity: 0; r: 2px; }
+  20% { opacity: 1; r: 5px; }
+  80% { opacity: 1; r: 5px; }
+  100% { opacity: 0; r: 2px; }
+}
+
+/* Large N in center */
+.nexus-n {
+  fill: url(#nGradient);
+  opacity: 0;
+  filter: drop-shadow(0 0 30px rgba(0, 240, 255, 0.6));
+  animation: nAppear 0.8s ease-out 1.2s forwards;
+  font-family: 'Arial', sans-serif;
+  letter-spacing: -2px;
+}
+
+@keyframes nAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Glow circle behind N */
+.n-glow {
+  stroke: #00f0ff;
+  stroke-width: 1;
+  opacity: 0;
+  animation: glowPulse 2s ease-in-out 1.2s infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 0.3;
+    r: 55px;
+  }
+  50% {
+    opacity: 0.6;
+    r: 65px;
+  }
+}
+
+/* Loading text */
+.loading-text {
+  font-size: 14px;
+  color: #00f0ff;
+  letter-spacing: 1px;
+  font-weight: 500;
+  opacity: 0;
+  animation: textFadeIn 0.8s ease-out 2s forwards;
+}
+
+@keyframes textFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.dots {
+  margin-left: 4px;
+  display: inline-block;
+}
+
+.dot {
+  animation: dotBounce 1.4s infinite;
+  opacity: 0.6;
+}
+
+.dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes dotBounce {
+  0%, 60%, 100% {
+    opacity: 0.6;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+/* Reduced motion mode: static display */
+.loading-screen.reduced-motion .wire,
+.loading-screen.reduced-motion .junction,
+.loading-screen.reduced-motion .n-glow,
+.loading-screen.reduced-motion .dots {
+  animation: none !important;
+}
+
+.loading-screen.reduced-motion .nexus-n {
+  animation: none !important;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.loading-screen.reduced-motion .loading-text {
+  animation: none !important;
+  opacity: 1;
+}
+
+.loading-screen.reduced-motion .junction {
+  opacity: 0.8;
+}
+
+.loading-screen.reduced-motion .n-glow {
+  opacity: 0.3;
+}
+
+/* Performance mode: simplify further */
+.loading-screen.performance-mode .circuit-board {
+  filter: none;
+}
+
+.loading-screen.performance-mode .n-glow {
+  display: none;
+}
+
+.loading-screen.performance-mode .wire {
+  stroke-width: 1.5;
+}
+
+/* SVG Gradients (inline via CSS would require JS; using style block) */

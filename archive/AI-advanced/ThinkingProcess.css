@@ -1,0 +1,24 @@
+.thinking-process {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.thinking-process h4 {
+  margin: 0 0 8px;
+}
+
+.thinking-process ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.thinking-process li {
+  color: #e5e7eb;
+  font-size: 14px;
+}

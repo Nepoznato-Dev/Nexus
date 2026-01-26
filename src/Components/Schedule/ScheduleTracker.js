@@ -5,6 +5,7 @@ export default function ScheduleTracker() {
   const [currentClass, setCurrentClass] = useState(null);
   const [timeRemaining, setTimeRemaining] = useState(null);
   const [nextClass, setNextClass] = useState(null);
+  const [lastNotificationMinute, setLastNotificationMinute] = useState(null);
 
   useEffect(() => {
     const updateSchedule = () => {
@@ -44,8 +45,36 @@ export default function ScheduleTracker() {
           const period = periods[i];
           if (!period.enabled) continue;
 
-          const [startHour, startMin] = period.startTime.split(':').map(Number);
-          const [endHour, endMin] = period.endTime.split(':').map(Number);
+          // Validate time format before parsing
+          if (!period.startTime || !period.endTime) {
+            console.warn(`Invalid period at index ${i}: missing time`);
+            continue;
+          }
+
+          const timeParts = period.startTime.split(':');
+          const endTimeParts = period.endTime.split(':');
+          
+          if (timeParts.length !== 2 || endTimeParts.length !== 2) {
+            console.warn(`Invalid period at index ${i}: malformed time format`);
+            continue;
+          }
+
+          const [startHour, startMin] = timeParts.map(Number);
+          const [endHour, endMin] = endTimeParts.map(Number);
+          
+          // Validate parsed values are valid numbers
+          if (isNaN(startHour) || isNaN(startMin) || isNaN(endHour) || isNaN(endMin)) {
+            console.warn(`Invalid period at index ${i}: invalid time values`);
+            continue;
+          }
+          
+          // Validate time ranges (0-23 for hours, 0-59 for minutes)
+          if (startHour < 0 || startHour > 23 || startMin < 0 || startMin > 59 ||
+              endHour < 0 || endHour > 23 || endMin < 0 || endMin > 59) {
+            console.warn(`Invalid period at index ${i}: time out of range`);
+            continue;
+          }
+
           const startMinutes = startHour * 60 + startMin;
           const endMinutes = endHour * 60 + endMin;
 
@@ -69,8 +98,12 @@ export default function ScheduleTracker() {
         setTimeRemaining(current?.minutesLeft || null);
 
         // Send notification X minutes before class ends (configurable)
+        // Only send once per minute to avoid spam
         const notifyMinutes = schedule.notifyBeforeEnd || 5;
-        if (current && current.minutesLeft === notifyMinutes) {
+        const currentMinute = Math.floor(current?.minutesLeft);
+        
+        if (current && currentMinute === notifyMinutes && lastNotificationMinute !== currentMinute) {
+          setLastNotificationMinute(currentMinute);
           if (window.nexusNotifications) {
             window.nexusNotifications.show({
               type: 'info',
@@ -82,6 +115,7 @@ export default function ScheduleTracker() {
 
       } catch (err) {
         console.error('Schedule update failed:', err);
+        setLastNotificationMinute(null);
       }
     };
 
@@ -89,7 +123,7 @@ export default function ScheduleTracker() {
     const interval = setInterval(updateSchedule, 30000); // Update every 30 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [lastNotificationMinute]);
 
   if (!currentClass && !nextClass) {
     return null;

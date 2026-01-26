@@ -1,5 +1,11 @@
 # Nexus Community Project
 
+**Copyright (c) 2026 Nepoznato-Dev - All Rights Reserved**
+
+⚠️ **PROPRIETARY SOFTWARE** - Unauthorized copying or use is prohibited. See [LICENSE](LICENSE) and [COPYRIGHT.md](COPYRIGHT.md).
+
+---
+
 A privacy-first, local-only student hub designed for Chromebooks and personal use.
 
 ## Features

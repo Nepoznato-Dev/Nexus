@@ -2,9 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from 'utils';
 import { useSettings } from '../../hooks/useSettings.js';
-import { Home, Globe, Gamepad2, Brain, Settings as Cog, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Home, Globe, Gamepad2, Brain, Settings as Cog, ChevronsLeft, ChevronsRight, Activity } from 'lucide-react';
 
-export default function Sidebar({ onWidthChange }) {
+export default function Sidebar({ onWidthChange, onTogglePerformance, performanceOpen }) {
   const navigate = useNavigate();
   const { settings } = useSettings();
   const [expanded, setExpanded] = useState(false);
@@ -25,7 +25,7 @@ export default function Sidebar({ onWidthChange }) {
 
   return (
     <aside
-      className="fixed left-0 top-0 h-screen z-50 border-r border-white/10 bg-black/40 backdrop-blur-md"
+      className="h-full border-r border-white/10 backdrop-blur-sm"
       style={{ width }}
     >
       <div className="h-full flex flex-col">
@@ -56,6 +56,14 @@ export default function Sidebar({ onWidthChange }) {
               {expanded && <span className="text-sm">{label}</span>}
             </button>
           ))}
+
+          <button
+            onClick={() => onTogglePerformance?.()}
+            className={`w-full flex items-center ${expanded ? 'gap-3 px-3' : 'justify-center'} py-2 text-white/70 hover:text-white hover:bg-white/10 transition-colors ${performanceOpen ? 'bg-white/10 text-white' : ''}`}
+          >
+            <Activity className="w-5 h-5" />
+            {expanded && <span className="text-sm">Performance</span>}
+          </button>
         </nav>
 
         <div className="mt-auto p-3 text-white/40 text-xs">

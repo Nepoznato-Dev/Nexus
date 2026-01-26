@@ -3,13 +3,25 @@ import { Send } from 'lucide-react';
 import GlassCard from '../UI/GlassCard.js';
 import { Input } from '../UI/input.js';
 import NeonButton from '../UI/NeonButton.js';
-import { getPersonalityResponse, getTimedTip } from '../../utils/personalities.js';
+import { generateResponse as generateKnowledgeResponse, analyzeUserPersonality } from '../AI/aiKnowledgeBase.js';
 import { storage } from '../Storage/clientStorage.js';
 
 export default function AIChat({ accentColor, initialQuery }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [personality, setPersonality] = useState('adaptive');
+  const [professionalism, setProfessionalism] = useState(0.5);
+  const [mentorship, setMentorship] = useState(0.5);
+  const [isThinking, setIsThinking] = useState(false);
+
+  const personalityPresets = {
+    adaptive: { professionalism: 0.55, mentorship: 0.55 },
+    kind: { professionalism: 0.45, mentorship: 0.7 },
+    moody: { professionalism: 0.25, mentorship: 0.35 },
+    professional: { professionalism: 0.75, mentorship: 0.5 },
+    mentor: { professionalism: 0.65, mentorship: 0.8 },
+    chill: { professionalism: 0.4, mentorship: 0.45 },
+  };
 
   useEffect(() => {
     // Load personality from settings
@@ -17,8 +29,14 @@ export default function AIChat({ accentColor, initialQuery }) {
       try {
         await storage.init();
         const settings = await storage.loadSettings();
-        if (settings?.aiPersonality) {
-          setPersonality(settings.aiPersonality);
+        const savedPersonality = settings?.aiPersonality;
+        if (savedPersonality) {
+          setPersonality(savedPersonality);
+          const preset = personalityPresets[savedPersonality];
+          if (preset) {
+            setProfessionalism(preset.professionalism);
+            setMentorship(preset.mentorship);
+          }
         }
       } catch (err) {
         console.error('Failed to load AI personality:', err);
@@ -27,6 +45,14 @@ export default function AIChat({ accentColor, initialQuery }) {
     loadPersonality();
   }, []);
 
+  useEffect(() => {
+    const preset = personalityPresets[personality];
+    if (preset) {
+      setProfessionalism(preset.professionalism);
+      setMentorship(preset.mentorship);
+    }
+  }, [personality]);
+
   // Handle initial query from universal search bar
   useEffect(() => {
     if (initialQuery && initialQuery.trim()) {
@@ -34,48 +60,7 @@ export default function AIChat({ accentColor, initialQuery }) {
     }
   }, [initialQuery]);
 
-  const generateResponse = (userMessage) => {
-    const lowerMsg = userMessage.toLowerCase();
-    
-    // Help/greeting
-    if (lowerMsg.includes('hello') || lowerMsg.includes('hi') || lowerMsg.includes('hey')) {
-      return getPersonalityResponse(personality, 'greeting');
-    }
-    
-    // Search requests
-    if (lowerMsg.includes('search') || lowerMsg.includes('find') || lowerMsg.includes('look up')) {
-      return getPersonalityResponse(personality, 'search');
-    }
-    
-    // Definition requests
-    if (lowerMsg.includes('what is') || lowerMsg.includes('define') || lowerMsg.includes('meaning of')) {
-      const word = userMessage.split(' ').pop();
-      return getPersonalityResponse(personality, 'definition').replace('{word}', word);
-    }
-    
-    // Encouragement
-    if (lowerMsg.includes('help') || lowerMsg.includes('stuck') || lowerMsg.includes('difficult')) {
-      return getPersonalityResponse(personality, 'encouragement');
-    }
-    
-    // Tips
-    if (lowerMsg.includes('tip') || lowerMsg.includes('advice') || lowerMsg.includes('suggest')) {
-      const tip = getTimedTip(personality);
-      return getPersonalityResponse(personality, 'tip').replace('{tip}', tip);
-    }
-    
-    // Default fallback with personality
-    const defaultResponses = {
-      adaptive: "I understand what you're asking. Let me help you with that.",
-      kind: "That's a great question! I'm here to help you figure it out! 💡",
-      moody: "Alright, alright. I see what you're getting at. Let me think...",
-      professional: "I've noted your query. Let me provide an appropriate response.",
-      mentor: "Excellent question! Let me break this down for you step by step.",
-      chill: "Yeah, I got you. Let me help you out with that. 👍"
-    };
-    
-    return defaultResponses[personality] || defaultResponses.adaptive;
-  };
+  const clamp01 = (value) => Math.max(0, Math.min(1, value));
 
   const handleSend = (messageText = null) => {
     const textToSend = messageText || input;
@@ -84,14 +69,24 @@ export default function AIChat({ accentColor, initialQuery }) {
     setMessages(prev => [...prev, { role: 'user', content: textToSend }]);
     const userInput = textToSend;
     setInput('');
+    setIsThinking(true);
+    const deltas = analyzeUserPersonality(userInput);
+    const updatedProfessionalism = clamp01(professionalism + deltas.professionalismDelta);
+    const updatedMentorship = clamp01(mentorship + deltas.mentorshipDelta);
+    setProfessionalism(updatedProfessionalism);
+    setMentorship(updatedMentorship);
     
     // Generate AI response
     setTimeout(() => {
-      const response = generateResponse(userInput);
+      const response = generateKnowledgeResponse(userInput, {
+        professionalism: updatedProfessionalism,
+        mentorship: updatedMentorship,
+      });
       setMessages(prev => [...prev, { 
         role: 'assistant', 
         content: response
       }]);
+      setIsThinking(false);
     }, 800);
   };
 
@@ -119,6 +114,13 @@ export default function AIChat({ accentColor, initialQuery }) {
             </div>
           </div>
         ))}
+        {isThinking && (
+          <div className="flex justify-start">
+            <div className="max-w-[70%] p-3 rounded-xl bg-white/5 text-white/70">
+              Thinking...
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-2">

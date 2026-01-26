@@ -10,7 +10,8 @@ export function useNotifications() {
 
   useEffect(() => {
     loadNotifications();
-    const interval = setInterval(loadNotifications, 1000);
+    // Reduced polling from 1s to 5s for better performance
+    const interval = setInterval(loadNotifications, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -21,6 +22,9 @@ export function useNotifications() {
       setUnreadCount(stored.filter(n => !n.read).length);
     } catch (err) {
       console.error('Failed to load notifications:', err);
+      // Initialize with empty array on corruption
+      setNotifications([]);
+      setUnreadCount(0);
     }
   };
 

@@ -13,7 +13,6 @@ import {
   Wrench,
   Sparkles,
   Clock,
-  Star,
   Bell,
   AlertTriangle,
   Zap,
@@ -27,13 +26,13 @@ import { storage, session } from '../Components/Storage/clientStorage.js';
 import SoftParticleDrift from '../Components/Backgrounds/SoftParticleDrift.js';
 import FPSMonitor from '../Components/Performance/FPSMonitor.js';
 import { PerformanceProvider, usePerformance } from '../Components/Performance/PerformanceManager.js';
-import DashboardAI from '../Components/AI/DashboardAI.js';
+import { useNotifications } from '../Components/Notifications/NotificationCenter.js';
 import FirstTimeSetup from '../Components/UI/FirstTimeSetup.js';
+import { usePageReady } from '../hooks/usePageReady.js';
 
 function DashboardContent() {
   const [user, setUser] = useState(null);
   const [settings, setSettings] = useState(null);
-  const [favorites, setFavorites] = useState([]);
   const [globalNotices, setGlobalNotices] = useState([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [loading, setLoading] = useState(true);
@@ -41,6 +40,10 @@ function DashboardContent() {
   const [showSetup, setShowSetup] = useState(false);
   const navigate = useNavigate();
   const { handlePerformanceChange, getPerformanceSettings } = usePerformance();
+  const { notifications, unreadCount } = useNotifications();
+  
+  // Signal page ready when loading completes
+  usePageReady(!loading);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -75,7 +78,6 @@ function DashboardContent() {
       await storage.init();
       const userData = await storage.loadUser(accountCode);
       const userSettings = await storage.loadSettings();
-      const userFavorites = await storage.loadFavorites();
 
       if (!userData) {
         session.clear();
@@ -95,7 +97,6 @@ function DashboardContent() {
           text: '#ffffff'
         }
       });
-      setFavorites(userFavorites);
       
       // Check if first-time setup is needed
       const setupComplete = await storage.db.get('setupComplete');
@@ -328,38 +329,66 @@ function DashboardContent() {
           </motion.div>
         )}
 
-        {/* Notification Bar - Replaced Stats */}
-        <motion.div 
+        {/* Notifications Bar */}
+        <motion.div
           className="mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <GlassCard className="p-4" hover={false} accentColor={settings?.theme?.accent}>
-            <div className="flex items-start gap-3">
-              <Bell className="w-5 h-5 text-white/70 mt-0.5" />
-              <div className="flex-1">
-                <h3 className="text-white font-medium mb-1">Quick Info</h3>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-white/60">
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('nexus:open-notifications'))}
+            className="w-full text-left"
+          >
+            <GlassCard
+              className="p-4 w-full"
+              hover
+              accentColor={settings?.theme?.accent}
+            >
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
+                    <Bell className="w-5 h-5 text-white/80" />
+                    <h3 className="text-white font-medium">Notifications</h3>
+                    {unreadCount > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-200 text-xs font-semibold">
+                        {unreadCount} unread
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-white/60">
                     <Clock className="w-4 h-4" />
                     <span>{currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-yellow-400" />
-                    <span>{favorites.length} Favorites</span>
-                  </div>
-                  {globalNotices.length > 0 && (
-                    <div className="flex items-center gap-2 text-white/90">
-                      <span className="px-2 py-0.5 rounded-full bg-white/10 text-xs">
-                        {globalNotices.length} new {globalNotices.length === 1 ? 'message' : 'messages'}
-                      </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {(notifications && notifications.length > 0
+                    ? notifications.slice(0, 3)
+                    : [{ id: 'empty', title: 'No notifications yet', body: 'Stay tuned for updates.', read: true }]
+                  ).map((notif, idx) => (
+                    <div
+                      key={notif.id || idx}
+                      className={`rounded-lg border border-white/10 bg-white/5 p-3 flex flex-col gap-1 transition ${notif.read ? 'opacity-80' : 'opacity-100'} text-left`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-semibold text-white line-clamp-1">{notif.title}</span>
+                        {!notif.read && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-200">New</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-white/70 line-clamp-2">{notif.body}</p>
+                      {notif.timestamp && (
+                        <span className="text-[11px] text-white/50">
+                          {new Date(notif.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      )}
                     </div>
-                  )}
+                  ))}
                 </div>
               </div>
-            </div>
-          </GlassCard>
+            </GlassCard>
+          </button>
         </motion.div>
 
         {/* Main Grid */}
@@ -411,8 +440,6 @@ function DashboardContent() {
           </p>
         </motion.footer>
 
-        {/* AI Assistant */}
-        <DashboardAI accentColor={settings?.theme?.accent || '#a55eea'} />
       </div>
 
       {/* First-Time Setup Wizard */}

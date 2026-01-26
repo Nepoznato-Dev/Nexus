@@ -39,8 +39,16 @@ const initDB = () => {
 };
 
 // Simple encryption/decryption using account code as key
+// ⚠️ WARNING: This is NOT cryptographically secure encryption
+// It's only basic obfuscation using btoa/atob
+// For sensitive data, use a proper crypto library like TweetNaCl.js or libsodium.js
+// This implementation protects against casual inspection but NOT against determined attacks
 const encrypt = (data, key) => {
   try {
+    if (!key || typeof key !== 'string') {
+      console.error('Encryption key must be a non-empty string');
+      return null;
+    }
     const str = JSON.stringify(data);
     const encoded = btoa(str + '::' + key.slice(0, 8));
     return encoded;
@@ -52,9 +60,15 @@ const encrypt = (data, key) => {
 
 const decrypt = (encrypted, key) => {
   try {
+    if (!key || typeof key !== 'string') {
+      console.error('Decryption key must be a non-empty string');
+      return null;
+    }
     const decoded = atob(encrypted);
     const [str, checksum] = decoded.split('::');
-    if (checksum !== key.slice(0, 8)) throw new Error('Invalid key');
+    if (!checksum || checksum !== key.slice(0, 8)) {
+      throw new Error('Invalid key or corrupted data');
+    }
     return JSON.parse(str);
   } catch (e) {
     console.error('Decryption failed:', e);
@@ -122,18 +136,30 @@ export const storage = {
 
   // Role management
   getRoleData() {
-    const data = localStorage.getItem('nexus_roles');
-    if (!data) {
-      // Initialize with owner role
+    try {
+      const data = localStorage.getItem('nexus_roles');
+      if (!data) {
+        // Initialize with owner role
+        const roles = {
+          owner: '091587',
+          admin: 'ADMIN-NEXUS',
+          users: [] // { code, role, discordId, verified, banned }
+        };
+        localStorage.setItem('nexus_roles', JSON.stringify(roles));
+        return roles;
+      }
+      return JSON.parse(data);
+    } catch (err) {
+      console.error('Failed to parse role data:', err);
+      // Return safe default on corruption
       const roles = {
-        owner: 'NEXUS-OWNER-2026',
+        owner: '091587',
         admin: 'ADMIN-NEXUS',
-        users: [] // { code, role, discordId, verified, banned }
+        users: []
       };
       localStorage.setItem('nexus_roles', JSON.stringify(roles));
       return roles;
     }
-    return JSON.parse(data);
   },
 
   saveRoleData(data) {
@@ -270,6 +296,9 @@ export const storage = {
     // Count recent violations (last 24 hours)
     const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
     const recentViolations = user.violations.filter(v => v.timestamp > oneDayAgo);
+    
+    // Clean up old violations to prevent array bloat
+    user.violations = recentViolations;
     
     const warningCount = recentViolations.length;
     const shouldBan = warningCount >= 3;

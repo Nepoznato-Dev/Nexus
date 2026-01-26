@@ -1,14 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
 
 export default function DecoyScreen({ onDismiss, reason = 'idle' }) {
   const [decoyType, setDecoyType] = useState('classroom');
 
+  // Only randomize once on mount
   useEffect(() => {
-    // Randomly choose between Google Classroom and IXL
     const types = ['classroom', 'ixl'];
     setDecoyType(types[Math.floor(Math.random() * types.length)]);
   }, []);
+
+  // Memoize key handler
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === '`' || e.key === '~') {
+      e.preventDefault();
+      if (onDismiss) onDismiss();
+    }
+  }, [onDismiss]);
+
+  // Only listen for boss key if in bosskey mode
+  useEffect(() => {
+    if (reason !== 'bosskey') return;
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [reason, handleKeyDown]);
 
   return (
     <div className="fixed inset-0 bg-white z-[9999] overflow-auto">
@@ -197,7 +213,7 @@ export default function DecoyScreen({ onDismiss, reason = 'idle' }) {
       {reason === 'bosskey' && (
         <button
           onClick={onDismiss}
-          className="fixed bottom-4 right-4 p-3 bg-gray-800 hover:bg-gray-700 text-white rounded-full shadow-lg opacity-20 hover:opacity-100 transition-opacity"
+          className="fixed bottom-4 right-4 p-3 bg-gray-800 hover:bg-gray-700 text-white rounded-full shadow-lg opacity-70 hover:opacity-100 transition-opacity"
           title="Dismiss (or press ` key)"
         >
           <X className="w-5 h-5" />

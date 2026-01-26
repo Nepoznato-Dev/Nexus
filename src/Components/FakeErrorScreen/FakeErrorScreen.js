@@ -30,6 +30,12 @@ export default function FakeErrorScreen({ onDismiss }) {
             if (e.key === 'c' || e.key === 'C') {
                 e.preventDefault();
                 setShowError(false);
+                // Remove the embedded parameter from URL so it doesn't show again
+                if (window.history && window.history.replaceState) {
+                    const url = new URL(window.location);
+                    url.searchParams.delete('embedded');
+                    window.history.replaceState(null, '', url.toString());
+                }
                 if (onDismiss) onDismiss();
             }
         };
@@ -57,7 +63,7 @@ export default function FakeErrorScreen({ onDismiss }) {
                             <div className="suggestions-title">Things you can try:</div>
                             <ul>
                                 <li>• Check the URL and try again</li>
-                                <li>• <a href="javascript:void(0)">Go back to the previous page</a></li>
+                                <li>• <a href="#" onClick={(e) => { e.preventDefault(); }}>Go back to the previous page</a></li>
                                 <li>• Try searching for what you're looking for using the search bar</li>
                             </ul>
                         </div>
