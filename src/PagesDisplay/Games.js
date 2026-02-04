@@ -856,6 +856,13 @@ export default function Games() {
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="flex items-center gap-4 mb-6">
+            {/* Placeholder for header content */}
+          </div>
+        </motion.header>
+      </div>
+    </div>
+  );
+}
 
 export default function Games() {
   const navigate = useNavigate();

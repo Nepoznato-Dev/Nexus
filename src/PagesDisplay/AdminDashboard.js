@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Users, Key, Ban, AlertTriangle, LogOut, Trash2, Activity, Cpu, Crown, UserX, Check, Home, UserPlus, X, Inbox, MessageSquareText } from 'lucide-react';
+import { Shield, Users, Key, Ban, AlertTriangle, LogOut, Trash2, Activity, Cpu, Crown, UserX, Check, Home, UserPlus, X, Inbox, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from 'utils';
 import { session, storage } from '../Components/Storage/clientStorage.js';
@@ -360,7 +360,7 @@ export default function AdminDashboard() {
                   </span>
                 </div>
                 <NeonButton variant="ghost" size="sm" onClick={exportReports}>
-                  <MessageSquareText className="w-4 h-4 mr-2" />
+                  <MessageSquare className="w-4 h-4 mr-2" />
                   Export JSON
                 </NeonButton>
               </div>
