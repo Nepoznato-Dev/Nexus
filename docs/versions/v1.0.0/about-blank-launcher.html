@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="description" content="Nexus v1.0.0 - Privacy-first student hub">
+    <title>Nexus Launcher</title>
+    <style>
+        :root {
+            --primary: #00f0ff;
+            --primary-dark: #0088cc;
+            --bg: #05060a;
+            --surface: #0f1117;
+            --text: #e8f7ff;
+            --text-muted: rgba(232, 247, 255, 0.6);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            color-scheme: dark;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+            width: min(520px, 90vw);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-section {
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 12px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary), #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 500;
+            margin-top: 12px;
+        }
+
+        .info-box {
+            background: linear-gradient(145deg, rgba(0, 240, 255, 0.04), rgba(255, 255, 255, 0.02));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .info-box strong {
+            color: var(--text);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(120deg, var(--primary), var(--primary-dark));
+            color: var(--bg);
+            box-shadow: 0 8px 24px rgba(0, 240, 255, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0, 240, 255, 0.35);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 12px rgba(0, 240, 255, 0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            padding: 20px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .feature {
+            text-align: center;
+            padding: 12px;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .feature-name {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .status.success {
+            color: #4ade80;
+        }
+
+        .status.error {
+            color: #ff9ea6;
+        }
+
+        .keyboard-hint {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 12px;
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 1.5rem; }
+            .container { gap: 32px; }
+            .features { gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-section">
+            <div class="logo">🚀</div>
+            <h1>Nexus</h1>
+            <p class="subtitle">Privacy-First Student Hub</p>
+            <span class="badge">v1.0.0 - Stable</span>
+        </div>
+
+        <div class="info-box">
+            <strong>How it works:</strong>
+            <p>This launcher opens Nexus in a new window that appears as a blank page, helping you stay focused while keeping your activity private.</p>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🎓</div>
+                <div class="feature-name">Study Tools</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎮</div>
+                <div class="feature-name">Games</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎵</div>
+                <div class="feature-name">Music</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🌐</div>
+                <div class="feature-name">Browser</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" id="launchBtn">Launch Nexus (in about:blank)</button>
+            <button class="btn btn-secondary" id="openNormalBtn">Open in New Tab</button>
+        </div>
+
+        <div class="keyboard-hint">Tip: Press <kbd>C</kbd> to launch with about:blank</div>
+        <div id="status" class="status"></div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            // Update this URL to your Nexus deployment
+            APP_URL: window.location.origin.includes('localhost') 
+                ? 'http://localhost:3000'
+                : 'https://nexus.example.com', // Change to your production URL
+            
+            POPUP_WIDTH: 1200,
+            POPUP_HEIGHT: 800
+        };
+
+        const statusEl = document.getElementById('status');
+
+        function showStatus(message, type = 'info') {
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            setTimeout(() => {
+                statusEl.textContent = '';
+                statusEl.className = 'status';
+            }, 3000);
+        }
+
+        function launchInAboutBlank() {
+            try {
+                // Open a new window that stays at about:blank
+                const child = window.open('about:blank', '_blank', 'width=' + CONFIG.POPUP_WIDTH + ',height=' + CONFIG.POPUP_HEIGHT + ',noopener,noreferrer');
+                
+                if (!child) {
+                    showStatus('⚠️ Popup blocked. Please allow popups for this site.', 'error');
+                    return;
+                }
+
+                // Create iframe markup
+                const iframeMarkup = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; }
+        html, body { width: 100%; height: 100%; background: #000; }
+        iframe { border: 0; width: 100%; height: 100%; display: block; }
+        .error { color: #ff6b6b; padding: 20px; font-family: monospace; background: #0a0a0f; }
+    </style>
+</head>
+<body>
+    <iframe 
+        src="${CONFIG.APP_URL}" 
+        allow="fullscreen; clipboard-read; clipboard-write; camera; microphone; geolocation" 
+        referrerpolicy="no-referrer"
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-pointer-lock allow-orientation-lock"
+    ></iframe>
+    <script>
+        // Monitor iframe and report back
+        window.addEventListener('error', (e) => {
+            console.error('Iframe error:', e);
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                console.log('User pressed ESC');
+            }
+        });
+    <\/script>
+</body>
+</html>`;
+
+                // Write iframe markup to new window
+                child.document.open();
+                child.document.write(iframeMarkup);
+                child.document.close();
+
+                showStatus('✅ Nexus launched in about:blank. Look for the new window!', 'success');
+            } catch (error) {
+                console.error('Launch error:', error);
+                showStatus('❌ Error launching Nexus: ' + error.message, 'error');
+            }
+        }
+
+        function launchInNewTab() {
+            try {
+                window.open(CONFIG.APP_URL, '_blank', 'noopener,noreferrer');
+                showStatus('✅ Opened in new tab!', 'success');
+            } catch (error) {
+                console.error('Open error:', error);
+                showStatus('❌ Error opening Nexus', 'error');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('launchBtn').addEventListener('click', launchInAboutBlank);
+        document.getElementById('openNormalBtn').addEventListener('click', launchInNewTab);
+
+        // Keyboard shortcut: Press C to launch
+        document.addEventListener('keydown', (event) => {
+            if ((event.key === 'c' || event.key === 'C') && !event.ctrlKey && !event.metaKey) {
+                event.preventDefault();
+                launchInAboutBlank();
+            }
+        });
+
+        // Show app URL in console for debugging
+        console.log('Nexus v1.0.0');
+        console.log('App URL:', CONFIG.APP_URL);
+        console.log('Press C to launch in about:blank');
+    </script>
+</body>
+</html>

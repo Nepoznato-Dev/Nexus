@@ -5,10 +5,24 @@ import './LoadingScreen.css';
 export default function LoadingScreen({ isLoading = true, showDuration = 2000 }) {
   const [shouldRender, setShouldRender] = useState(isLoading);
   const [isFading, setIsFading] = useState(false);
+  const [spinnerIndex, setSpinnerIndex] = useState(0);
   const { settings } = useSettings();
+
+  const spinnerChars = ['|', '/', '⏤', '\\'];
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const performanceMode = settings?.performance?.performanceMode ?? false;
+
+  // Spinner animation
+  useEffect(() => {
+    if (!isLoading) return;
+    
+    const interval = setInterval(() => {
+      setSpinnerIndex(prev => (prev + 1) % spinnerChars.length);
+    }, 250);
+
+    return () => clearInterval(interval);
+  }, [isLoading]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -105,15 +119,6 @@ export default function LoadingScreen({ isLoading = true, showDuration = 2000 })
             />
           </g>
 
-          {/* Glowing circles at junction points */}
-          <g className="junction-points">
-            <circle cx="100" cy="50" r="3" className="junction junction-1" />
-            <circle cx="60" cy="50" r="3" className="junction junction-2" />
-            <circle cx="140" cy="50" r="3" className="junction junction-3" />
-            <circle cx="60" cy="120" r="3" className="junction junction-4" />
-            <circle cx="140" cy="120" r="3" className="junction junction-5" />
-          </g>
-
           {/* Large N in center */}
           <text
             x="100"
@@ -136,14 +141,9 @@ export default function LoadingScreen({ isLoading = true, showDuration = 2000 })
           />
         </svg>
 
-        {/* Loading text with dot animation */}
+        {/* Spinner under N */}
         <div className="loading-text">
-          <span>Initializing Nexus</span>
-          <span className="dots">
-            <span className="dot">.</span>
-            <span className="dot">.</span>
-            <span className="dot">.</span>
-          </span>
+          <span className="spinner">{spinnerChars[spinnerIndex]}</span>
         </div>
       </div>
     </div>

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Users, Key, Ban, AlertTriangle, LogOut, Trash2, Activity, Cpu, Crown, UserX, Check, Home, UserPlus, X } from 'lucide-react';
+import { Shield, Users, Key, Ban, AlertTriangle, LogOut, Trash2, Activity, Cpu, Crown, UserX, Check, Home, UserPlus, X, Inbox, MessageSquareText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from 'utils';
 import { session, storage } from '../Components/Storage/clientStorage.js';
+import { reportStorage } from '../Components/Storage/reportStorage.js';
 import GlassCard from '../Components/UI/GlassCard.js';
 import NeonButton from '../Components/UI/NeonButton.js';
 import AnimatedBackground from '../Components/UI/AnimatedBackground.js';
@@ -15,6 +16,8 @@ export default function AdminDashboard() {
   const [banList, setBanList] = useState([]);
   const [notices, setNotices] = useState([]);
   const [activeSessions, setActiveSessions] = useState([]);
+  const [reportInbox, setReportInbox] = useState([]);
+  const [reportReview, setReportReview] = useState([]);
   const [stats, setStats] = useState({ fps: 60, ram: 512, activeUsers: 0 });
   const [loading, setLoading] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
@@ -46,6 +49,7 @@ export default function AdminDashboard() {
       setPendingUsers(pending);
       setStats(prev => ({ ...prev, activeUsers: allUsers.length }));
       loadActiveSessions();
+      loadReports();
     } catch (err) {
       console.error('Failed to load admin data:', err);
     } finally {
@@ -66,10 +70,52 @@ export default function AdminDashboard() {
     }
   };
 
+  const loadReports = () => {
+    try {
+      setReportInbox(reportStorage.getInbox());
+      setReportReview(reportStorage.getReviewQueue());
+    } catch (err) {
+      console.error('Failed to load reports:', err);
+    }
+  };
+
+  const approveReport = (reportId) => {
+    if (!confirm('Approve this report and move it to inbox?')) return;
+    reportStorage.approveReport(reportId);
+    loadReports();
+  };
+
+  const rejectReport = (reportId) => {
+    if (!confirm('Delete this report from review?')) return;
+    reportStorage.rejectReport(reportId);
+    loadReports();
+  };
+
+  const resolveReport = (reportId) => {
+    reportStorage.resolveReport(reportId);
+    loadReports();
+  };
+
+  const exportReports = () => {
+    const data = reportStorage.exportAll();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nexus_bug_reports_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const measurePerformance = () => {
     const fps = Math.round(1000 / 16.67);
     const ram = performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1024 / 1024) : 512;
     setStats({ fps, ram, activeUsers: users.length || 0 });
+  };
+
+  const formatReportDate = (timestamp) => {
+    if (!timestamp) return 'Unknown';
+    return new Date(timestamp).toLocaleString();
   };
 
   const kickUser = (sessionId, email, targetRole) => {
@@ -291,6 +337,92 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </GlassCard>
+          </motion.div>
+        )}
+
+        {/* IRIS Report Inbox - Admin & Owner */}
+        {(isOwner || session.isAdmin()) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.04 }}
+            className="mb-6"
+          >
+            <GlassCard className="p-6" hover={false}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <Inbox className="w-5 h-5 text-cyan-400" />
+                  <h2 className="text-lg font-semibold text-white">IRIS Report Inbox</h2>
+                  <span className="px-2 py-1 rounded-full bg-cyan-500/20 text-cyan-400 text-xs">
+                    {reportInbox.length} Reports
+                  </span>
+                </div>
+                <NeonButton variant="ghost" size="sm" onClick={exportReports}>
+                  <MessageSquareText className="w-4 h-4 mr-2" />
+                  Export JSON
+                </NeonButton>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <h3 className="text-sm text-white/70">Approved Reports</h3>
+                  {reportInbox.length === 0 && (
+                    <p className="text-white/40 text-sm">No reports yet.</p>
+                  )}
+                  {reportInbox.map((report) => (
+                    <div key={report.id} className="p-3 rounded-lg bg-white/5 border border-white/10">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-white text-sm font-medium">{report.title || 'Untitled Report'}</p>
+                          <p className="text-xs text-white/50">{report.description || report.message || 'No description'}</p>
+                          <p className="text-xs text-white/40 mt-1">Type: {report.classification?.type || 'unknown'} • {formatReportDate(report.createdAt)}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <NeonButton variant="ghost" size="sm" onClick={() => resolveReport(report.id)}>
+                            <Check className="w-4 h-4 mr-1" />
+                            Resolve
+                          </NeonButton>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-yellow-400" />
+                    <h3 className="text-sm text-white/70">Needs Review (Possible Junk)</h3>
+                    <span className="px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-400 text-xs">
+                      {reportReview.length}
+                    </span>
+                  </div>
+                  {reportReview.length === 0 && (
+                    <p className="text-white/40 text-sm">No items in review.</p>
+                  )}
+                  {reportReview.map((report) => (
+                    <div key={report.id} className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-white text-sm font-medium">{report.title || 'Untitled Report'}</p>
+                          <p className="text-xs text-white/50">{report.description || report.message || 'No description'}</p>
+                          <p className="text-xs text-white/40 mt-1">Confidence: {Math.round((report.classification?.confidence || 0) * 100)}%</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <NeonButton variant="primary" size="sm" onClick={() => approveReport(report.id)}>
+                            <Check className="w-4 h-4 mr-1" />
+                            Approve
+                          </NeonButton>
+                          <NeonButton variant="danger" size="sm" onClick={() => rejectReport(report.id)}>
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            Delete
+                          </NeonButton>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </GlassCard>
           </motion.div>

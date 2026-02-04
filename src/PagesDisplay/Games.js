@@ -8,10 +8,11 @@ import GlassCard from '../Components/UI/GlassCard.js';
 import NeonButton from '../Components/UI/NeonButton.js';
 import GameCard from '../Components/Games/GameCard.js';
 import GameFilters from '../Components/Games/GameFilters.js';
-import { storage } from '../Components/Storage/clientStorage.js';
+import { storage, session } from '../Components/Storage/clientStorage.js';
 import SoftParticleDrift from '../Components/Backgrounds/SoftParticleDrift.js';
 
-const SAMPLE_GAMES = [
+// Fallback games in case manifest doesn't load
+const FALLBACK_GAMES = [
   { 
     id: 1, 
     title: '2048', 
@@ -613,13 +614,13 @@ const SAMPLE_GAMES = [
     url: 'https://www.coolmathgames.com/0-papas-pizzeria'
   },
 ];
-
 export default function Games() {
   const navigate = useNavigate();
   const goBack = useNavigateBack();
   const [search, setSearch] = useState('');
   const [performance, setPerformance] = useState('all');
   const [selectedTags, setSelectedTags] = useState([]);
+  const [selectedGame, setSelectedGame] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
   const [activeSource, setActiveSource] = useState('all');
@@ -652,9 +653,104 @@ export default function Games() {
     }
   };
 
-  const allTags = [...new Set(SAMPLE_GAMES.flatMap(g => g.tags))].sort();
+  // State for loaded games
+  const [loadedGames, setLoadedGames] = useState(FALLBACK_GAMES);
+  const [gamesLoading, setGamesLoading] = useState(true);
+  const [canAccessTesting, setCanAccessTesting] = useState(false);
 
-  const filteredGames = SAMPLE_GAMES.filter(game => {
+  // Check if user can access testing games
+  useEffect(() => {
+    const currentCode = session.get();
+    if (currentCode) {
+      const canAccess = storage.canAccessTestingGames(currentCode);
+      setCanAccessTesting(canAccess);
+    }
+  }, []);
+
+  // Load games from manifest
+  useEffect(() => {
+    const loadGames = async () => {
+      try {
+        // Load regular games
+        const response = await fetch('/games/games-manifest.json');
+        let allGames = [...FALLBACK_GAMES];
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.games && Array.isArray(data.games)) {
+            // Convert manifest format to component format
+            const convertedGames = data.games.map(game => ({
+              id: game.id,
+              title: game.title,
+              thumbnail: game.thumbnail || generateThumbnail(game.title, game.category),
+              tags: game.tags || [game.category],
+              performance: game.performance || 'low',
+              source: game.localPath ? 'local' : 'online',
+              playTime: game.playTime || '5-10 min',
+              url: game.localPath || game.online, // Prefer local cloned games, fallback to online
+              tier: game.tier,
+              quality: game.quality,
+              testing: false
+            }));
+            allGames = [...convertedGames, ...FALLBACK_GAMES];
+          }
+        }
+
+        // Load testing games if user has access
+        if (canAccessTesting) {
+          try {
+            const testingResponse = await fetch('/games/testing-games-manifest.json');
+            if (testingResponse.ok) {
+              const testingData = await testingResponse.json();
+              if (Array.isArray(testingData)) {
+                const convertedTestingGames = testingData.map(game => ({
+                  id: game.id,
+                  title: game.title,
+                  thumbnail: generateThumbnail(game.title, game.tags?.[0] || 'testing'),
+                  tags: [...(game.tags || []), 'testing'],
+                  performance: game.performance || 'medium',
+                  source: game.localPath ? 'local' : 'online',
+                  playTime: '10+ min',
+                  url: game.localPath || game.online,
+                  testing: true,
+                  rating: game.rating
+                }));
+                allGames = [...allGames, ...convertedTestingGames];
+              }
+            }
+          } catch (err) {
+            console.log('Testing games not available');
+          }
+        }
+
+        setLoadedGames(allGames);
+      } catch (err) {
+        console.log('Using fallback games - manifest not loaded');
+      } finally {
+        setGamesLoading(false);
+      }
+    };
+    loadGames();
+  }, [canAccessTesting]);
+
+  // Helper to generate placeholder thumbnails
+  const generateThumbnail = (title, category) => {
+    const colors = {
+      puzzle: '%23edc850',
+      strategy: '%23312e2b',
+      arcade: '%2344d62c',
+      platformer: '%23ff6b35',
+      racing: '%23f7931e',
+      shooter: '%23ff1744',
+      '3d': '%23000'
+    };
+    const color = colors[category] || '%23666';
+    return `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"%3E%3Crect fill="${color}" width="400" height="225"/%3E%3Ctext x="50%25" y="50%25" font-size="48" fill="%23fff" text-anchor="middle" dy=".3em" font-family="Arial,sans-serif" font-weight="bold"%3E${encodeURIComponent(title)}%3C/text%3E%3C/svg%3E`;
+  };
+
+  const allTags = [...new Set(loadedGames.flatMap(g => g.tags))].sort();
+
+  const filteredGames = loadedGames.filter(game => {
     const matchesSearch = game.title.toLowerCase().includes(search.toLowerCase());
     const matchesPerformance = performance === 'all' || game.performance === performance;
     const matchesTags = selectedTags.length === 0 || selectedTags.every(tag => game.tags.includes(tag));
@@ -693,8 +789,251 @@ export default function Games() {
   };
 
   const playGame = (game) => {
-    // Navigate to browser with the game URL
-    navigate(createPageUrl('Browser'), { state: { url: game.url } });
+    const url = game?.url;
+    const isMinecraftJava =
+      game?.title?.toLowerCase().includes('minecraft java') ||
+      (typeof url === 'string' && url.includes('/games/minecraft/launcher.html'));
+
+    if (isMinecraftJava && typeof url === 'string') {
+      const newTab = window.open('about:blank', '_blank', 'noopener,noreferrer');
+      if (newTab) {
+        newTab.document.title = 'Minecraft Java Edition';
+        newTab.document.body.style.margin = '0';
+        newTab.document.body.style.padding = '0';
+        newTab.document.body.style.overflow = 'hidden';
+        newTab.document.body.style.background = '#000';
+        newTab.document.documentElement.style.margin = '0';
+        newTab.document.documentElement.style.padding = '0';
+        newTab.document.documentElement.style.overflow = 'hidden';
+        newTab.document.documentElement.style.height = '100%';
+
+        const iframe = newTab.document.createElement('iframe');
+        iframe.src = url;
+        iframe.style.position = 'fixed';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.border = 'none';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.overflow = 'hidden';
+        iframe.setAttribute('allowfullscreen', 'true');
+        iframe.setAttribute('allow', 'fullscreen');
+
+        newTab.document.body.appendChild(iframe);
+      }
+      return;
+    }
+
+    // Open game in iframe modal instead of navigating to browser
+    setSelectedGame(game);
+  };
+
+  const tabs = [
+    { id: 'all', label: 'All Games', icon: TrendingUp },
+    { id: 'favorites', label: 'Favorites', icon: Star },
+    { id: 'recent', label: 'Recently Played', icon: Clock },
+  ];
+
+  const platforms = [
+    { id: 'all', name: 'All Platforms' },
+    { id: 'poki', name: 'Poki' },
+    { id: 'crazygames', name: 'CrazyGames' },
+    { id: 'coolmath', name: 'Coolmath Games' },
+    { id: 'nealfun', name: 'Neal.fun' },
+    { id: 'gamejolt', name: 'GameJolt' },
+    { id: 'github', name: 'GitHub Games' }
+  ];
+
+  return (
+    <div className="min-h-screen relative overflow-hidden">
+      <SoftParticleDrift accentColor={accentColor} particleCount={40} />
+      
+      <div className="relative z-10 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.header 
+          className="mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="flex items-center gap-4 mb-6">
+
+export default function Games() {
+  const navigate = useNavigate();
+  const goBack = useNavigateBack();
+  const [search, setSearch] = useState('');
+  const [performance, setPerformance] = useState('all');
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [selectedGame, setSelectedGame] = useState(null);
+  const [favorites, setFavorites] = useState([]);
+  const [activeTab, setActiveTab] = useState('all');
+  const [activeSource, setActiveSource] = useState('all');
+
+  const accentColor = '#ff6b6b';
+
+  useEffect(() => {
+    loadFavorites();
+  }, []);
+
+  const loadFavorites = async () => {
+    try {
+      await storage.init();
+      const saved = await storage.loadFavorites();
+      setFavorites(saved);
+    } catch (err) {
+      console.error('Failed to load favorites:', err);
+    }
+  };
+
+  const loadSettings = async () => {
+    try {
+      await storage.init();
+      const saved = await storage.loadSettings();
+      if (saved) {
+        setSettings(saved);
+      }
+    } catch (err) {
+      console.error('Failed to load favorites:', err);
+    }
+  };
+
+  // State for loaded games
+  const [loadedGames, setLoadedGames] = useState(FALLBACK_GAMES);
+  const [gamesLoading, setGamesLoading] = useState(true);
+  const [canAccessTesting, setCanAccessTesting] = useState(false);
+
+  // Check if user can access testing games
+  useEffect(() => {
+    const currentCode = session.get();
+    if (currentCode) {
+      const canAccess = storage.canAccessTestingGames(currentCode);
+      setCanAccessTesting(canAccess);
+    }
+  }, []);
+
+  // Load games from manifest
+  useEffect(() => {
+    const loadGames = async () => {
+      try {
+        // Load regular games
+        const response = await fetch('/games/games-manifest.json');
+        let allGames = [...FALLBACK_GAMES];
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.games && Array.isArray(data.games)) {
+            // Convert manifest format to component format
+            const convertedGames = data.games.map(game => ({
+              id: game.id,
+              title: game.title,
+              thumbnail: game.thumbnail || generateThumbnail(game.title, game.category),
+              tags: game.tags || [game.category],
+              performance: game.performance || 'low',
+              source: game.localPath ? 'local' : 'online',
+              playTime: game.playTime || '5-10 min',
+              url: game.localPath || game.online, // Prefer local cloned games, fallback to online
+              tier: game.tier,
+              quality: game.quality,
+              testing: false
+            }));
+            allGames = [...convertedGames, ...FALLBACK_GAMES];
+          }
+        }
+
+        // Load testing games if user has access
+        if (canAccessTesting) {
+          try {
+            const testingResponse = await fetch('/games/testing-games-manifest.json');
+            if (testingResponse.ok) {
+              const testingData = await testingResponse.json();
+              if (Array.isArray(testingData)) {
+                const convertedTestingGames = testingData.map(game => ({
+                  id: game.id,
+                  title: game.title,
+                  thumbnail: generateThumbnail(game.title, game.tags?.[0] || 'testing'),
+                  tags: [...(game.tags || []), 'testing'],
+                  performance: game.performance || 'medium',
+                  source: game.localPath ? 'local' : 'online',
+                  playTime: '10+ min',
+                  url: game.localPath || game.online,
+                  testing: true,
+                  rating: game.rating
+                }));
+                allGames = [...allGames, ...convertedTestingGames];
+              }
+            }
+          } catch (err) {
+            console.log('Testing games not available');
+          }
+        }
+
+        setLoadedGames(allGames);
+      } catch (err) {
+        console.log('Using fallback games - manifest not loaded');
+      } finally {
+        setGamesLoading(false);
+      }
+    };
+    loadGames();
+  }, [canAccessTesting]);
+
+  // Helper to generate placeholder thumbnails
+  const generateThumbnail = (title, category) => {
+    const colors = {
+      puzzle: '%23edc850',
+      strategy: '%23312e2b',
+      arcade: '%2344d62c',
+      platformer: '%23ff6b35',
+      racing: '%23f7931e',
+      shooter: '%23ff1744',
+      '3d': '%23000'
+    };
+    const color = colors[category] || '%23666';
+    return `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"%3E%3Crect fill="${color}" width="400" height="225"/%3E%3Ctext x="50%25" y="50%25" font-size="48" fill="%23fff" text-anchor="middle" dy=".3em" font-family="Arial,sans-serif" font-weight="bold"%3E${encodeURIComponent(title)}%3C/text%3E%3C/svg%3E`;
+  };
+
+  const allTags = [...new Set(loadedGames.flatMap(g => g.tags))].sort();
+
+  const filteredGames = loadedGames.filter(game => {
+    const matchesSearch = game.title.toLowerCase().includes(search.toLowerCase());
+    const matchesPerformance = performance === 'all' || game.performance === performance;
+    const matchesTags = selectedTags.length === 0 || selectedTags.every(tag => game.tags.includes(tag));
+    const matchesSource = activeSource === 'all' || game.source === activeSource;
+    const matchesFavorite = activeTab !== 'favorites' || favorites.includes(game.id);
+    return matchesSearch && matchesPerformance && matchesTags && matchesSource && matchesFavorite;
+  });
+
+  // Pin favorites to top
+  const sortedGames = [...filteredGames].sort((a, b) => {
+    const aFav = favorites.includes(a.id);
+    const bFav = favorites.includes(b.id);
+    if (aFav && !bFav) return -1;
+    if (!aFav && bFav) return 1;
+    return 0;
+  });
+
+  const toggleFavorite = async (game) => {
+    const newFavorites = favorites.includes(game.id) 
+      ? favorites.filter(id => id !== game.id)
+      : [...favorites, game.id];
+    
+    setFavorites(newFavorites);
+    
+    try {
+      await storage.saveFavorites(newFavorites);
+    } catch (err) {
+      console.error('Failed to save favorites:', err);
+    }
+  };
+
+  const toggleTag = (tag) => {
+    setSelectedTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const playGame = (game) => {
+    // Open game in iframe modal instead of navigating to browser
+    setSelectedGame(game);
   };
 
   const tabs = [
@@ -760,7 +1099,7 @@ export default function Games() {
               variant="ghost" 
               className="ml-auto"
               onClick={() => {
-                const randomGame = SAMPLE_GAMES[Math.floor(Math.random() * SAMPLE_GAMES.length)];
+                const randomGame = loadedGames[Math.floor(Math.random() * loadedGames.length)];
                 playGame(randomGame);
               }}
             >
@@ -858,6 +1197,53 @@ export default function Games() {
             <p className="text-white/50 text-lg">No games found matching your filters</p>
           </motion.div>
         )}
+
+        {/* Game Player Modal */}
+        <AnimatePresence>
+          {selectedGame && (
+            <motion.div
+              className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedGame(null)}
+            >
+              <motion.div
+                className="relative w-full h-[90vh] max-w-5xl bg-[#2a2a3e] rounded-2xl shadow-2xl overflow-hidden border border-white/10"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-[#2a2a3e] to-transparent p-4 flex items-center justify-between">
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold text-white">{selectedGame.title}</h2>
+                    <p className="text-sm text-white/50">{selectedGame.playTime}</p>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setSelectedGame(null)}
+                    className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/70 hover:text-white transition-colors"
+                  >
+                    ✕
+                  </motion.button>
+                </div>
+
+                {/* Game iframe */}
+                <iframe
+                  src={selectedGame.url}
+                  title={selectedGame.title}
+                  className="w-full h-full border-none"
+                  allowFullScreen
+                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-presentation"
+                  allow="autoplay; fullscreen; accelerometer; camera; clipboard-read; clipboard-write; encrypted-media; geolocation; gyroscope; magnetometer; microphone; midi; payment; picture-in-picture; speaker; usb; vr; xr-spatial-tracking"
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

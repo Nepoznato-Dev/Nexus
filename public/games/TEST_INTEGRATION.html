@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games Integration Test - Nexus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+        .status {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .game-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .game-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .game-info {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin: 5px 0;
+        }
+        .game-tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .tag {
+            background: rgba(0, 255, 255, 0.2);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+        .play-btn {
+            background: #0ff;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        .play-btn:hover {
+            background: #00cccc;
+        }
+        .quality-badge {
+            display: inline-block;
+            background: rgba(76, 175, 80, 0.3);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-left: 5px;
+        }
+        .local-badge {
+            background: rgba(33, 150, 243, 0.3);
+        }
+        .online-badge {
+            background: rgba(255, 152, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Nexus Games Integration Test</h1>
+        
+        <div class="status" id="status">
+            <p><strong>Loading games manifest...</strong></p>
+        </div>
+
+        <div id="stats" class="status" style="display: none;">
+            <h3>📊 Games Library Stats</h3>
+            <p id="total-games"></p>
+            <p id="local-games"></p>
+            <p id="online-games"></p>
+            <p id="quality-games"></p>
+        </div>
+
+        <div class="games-grid" id="games-grid"></div>
+    </div>
+
+    <script>
+        async function loadGames() {
+            try {
+                const response = await fetch('/games/games-manifest.json');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (!data.games || !Array.isArray(data.games)) {
+                    throw new Error('Invalid manifest format');
+                }
+
+                // Update status
+                document.getElementById('status').innerHTML = `
+                    <p><strong>✅ Manifest loaded successfully!</strong></p>
+                    <p>Version: ${data.version || 'unknown'}</p>
+                    <p>Last Updated: ${data.lastUpdated || 'unknown'}</p>
+                `;
+
+                // Show stats
+                const localGames = data.games.filter(g => g.localPath);
+                const onlineGames = data.games.filter(g => g.online && !g.localPath);
+                const qualityGames = data.games.filter(g => g.quality === 'proven');
+
+                document.getElementById('stats').style.display = 'block';
+                document.getElementById('total-games').textContent = `Total Games: ${data.games.length}`;
+                document.getElementById('local-games').textContent = `Local Games: ${localGames.length}`;
+                document.getElementById('online-games').textContent = `Online Games: ${onlineGames.length}`;
+                document.getElementById('quality-games').textContent = `Quality Verified: ${qualityGames.length}`;
+
+                // Display games
+                const gamesGrid = document.getElementById('games-grid');
+                data.games.forEach(game => {
+                    const card = document.createElement('div');
+                    card.className = 'game-card';
+                    
+                    const sourceType = game.localPath ? 'local' : 'online';
+                    const badgeClass = sourceType === 'local' ? 'local-badge' : 'online-badge';
+                    const qualityBadge = game.quality === 'proven' ? '<span class="quality-badge">✓ Proven</span>' : '';
+                    
+                    card.innerHTML = `
+                        <div class="game-title">
+                            ${game.title}
+                            <span class="quality-badge ${badgeClass}">${sourceType.toUpperCase()}</span>
+                            ${qualityBadge}
+                        </div>
+                        <div class="game-info">${game.description || 'No description'}</div>
+                        <div class="game-info">⏱️ ${game.playTime || 'Unknown'}</div>
+                        <div class="game-info">💾 RAM: ${game.ramEstimate || 'Unknown'}</div>
+                        <div class="game-info">📦 Size: ${game.fileSize || 'Unknown'}</div>
+                        ${game.github ? `<div class="game-info">⭐ ${game.stars || '0'}</div>` : ''}
+                        <div class="game-tags">
+                            ${(game.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <button class="play-btn" onclick="playGame('${game.localPath || game.online}', '${game.title}')">
+                            ${game.localPath ? '▶️ Play Local' : '🌐 Play Online'}
+                        </button>
+                    `;
+                    
+                    gamesGrid.appendChild(card);
+                });
+
+            } catch (error) {
+                document.getElementById('status').innerHTML = `
+                    <p><strong>❌ Error loading manifest</strong></p>
+                    <p>${error.message}</p>
+                    <p>Make sure games-manifest.json exists in /public/games/</p>
+                `;
+                console.error('Error loading games:', error);
+            }
+        }
+
+        function playGame(url, title) {
+            if (confirm(`Play "${title}"?\n\nURL: ${url}`)) {
+                window.open(url, '_blank');
+            }
+        }
+
+        // Load games on page load
+        loadGames();
+    </script>
+</body>
+</html>

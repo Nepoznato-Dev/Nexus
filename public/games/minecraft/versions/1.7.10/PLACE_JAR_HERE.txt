@@ -1,0 +1,7 @@
+# Place minecraft-1.7.10.jar here
+
+Download from:
+- Official launcher: %APPDATA%\.minecraft\versions\1.7.10\1.7.10.jar
+- Or use MultiMC to download
+
+File should be named: minecraft-1.7.10.jar

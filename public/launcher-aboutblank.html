@@ -4,35 +4,333 @@
   <meta charset="UTF-8" />
   <title>Nexus About:Blank Launcher</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #0a0a0f; color: #fff; margin: 0; padding: 24px; }
-    button { padding: 12px 16px; background: #00f0ff; color: #0a0a0f; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; }
-    button:hover { filter: brightness(0.9); }
-    .note { margin-top: 12px; color: #9ca3af; font-size: 14px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: linear-gradient(135deg, #0a0a0f 0%, #1a0a2e 100%);
+      color: #e5e7eb;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .container {
+      max-width: 600px;
+      width: 100%;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .logo {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #00d4ff, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+    .title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #f3f4f6;
+    }
+    .subtitle {
+      color: #9ca3af;
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+    .status-box {
+      background: rgba(17, 24, 39, 0.8);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #d1d5db;
+    }
+    .status-box.loading {
+      border-color: rgba(245, 158, 11, 0.6);
+      background: rgba(245, 158, 11, 0.05);
+    }
+    .status-box.error {
+      border-color: rgba(239, 68, 68, 0.6);
+      background: rgba(239, 68, 68, 0.05);
+    }
+    .status-box.success {
+      border-color: rgba(34, 197, 94, 0.6);
+      background: rgba(34, 197, 94, 0.05);
+    }
+    .status-icon {
+      display: inline-block;
+      margin-right: 0.5rem;
+      font-weight: 700;
+    }
+    .buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    button {
+      flex: 1;
+      min-width: 140px;
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #00d4ff, #7c3aed);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    button.secondary {
+      background: rgba(124, 58, 237, 0.2);
+      color: #00d4ff;
+      border: 1px solid rgba(124, 58, 237, 0.5);
+    }
+    button.secondary:hover:not(:disabled) {
+      background: rgba(124, 58, 237, 0.3);
+    }
+    .note {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-left: 3px solid rgba(0, 212, 255, 0.5);
+      border-radius: 4px;
+      color: #9ca3af;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(0, 212, 255, 0.3);
+      border-top-color: #00d4ff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .hidden { display: none; }
+    .info-section {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: rgba(0, 212, 255, 0.05);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
   </style>
 </head>
 <body>
-  <h1>Launch Nexus in about:blank</h1>
-  <p>Opens an about:blank window and loads the app inside an embedded frame.</p>
-  <button id="launch">Open about:blank</button>
-  <div class="note">If your browser blocks popups, allow this site to open a new window.</div>
+  <div class="container">
+    <div class="header">
+      <div class="logo">⚡</div>
+      <div class="title">Nexus Launcher</div>
+      <div class="subtitle">IRIS-Powered Performance Loading</div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box">
+      <span class="status-icon">🚀</span>
+      <span id="statusText">Ready to launch. Click "Launch Nexus" to begin.</span>
+    </div>
+
+    <!-- Buttons -->
+    <div class="buttons">
+      <button id="launchBtn">Launch Nexus</button>
+      <button id="retryBtn" class="secondary hidden">Retry Launch</button>
+    </div>
+
+    <!-- Info Section -->
+    <div class="info-section">
+      <strong>IRIS Performance Boost:</strong> Nexus will automatically optimize loading by culling non-essential resources and prioritizing critical components for fast startup.
+    </div>
+
+    <!-- Help Note -->
+    <div class="note">
+      <strong>💡 Tip:</strong> If popups are blocked, your browser will show a popup notification. Allow this site to open popups for Nexus to launch properly.
+    </div>
+  </div>
 
   <script>
-    document.getElementById('launch').onclick = () => {
-      const win = window.open('about:blank', '_blank');
-      if (!win) {
-        alert('Popup blocked. Please allow popups for this site.');
-        return;
-      }
+    const MAX_RETRIES = 2;
+    const LOAD_TIMEOUT_MS = 8000;
+    let attempt = 0;
+    let launchedWindow = null;
+    let loadTimer = null;
 
-      const doc = win.document;
-      doc.open();
-      doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Nexus</title>
-        <style>html,body,iframe{margin:0;padding:0;width:100%;height:100%;border:0;overflow:hidden;background:#000;}</style>
-      </head><body>
-        <iframe src="${location.origin}/index.html?embedded=true" allow="fullscreen; clipboard-read; clipboard-write"></iframe>
-      </body></html>`);
-      doc.close();
+    const elements = {
+      statusBox: document.getElementById('statusBox'),
+      statusText: document.getElementById('statusText'),
+      launchBtn: document.getElementById('launchBtn'),
+      retryBtn: document.getElementById('retryBtn')
     };
-  </script>
-</body>
-</html>
+
+    const setStatus = (text, type = 'default') => {
+      elements.statusBox.className = `status-box ${type}`;
+      elements.statusText.innerHTML = text;
+    };
+
+    const checkPageLoaded = (win) => {
+      try {
+        // Try to detect if the page loaded
+        if (!win) return false;
+        if (win.closed) return false;
+        
+        // Check if document is accessible and has content
+        const doc = win.document;
+        const body = doc?.body;
+        
+        if (!body) return false;
+        
+        // Check if basic Nexus elements exist
+        const hasContent = body.innerHTML && body.innerHTML.trim().length > 100;
+        const hasApp = !!doc.getElementById('root') || !!doc.querySelector('[class*="app"]');
+        
+        return hasContent || hasApp;
+      } catch (err) {
+        // Cross-origin errors are expected, but means the page likely loaded
+        return true;
+      }
+    };
+
+    const handleLaunchSuccess = () => {
+      clearTimeout(loadTimer);
+      setStatus('<span class="status-icon">✅</span> Nexus loaded successfully! Page will close in 2 seconds.', 'success');
+      elements.launchBtn.disabled = true;
+      
+      setTimeout(() => {
+        window.close();
+      }, 2000);
+    };
+
+    const handleLaunchFailure = (reason) => {
+      clearTimeout(loadTimer);
+      
+      if (attempt < MAX_RETRIES) {
+        attempt++;
+        setStatus(
+          `<span class="spinner"></span><strong>Loading attempt ${attempt} of ${MAX_RETRIES}:</strong><br/>` +
+          `Iframe didn't load correctly. I will try it again to see if code is broken or has been removed by Nexus owner.`,
+          'loading'
+        );
+        
+        setTimeout(() => {
+          launchApp();
+        }, 1500);
+      } else {
+        setStatus(
+          `<span class="status-icon">❌</span> <strong>Launch Failed:</strong><br/>` +
+          `Nexus could not load after ${MAX_RETRIES} attempts. The page may be unavailable or removed. ` +
+          `Check if the server is running or try again later.`,
+          'error'
+        );
+        
+        elements.launchBtn.classList.add('hidden');
+        elements.retryBtn.classList.remove('hidden');
+        
+        console.error(`Launch failed: ${reason}. Attempts: ${attempt}`);
+      }
+    };
+
+    const launchApp = () => {
+      setStatus(
+        `<span class="spinner"></span><strong>Launching with IRIS Performance Optimization...</strong><br/>` +
+        `Culling non-essential resources & prioritizing critical components.`,
+        'loading'
+      );
+
+      try {
+        // Add performance optimization flag to URL
+        const url = `${location.origin}/index.html?performance=optimized&mode=iris-load`;
+        launchedWindow = window.open(url, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+
+        if (!launchedWindow) {
+          handleLaunchFailure('popup-blocked');
+          setStatus(
+            `<span class="status-icon">⚠️</span> <strong>Popup Blocked:</strong><br/>` +
+            `Allow popups for this site to launch Nexus.`,
+            'error'
+          );
+          return;
+        }
+
+        // Set timeout for page load check
+        loadTimer = setTimeout(() => {
+          if (!checkPageLoaded(launchedWindow)) {
+            handleLaunchFailure('load-timeout');
+          }
+        }, LOAD_TIMEOUT_MS);
+
+        // Try to detect successful load via window events
+        launchedWindow.addEventListener('load', () => {
+          if (checkPageLoaded(launchedWindow)) {
+            handleLaunchSuccess();
+          }
+        }, { once: true });
+
+        // Fallback: periodically check if page loaded
+        const checkInterval = setInterval(() => {
+          if (checkPageLoaded(launchedWindow)) {
+            clearInterval(checkInterval);
+            handleLaunchSuccess();
+          }
+        }, 500);
+
+        // Clean up interval if window closes
+        const closeCheckInterval = setInterval(() => {
+          if (launchedWindow.closed) {
+            clearInterval(checkInterval);
+            clearInterval(closeCheckInterval);
+            if (attempt >= MAX_RETRIES) {
+              handleLaunchFailure('window-closed');
+            }
+          }
+        }, 1000);
+
+      } catch (error) {
+        handleLaunchFailure(`exception: ${error.message}`);
+      }
+    };
+
+    // Event listeners
+    elements.launchBtn.addEventListener('click', () => {
+      attempt = 0;
+      launchApp();
+    });
+
+    elements.retryBtn.addEventListener('click', () => {
+      attempt = 0;
+      elements.retryBtn.classList.add('hidden');
+      elements.launchBtn.classList.remove('hidden');
+      launchApp();
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'c' && !elements.launchBtn.disabled) {
+        e.preventDefault();
+        launchApp();
+      } else if (e.key.toLowerCase() === 'r' && !elements.retryBtn.classList.contains('hidden')) {
+        e.preventDefault();
+        elements.retryBtn.click();
+      }
+    });

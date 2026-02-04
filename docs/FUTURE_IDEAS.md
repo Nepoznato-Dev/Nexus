@@ -56,6 +56,18 @@
 - Built-in terminal for user execution
 - Data analysis
 - Custom configurable behavior per user
+- **YouTube + Library Search** (IRIS)
+  - Search YouTube for tutorials/explanations
+  - Search in-app Open Access Library sources
+  - Present **books + videos** together for deeper learning
+  - Encourage long-form sources for high-quality answers
+
+### IRIS Smart Performance Manager
+- **Task manager shows top resource hogs** (CPU/GPU/RAM) sorted by impact
+- **Auto-cull inactive tasks** (browser tabs, videos, games, media, AI)
+- **Safe-mode culling** if AI must pause (minimal culler still runs)
+- **Context-aware messages** (“IRIS stopped ‘X’ — enjoy your video lag free!”)
+- **User controls**: aggressiveness level + protected apps list
 
 ### Page Editor Mode
 - Allow users to customize UI/layout of any page
@@ -174,6 +186,8 @@ Merge redundant settings:
 - RAM limiter for games (configurable)
 - Option: Close all tabs for maximum game performance
 - Option: ESC key → panic mode (closes game, returns to Nexus logged in)
+- Show **top CPU/GPU/RAM tasks first** (sorted by impact)
+- Allow **auto-cull of inactive tasks** with user-friendly notifications
 
 ### System Specs & Monitoring
 - Real-time RAM, CPU, GPU usage
@@ -238,6 +252,25 @@ Current: "Nexus" (means connection of things)
 
 ---
 
+## 18. Open Access Library Hub
+**Priority:** v1.1+
+
+### Sources
+- Project Gutenberg (public domain classics)
+- Open Library (borrowable/archival titles)
+- LibreTexts (open textbooks)
+- OpenStax (open educational resources)
+- OER Commons (learning materials)
+- Directory of Open Access Books (DOAB)
+
+### Features
+- Unified search across all sources
+- Source filters + availability tags
+- Reading lists / offline queue
+- Citation export (MLA/APA/Chicago)
+
+---
+
 ## 13. System Specs & Usage Monitoring
 **Priority:** v1.1+
 
@@ -297,7 +330,19 @@ Current: "Nexus" (means connection of things)
 
 ---
 
-## 17. Enhanced Role System
+## 17. In-App Bug Reports (Zero-Cost)
+**Priority:** v1.1+
+
+- **Bug Report Inbox** inside Nexus (no external services)
+- Users can submit: title, steps, expected vs actual, device info, screenshots
+- **Local storage / IndexedDB** for offline-first reports
+- **Export** button: download JSON/CSV so owner can review
+- Optional: auto-attach basic diagnostics (FPS, RAM, page, time)
+- Later upgrade: send to GitHub issues or email when funds allow
+
+---
+
+## 18. Enhanced Role System
 **Priority:** 1.0.0 ✓ (IN PROGRESS)
 
 ### Role Hierarchy (Color-Coded)
@@ -370,6 +415,7 @@ Current: "Nexus" (means connection of things)
 - [ ] Per-page browser mode
 - [ ] Movie site integration
 - [ ] Advanced animation controls
+- [ ] Minecraft Mod Manager (see Section 20)
 
 ### v2.0+
 - [ ] Code obfuscation
@@ -384,5 +430,107 @@ Current: "Nexus" (means connection of things)
 
 ---
 
-**Last Updated:** January 26, 2026
+## 20. Minecraft Mod Manager
+**Priority:** v1.2+
+**Accessibility Focus:** Bypasses school filters for educational modding
+
+### Problem
+- Modrinth and CurseForge URLs blocked by GoGuardian/school filters
+- Students can't learn modding or customize their Minecraft experience
+- No easy way to install mods without technical knowledge
+- Hidden task manager prevents direct downloads
+
+### Solution
+IRIS becomes the **mod discovery & download proxy** for students:
+- Search Modrinth/CurseForge via IRIS interface
+- Download mods directly to user-selected folder
+- Educational resources (mod guides, dependency info, version matching)
+- Safety warnings and best practices
+
+### Core Features
+
+#### 1. Mod Discovery
+- **Search Interface**
+  - Real-time search across Modrinth + CurseForge
+  - Filters: Game version, category (gameplay, decoration, optimization), sort by downloads/recency
+  - Display: Screenshots, description, author, downloads count, rating
+  - Version selector (which Minecraft version)
+
+#### 2. Mod Download
+- **Download Management**
+  - User selects folder via file picker (bypasses blocked direct downloads)
+  - Batch download (select multiple mods at once)
+  - Progress tracking: File size, speed, ETA
+  - Checksum validation (verify integrity)
+  
+#### 3. Dependency Resolution
+- **Smart Dependency Detection**
+  - Scans mod metadata from API
+  - Alerts user: "This mod requires [Fabric/Forge] loader"
+  - Suggests additional required mods ("Requires: Library X version Y")
+  - One-click: "Download All Dependencies"
+
+#### 4. Educational Content
+- **Learning Resources Built-In**
+  - "What is a Minecraft mod?" explainer
+  - "How to install mods" step-by-step guide
+  - "Mod loaders explained" (Fabric vs Forge vs Quilt)
+  - "Save safety tips" - backup before installing
+  - Links to mod documentation
+
+#### 5. Version Matching
+- **Game Version Compatibility**
+  - Auto-detects user's Minecraft version (read from launcher)
+  - Shows which mods support that version
+  - Warning if mod only works on different versions
+  - Multi-version support ("Works on 1.20.1, 1.19.3, 1.18+")
+
+#### 6. Safety & Best Practices
+- **Risk Warnings**
+  - Flag untrusted sources (only Modrinth/CurseForge)
+  - Backup reminder ("Always backup saves before mods")
+  - Performance impact estimate ("Heavy mods: expect 10-20 FPS drop")
+  - Mod conflicts warning ("Popular conflicts: OptiFine + Sodium")
+
+### API Integration
+
+#### Modrinth API
+- Endpoint: `https://api.modrinth.com/v2/search`
+- Rate limit: 600 req/min (sufficient for users)
+- Data: mod name, description, downloads, ratings, versions, dependencies, screenshots
+
+#### CurseForge API
+- Endpoint: `https://api.curseforge.com/v1/mods/search`
+- Requires API key (free tier available)
+- Data: mod info, file downloads, version compatibility
+
+### Implementation Architecture
+
+```
+ModManager.js (React Component)
+├── ModSearch.js (Search UI + filters)
+├── ModDetails.js (Mod info, dependencies, versions)
+├── ModDownloader.js (Download + progress)
+├── ModEducation.js (Learning resources)
+└── modAPIHandler.js (Modrinth/CurseForge API calls)
+```
+
+### User Flow
+1. Student navigates to "Minecraft Mods" in Utilities
+2. Searches for mod name (e.g., "Sodium")
+3. Sees compatibility: ✅ 1.20.1, ❌ 1.19 (not compatible)
+4. Clicks download → selects folder
+5. System detects dependency: "Needs Fabric Loader" → one-click add
+6. Downloads all files to selected folder
+7. Educational tip: "Now follow this guide to install mods..."
+
+### Success Metrics
+- ✅ Zero students need help installing mods manually
+- ✅ No broken installations (dependency conflicts prevented)
+- ✅ Mods actually work first try
+- ✅ Students learn modding ecosystem through built-in guides
+
+---
+
+**Last Updated:** February 3, 2026
 **Status:** Living document—updates as priorities shift

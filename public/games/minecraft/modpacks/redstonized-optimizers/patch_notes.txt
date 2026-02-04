@@ -1,0 +1,10 @@
+Redstonized Optimizers - Compatibility Patch (2026-01-29)
+
+- Added compatibility/bridge mods: Indium, CIT Resewn, Entity Texture Features, Entity Model Features, Sinytra Connector (optional)
+- Updated documentation for all known mod conflicts and best practices
+- Updated config recommendations for Distant Horizons, Iris, Bobby, EntityCulling, Embeddium
+- Added troubleshooting for visual glitches and startup crashes
+- Warned against using Sodium or OptiFine with Embeddium
+- All mods now set to latest stable versions (where possible)
+- Mod Menu and config toggles recommended for all users
+- See compatibility_patches.md for full details

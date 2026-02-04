@@ -355,6 +355,18 @@ export const storage = {
     const roleData = this.getUserRole(accessCode);
     return roleData.approved || roleData.role === 'owner' || roleData.role === 'admin';
   },
+
+  // Testing games access control
+  canAccessTestingGames(accessCode) {
+    const roleData = this.getUserRole(accessCode);
+    const allowedRoles = ['owner', 'admin', 'moderator'];
+    return allowedRoles.includes(roleData.role);
+  },
+
+  isModerator(accessCode) {
+    const roleData = this.getUserRole(accessCode);
+    return roleData.role === 'moderator';
+  },
   
   async saveSettings(settings) {
     const db = await initDB();

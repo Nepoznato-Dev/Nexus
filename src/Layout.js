@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, Sparkles, Bell } from 'lucide-react';
 import { createPageUrl } from 'utils';
 import { session, storage } from './Components/Storage/clientStorage.js';
+import { redirectOnSessionInvalid } from './utils/iframeNavigation';
 import KeyboardHandler from './Components/UI/KeyboardHandler.js';
 import WidgetsOverlay from './Components/Widgets/WidgetsOverlay.js';
 import Sidebar from './Components/UI/Sidebar.js';
@@ -19,8 +20,18 @@ const getFakeTitle = () => {
 };
 
 export default function Layout({ children, currentPageName }) {
+  // Generate unique sessionId on mount
+  const sessionIdRef = useRef(sessionStorage.getItem('nexus_session_id'));
+  if (!sessionIdRef.current) {
+    sessionIdRef.current = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    sessionStorage.setItem('nexus_session_id', sessionIdRef.current);
+  }
+  const sessionId = sessionIdRef.current;
+
   const [searchInput, setSearchInput] = useState('');
   const [searchMode, setSearchMode] = useState('browser'); // 'browser' or 'ai'
+  const [aiDropdownOpen, setAiDropdownOpen] = useState(false);
+
   const [lastActivity, setLastActivity] = useState(Date.now());
   const lastActivityRef = useRef(Date.now());
   const [notificationCenterOpen, setNotificationCenterOpen] = useState(false);
@@ -216,7 +227,7 @@ export default function Layout({ children, currentPageName }) {
           // User has been kicked
           localStorage.removeItem('nexus_kick_list');
           sessionStorage.clear();
-          window.location.href = createPageUrl('Landing');
+          redirectOnSessionInvalid(navigate);
         }
       } catch (err) {
         console.error('Kick check failed:', err);
@@ -240,7 +251,7 @@ export default function Layout({ children, currentPageName }) {
           alert(message);
           session.clear();
           sessionStorage.clear();
-          window.location.href = createPageUrl('Landing');
+          redirectOnSessionInvalid(navigate);
         }
       } catch (err) {
         console.error('Ban check failed:', err);
@@ -320,13 +331,27 @@ export default function Layout({ children, currentPageName }) {
     if (searchInput.trim()) {
       if (searchMode === 'browser') {
         navigate(createPageUrl('Browser'), { state: { url: searchInput.trim() } });
+        setSearchInput('');
       } else {
-        // Navigate to StudyTools with AI query
-        navigate(createPageUrl('StudyTools'), { state: { aiQuery: searchInput.trim() } });
+        // AI mode: open dropdown instead of navigating
+        setAiDropdownOpen(true);
       }
-      setSearchInput('');
     }
   };
+
+  // Toggle AI dropdown when clicking AI mode button
+  const handleAiModeToggle = () => {
+    if (searchMode === 'ai') {
+      // Already in AI mode, toggle dropdown
+      setAiDropdownOpen(!aiDropdownOpen);
+    } else {
+      // Switch to AI mode and open dropdown
+      setSearchMode('ai');
+      setAiDropdownOpen(true);
+    }
+  };
+
+  if (requireAboutBlank) {
 
   return (
     <div className="min-h-screen bg-[#2a2a3e] flex flex-col">
@@ -356,13 +381,13 @@ export default function Layout({ children, currentPageName }) {
                 <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => setSearchMode(searchMode === 'browser' ? 'ai' : 'browser')}
+                    onClick={handleAiModeToggle}
                     className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                      searchMode === 'ai'
+                      searchMode === 'ai' || aiDropdownOpen
                         ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
                         : 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
                     }`}
-                    title={`Switch to ${searchMode === 'browser' ? 'AI' : 'Browser'} mode`}
+                    title={searchMode === 'ai' ? 'Open AI Assistant' : 'Switch to AI mode'}
                   >
                     {searchMode === 'browser' ? <Search className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
                     <span className="text-sm font-medium hidden sm:inline">
@@ -474,6 +499,9 @@ export default function Layout({ children, currentPageName }) {
           animation: pulse-glow 2s ease-in-out infinite;
         }
       `}</style>
+
+      {/* AI Dropdown */}
+
 
       <NotificationCenter
         isOpen={notificationCenterOpen}

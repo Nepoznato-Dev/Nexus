@@ -1,0 +1,228 @@
+.personality-control {
+  background: linear-gradient(135deg, rgba(10, 10, 15, 0.8), rgba(26, 26, 46, 0.8));
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.personality-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.personality-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #00f0ff;
+  letter-spacing: 0.5px;
+}
+
+.lock-btn {
+  background: none;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  color: rgba(255, 255, 255, 0.6);
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.lock-btn:hover {
+  background: rgba(0, 240, 255, 0.1);
+  color: #00f0ff;
+  border-color: rgba(0, 240, 255, 0.5);
+}
+
+.lock-btn.locked {
+  background: rgba(255, 0, 127, 0.1);
+  border-color: rgba(255, 0, 127, 0.3);
+  color: #ff007f;
+}
+
+.auto-adapt-hint {
+  margin: 0;
+  font-size: 11px;
+  color: rgba(0, 240, 255, 0.5);
+  text-align: center;
+  font-style: italic;
+}
+
+/* 2D Control Grid */
+.personality-grid {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, 
+    rgba(0, 240, 255, 0.05) 0%,
+    rgba(0, 128, 255, 0.05) 50%,
+    rgba(255, 0, 127, 0.05) 100%
+  );
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 8px;
+  cursor: crosshair;
+  user-select: none;
+  overflow: hidden;
+}
+
+.personality-grid::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  transform: translate(-50%, -50%);
+}
+
+.personality-grid::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-50%);
+}
+
+/* Crosshair cursor */
+.personality-crosshair {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.personality-crosshair::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle, #00f0ff, rgba(0, 240, 255, 0.4));
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.6), inset 0 0 4px rgba(0, 240, 255, 0.8);
+}
+
+.personality-crosshair::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 16px;
+  background: #00f0ff;
+  transform: translate(-50%, -50%);
+}
+
+/* Axis labels */
+.axis-label {
+  position: absolute;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.left-label {
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.right-label {
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.top-label {
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bottom-label {
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Preset buttons */
+.preset-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 6px;
+}
+
+.preset-btn {
+  background: rgba(0, 240, 255, 0.05);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  color: rgba(255, 255, 255, 0.6);
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: capitalize;
+}
+
+.preset-btn:hover {
+  background: rgba(0, 240, 255, 0.15);
+  border-color: rgba(0, 240, 255, 0.4);
+  color: #00f0ff;
+}
+
+.preset-btn.active {
+  background: rgba(0, 240, 255, 0.25);
+  border-color: #00f0ff;
+  color: #00f0ff;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+}
+
+/* Reset button */
+.reset-btn {
+  background: rgba(255, 0, 127, 0.1);
+  border: 1px solid rgba(255, 0, 127, 0.3);
+  color: rgba(255, 0, 127, 0.7);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.reset-btn:hover {
+  background: rgba(255, 0, 127, 0.2);
+  border-color: rgba(255, 0, 127, 0.5);
+  color: #ff007f;
+}
+
+@media (max-width: 768px) {
+  .preset-buttons {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .axis-label {
+    font-size: 10px;
+  }
+}

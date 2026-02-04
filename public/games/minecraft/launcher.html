@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minecraft Java Edition - Launcher</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .launcher-container {
+      max-width: 600px;
+      width: 90%;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    .minecraft-logo {
+      font-size: 48px;
+      font-weight: bold;
+      background: linear-gradient(45deg, #00f0ff, #0080ff, #00f0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+      text-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+    }
+
+    .launcher-info {
+      margin: 30px 0;
+      padding: 20px;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 10px;
+    }
+
+    .launcher-info h2 {
+      color: #00f0ff;
+      margin-bottom: 10px;
+      font-size: 24px;
+    }
+
+    .launcher-info p {
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+      margin: 10px 0;
+    }
+
+    .feature-list {
+      list-style: none;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .feature-list li {
+      padding: 10px;
+      margin: 5px 0;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      border-left: 3px solid #00f0ff;
+    }
+
+    .feature-list li::before {
+      content: "✓ ";
+      color: #00f0ff;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .launch-button {
+      background: linear-gradient(135deg, #00f0ff, #0080ff);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 20px 0;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(0, 240, 255, 0.3);
+    }
+
+    .launch-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(0, 240, 255, 0.5);
+    }
+
+    .launch-button:active {
+      transform: translateY(0);
+    }
+
+    .warning {
+      background: rgba(255, 165, 0, 0.1);
+      border: 1px solid rgba(255, 165, 0, 0.3);
+      color: #ffa500;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    .platform-info {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <div class="launcher-container">
+    <div class="minecraft-logo">MINECRAFT</div>
+    
+    <div class="launcher-info">
+      <h2>Java Edition with TLauncher</h2>
+      <p>Full desktop experience with unlimited possibilities</p>
+    </div>
+
+    <ul class="feature-list">
+      <li>Full Minecraft Java Edition experience</li>
+      <li>All versions supported (1.7 - latest)</li>
+      <li>Fabric & Forge mod support</li>
+      <li>Multiplayer & server access</li>
+      <li>Resource packs & shaders</li>
+      <li>Optimized with performance mods</li>
+    </ul>
+
+    <button class="launch-button" onclick="launchMinecraft()">
+      🚀 Launch Minecraft
+    </button>
+
+    <div class="warning">
+      ⚠️ Desktop application will open in a new window. Make sure you have Java installed.
+    </div>
+
+    <div class="platform-info">
+      Platform: <span id="platform">Detecting...</span><br>
+      Location: <span id="location">Loading...</span>
+    </div>
+  </div>
+
+  <script>
+    // Detect platform
+    const platform = navigator.platform;
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isChromebook = userAgent.includes('cros');
+    const isWindows = platform.includes('Win');
+    const isMac = platform.includes('Mac');
+    const isLinux = platform.includes('Linux') && !isChromebook;
+    
+    document.getElementById('platform').textContent = isChromebook ? 'Chrome OS (Chromebook)' : platform;
+
+    // Get Minecraft installation path
+    const mcPath = window.location.origin + '/.testing-apparatus/Minecraft JAVA';
+    document.getElementById('location').textContent = mcPath;
+
+    // Check if on Chromebook and redirect to Chromebook launcher
+    if (isChromebook) {
+      window.location.href = '/games/minecraft/chromebook-launcher.html';
+      return;
+    }
+
+    function launchMinecraft() {
+      if (isChromebook) {
+        goToEaglercraft();
+        return;
+      }
+
+      const launcher = isWindows ? 'TLauncher.exe' : 'TLauncher32bit.exe';
+      
+      // Try to launch via file protocol
+      const launcherPath = `file:///${mcPath}/${launcher}`.replace(/\\/g, '/');
+      
+      // Method 1: Try to open as download (will prompt user)
+      const link = document.createElement('a');
+      link.href = `/.testing-apparatus/Minecraft JAVA/${launcher}`;
+      link.download = launcher;
+      link.click();
+
+      // Method 2: Show instructions if automatic launch fails
+      setTimeout(() => {
+        alert(`
+🎮 Minecraft Launcher Instructions:
+
+1. Navigate to: ${mcPath}
+2. Run: ${launcher}
+3. Log in with your account
+4. Select your version and click Play!
+
+For better performance:
+- Allocate at least 2GB RAM
+- Enable optimization mods in the 'mods' folder
+- Use Fabric loader for best compatibility
+
+Happy mining! ⛏️
+        `);
+      }, 1000);
+    }
+
+    // Alternative: Show file location immediately
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('Minecraft installation path:', mcPath);
+      console.log('Platform detected:', isChromebook ? 'Chromebook' : platform);
+    });
+  </script>
+</body>
+</html>

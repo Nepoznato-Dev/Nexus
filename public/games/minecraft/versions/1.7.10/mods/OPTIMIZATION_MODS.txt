@@ -1,0 +1,10 @@
+# Optimization Mods for 1.7.10
+
+Download these mods:
+1. OptiFine HD U E7 - https://optifine.net/adloadx?f=OptiFine_1.7.10_HD_U_E7.jar
+2. FastCraft 1.25 - https://www.curseforge.com/minecraft/mc-mods/fastcraft/files
+3. FoamFix - https://www.curseforge.com/minecraft/mc-mods/foamfix-optimization-mod/files
+
+Place .jar files in this directory.
+
+Required: Forge 1.7.10

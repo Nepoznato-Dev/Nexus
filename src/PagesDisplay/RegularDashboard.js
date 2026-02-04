@@ -124,8 +124,15 @@ function DashboardContent() {
     document.querySelectorAll('audio, video').forEach(el => el.pause());
     // Clear session but keep encrypted data
     session.clear();
-    // Redirect to safe page
-    window.location.href = 'https://www.google.com/search?q=math+homework';
+    // Redirect to safe page (iframe-safe)
+    if (typeof window !== 'undefined') {
+      try {
+        window.open('https://www.google.com/search?q=math+homework', '_blank', 'noopener,noreferrer');
+      } catch (e) {
+        // Fallback if blocked
+        window.location.href = 'https://www.google.com/search?q=math+homework';
+      }
+    }
   };
 
   const handleLowEndModeToggle = async () => {

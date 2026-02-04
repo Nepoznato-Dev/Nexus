@@ -110,6 +110,61 @@ function App() {
     return !params.has('embedded');
   });
 
+  // IRIS Performance Optimization on startup
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const perfMode = params.get('performance');
+    const loadMode = params.get('mode');
+
+    if (perfMode === 'optimized' && loadMode === 'iris-load') {
+      // Enable IRIS Performance Manager in aggressive mode
+      if (typeof window !== 'undefined') {
+        // Start performance optimization immediately
+        try {
+          const performanceManager = require('./Components/I.R.I.S. — Intelligent Reasoning & Information Synthesizer/irisPerformanceManager.js').default;
+          if (performanceManager) {
+            performanceManager.startMonitoring();
+            performanceManager.setAggressiveness('medium');
+            
+            // Log optimization started
+            console.log('[IRIS] Performance optimization active - culling non-essential resources');
+            
+            // Signal to launcher that page is loading
+            if (window.parent && window.parent !== window) {
+              try {
+                window.parent.postMessage({ type: 'nexus:page-loading' }, '*');
+              } catch (e) {
+                // Ignore cross-origin errors
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('[IRIS] Performance manager not yet loaded');
+        }
+      }
+    }
+  }, []);
+
+  // Signal page ready to launcher
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const perfMode = params.get('performance');
+
+    if (perfMode === 'optimized') {
+      const timeout = setTimeout(() => {
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'nexus:page-ready' }, '*');
+          }
+        } catch (e) {
+          // Ignore
+        }
+      }, 1000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, []);
+
   // If error screen is showing, don't render the app at all
   if (showErrorScreen) {
     return (

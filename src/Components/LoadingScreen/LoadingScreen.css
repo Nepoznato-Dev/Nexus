@@ -25,7 +25,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
+  gap: 0;
+  width: 200px;
+  position: relative;
 }
 
 /* Circuit Board SVG */
@@ -131,51 +133,35 @@
 
 /* Loading text */
 .loading-text {
-  font-size: 14px;
+  position: absolute;
+  top: 156px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
   color: #00f0ff;
   letter-spacing: 1px;
   font-weight: 500;
-  opacity: 0;
-  animation: textFadeIn 0.8s ease-out 2s forwards;
 }
 
-@keyframes textFadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-.dots {
-  margin-left: 4px;
+/* Spinner animation */
+.spinner {
   display: inline-block;
+  font-size: 24px;
+  font-weight: bold;
+  color: #00f0ff;
+  animation: spinnerFadeIn 0.5s ease-out 1.5s forwards;
+  opacity: 0;
 }
 
-.dot {
-  animation: dotBounce 1.4s infinite;
-  opacity: 0.6;
-}
-
-.dot:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.dot:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.dot:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes dotBounce {
-  0%, 60%, 100% {
-    opacity: 0.6;
+/* Spinner fade in animation */
+@keyframes spinnerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
-  30% {
+  to {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -183,7 +169,7 @@
 .loading-screen.reduced-motion .wire,
 .loading-screen.reduced-motion .junction,
 .loading-screen.reduced-motion .n-glow,
-.loading-screen.reduced-motion .dots {
+.loading-screen.reduced-motion .spinner {
   animation: none !important;
 }
 

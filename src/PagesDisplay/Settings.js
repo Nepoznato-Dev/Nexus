@@ -369,7 +369,15 @@ export default function Settings() {
             settingsEmitter.emit(mergedSettings);
             
             alert('Settings imported successfully! Page will reload to apply changes.');
-            setTimeout(() => window.location.reload(), 1000);
+            setTimeout(() => {
+              if (typeof window !== 'undefined') {
+                try {
+                  window.location.reload();
+                } catch (e) {
+                  console.error('Reload failed:', e);
+                }
+              }
+            }, 1000);
           } catch (err) {
             console.error('Failed to parse settings file:', err);
             alert('Invalid settings file. Please check the file and try again.');

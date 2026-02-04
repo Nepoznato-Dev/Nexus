@@ -1,0 +1,213 @@
+/* AI Dropdown - ChatGPT-style overlay */
+
+.ai-dropdown-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 9998;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ai-dropdown-panel {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  width: 60%;
+  height: 50%;
+  max-height: calc(100vh - 120px);
+  background: linear-gradient(135deg, rgba(10, 10, 15, 0.95), rgba(26, 26, 46, 0.95));
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  animation: slideDown 0.3s ease-out forwards;
+  overflow: hidden;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.ai-dropdown-panel.open {
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+/* Header */
+.ai-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+  flex-shrink: 0;
+}
+
+.ai-dropdown-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ai-icon {
+  font-size: 24px;
+  animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(139, 92, 246, 0.9));
+  }
+}
+
+.ai-dropdown-title h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #a78bfa, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ai-dropdown-close {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-dropdown-close:hover {
+  background: rgba(255, 59, 48, 0.1);
+  border-color: rgba(255, 59, 48, 0.3);
+  color: #ff3b30;
+}
+
+/* Content */
+.ai-dropdown-content {
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* Adjust AIChat styling for dropdown */
+.ai-dropdown-content .ai-chat-container {
+  height: 100%;
+  padding: 0;
+  background: transparent;
+  grid-template-columns: 1fr 280px;
+  gap: 12px;
+}
+
+.ai-dropdown-content .ai-chat-main {
+  height: 100%;
+  padding: 16px;
+}
+
+.ai-dropdown-content .ai-sidebar {
+  padding: 16px;
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.ai-dropdown-content .messages-area {
+  max-height: calc(100% - 80px);
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+  .ai-dropdown-panel {
+    width: 70%;
+    height: 60%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .ai-dropdown-panel {
+    width: 85%;
+    height: 70%;
+  }
+
+  .ai-dropdown-content .ai-chat-container {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-dropdown-content .ai-sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .ai-dropdown-panel {
+    width: 95%;
+    height: 80%;
+    top: 60px;
+  }
+
+  .ai-dropdown-header {
+    padding: 12px 16px;
+  }
+
+  .ai-dropdown-title h2 {
+    font-size: 16px;
+  }
+
+  .ai-icon {
+    font-size: 20px;
+  }
+}
+
+/* Smooth scrollbars */
+.ai-dropdown-content ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.ai-dropdown-content ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.ai-dropdown-content ::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 3px;
+}
+
+.ai-dropdown-content ::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.5);
+}

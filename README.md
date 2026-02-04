@@ -6,110 +6,82 @@
 
 ---
 
-A privacy-first, local-only student hub designed for Chromebooks and personal use.
+A privacy-first, local-first student hub designed for Chromebooks and personal use. Nexus focuses on study tools, utilities, and safe entertainment with a clean UI and fast performance.
 
-## Features
+## Highlights
 
-- 🔒 **Privacy-First**: All data stays local on your device
-- 🎮 **Games Platform**: Access to various web games
-- 📚 **Study Tools**: Whiteboard, calculator, dictionary, flashcards
-- 🎵 **Music Player**: Local music playback
-- 📺 **Video Library**: Video content access
-- 🌐 **Web Browser**: Built-in browsing capabilities
-- 👥 **Social Hub**: Community features
-- ⚙️ **Settings**: Customizable preferences
-- 🛠️ **Utilities**: Calculator, unit converter, etc.
-- 🔄 **Auto-Recovery**: Automatically handles launch failures and retries
+- 🔒 **Privacy-First**: Data stays on the device (local storage / IndexedDB)
+- 📚 **Study Toolkit**: Dictionary, flashcards, notes, formula sheets, timers
+- 🧮 **Utilities**: Calculator, unit converter, whiteboard, productivity tools
+- 🎮 **Games Hub**: Curated web games
+- 🎵 **Media Tools**: Local music playback and video library
+- 🤖 **I.R.I.S (AI)**: Smart assistant and study helper (local-first design)
+- 🧩 **Minecraft Mod Manager**: Discovery, safety tips, and learning guides
+- 🔄 **Auto-Recovery**: Handles launch failures and retries automatically
 
 ## Quick Start
 
-### For Personal Use (Recommended)
+### Development (Recommended)
 
-1. **Start the app:**
-   ```bash
-   npm start
-   ```
-
-2. **Access Nexus:**
-   - Go to: `http://localhost:3000`
-   - The launcher will automatically open Nexus in a new window after 3 seconds
-   - Or press `C` to launch immediately
-   - The launcher window will close automatically
-
-### For School/Chromebook Use
-
-1. **Start the development server:**
-   ```bash
-   npm start
-   ```
-
-2. **Access:**
-   - Navigate to `http://localhost:3000`
-   - Press `C` or wait 3 seconds for auto-launch
-
-### Alternative: Production Build
-
-If the development server is unstable:
 ```bash
-npm run serve  # Builds and serves on port 3000
+npm install
+npm start
 ```
-   - Nexus opens in a popup window for unrestricted access
+
+Open http://localhost:3000
+
+### Production Build
+
+```bash
+npm run build
+npm run serve
+```
 
 ## Architecture
 
-- **Frontend**: React 18 with React Router
-- **Styling**: Tailwind CSS with custom glassmorphism
-- **Storage**: IndexedDB for local data persistence
+- **Frontend**: React 18 + React Router
+- **Styling**: Tailwind CSS + custom glassmorphism
+- **Storage**: IndexedDB + localStorage
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
-- **Serving**: Production build served via Python HTTP server (most stable)
+
+## Local-First Design
+
+Nexus is designed to work offline for core functionality:
+
+- No server dependency for core features
+- Local storage by default
+- Optional online integrations may be added for specific tools
+
+## Key Pages
+
+- Utilities: [src/PagesDisplay/Utilities.js](src/PagesDisplay/Utilities.js)
+- Games: [src/PagesDisplay/Games.js](src/PagesDisplay/Games.js)
+- Study Tools: [src/PagesDisplay/StudyTools.js](src/PagesDisplay/StudyTools.js)
+- Settings: [src/PagesDisplay/Settings.js](src/PagesDisplay/Settings.js)
+
+## Minecraft Mod Manager
+
+The Mod Manager provides a student-friendly way to discover mods, learn safe installation practices, and manage dependencies. See [MOD_MANAGER_SETUP.md](MOD_MANAGER_SETUP.md) for details.
 
 ## Stability Notes
 
-- **Development Server**: Now configured with `CI=false` for better stability in Codespaces
-- **Port 3000**: Default port for development (most compatible with Codespaces)
-- **GitHub Codespaces**: Development server should now work reliably
-- **Production Build**: Available via `npm run serve` for maximum stability
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm start
-
-# Build for production
-npm run build
-```
-
-## Local-Only Design
-
-This app is designed to work entirely offline and locally:
-- No external API calls
-- All data stored in browser storage
-- No server dependencies for core functionality
-- Privacy-focused by design
+- **Port 3000**: Default dev port for compatibility
+- **Codespaces**: Works reliably with CI disabled
+- **Launcher**: Includes auto-retry and fallback behavior
 
 ## Troubleshooting
 
 ### Launch Issues
-- **Popup blocked**: Allow popups for the site in your browser settings
-- **Server not running**: Run `npm start` to start the development server
-- **Port conflicts**: The app uses port 3000 by default
+- **Popup blocked**: Allow popups for the site in browser settings
+- **Server not running**: Run `npm start`
+- **Port conflicts**: Ensure port 3000 is free
 
 ### Recovery Options
-- **Auto-retry**: The launcher automatically retries failed launches
-- **Manual retry**: Press `R` when launch fails to restart the process
-- **Refresh**: Press `F5` to reload the launcher if it gets stuck
-- **Browser restart**: Close and reopen your browser if issues persist
-
-### Error Messages
-- **"Popup blocked"**: Enable popups in browser settings
-- **"Server not running"**: Start the server with `npm start`
-- **"Failed to load Nexus"**: Check that the React server is running on port 3000
+- **Auto-retry**: Launcher retries failed launches
+- **Manual retry**: Press `R` on the launcher
+- **Refresh**: Press `F5` if the launcher gets stuck
 
 ## Contributing
 
-This is a personal project, but feel free to fork and modify for your own use!
+Personal project — feel free to fork and adapt for your own use.

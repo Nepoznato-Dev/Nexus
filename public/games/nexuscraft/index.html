@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexusCraft - Optimized Minecraft in Browser</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: rgba(30,40,60,0.85);
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(90deg, #00f0ff, #00ff80);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    .desc {
+      color: #b0eaff;
+      margin-bottom: 24px;
+    }
+    select, button {
+      font-size: 1.1rem;
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: none;
+      margin: 8px 0;
+    }
+    button {
+      background: linear-gradient(90deg, #00f0ff, #00ff80);
+      color: #222;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: linear-gradient(90deg, #00ff80, #00f0ff);
+    }
+    #game-frame {
+      width: 100%;
+      min-height: 600px;
+      border: none;
+      margin-top: 24px;
+      border-radius: 12px;
+      background: #111;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .note {
+      color: #ffb347;
+      margin-top: 18px;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>NexusCraft</h1>
+    <div class="desc">Optimized Minecraft in your browser — powered by Nexus and Eaglercraft technology.<br>
+      <span style="font-size:1.1rem; color:#44ff44;">No install required. Multi-version. Ultra-fast.</span>
+    </div>
+    <label for="mc-version">Select Minecraft Version:</label>
+    <select id="mc-version">
+      <option value="1.5.2">1.5.2 (Classic Eaglercraft)</option>
+      <option value="1.8.8">1.8.8 (PvP Standard)</option>
+      <option value="1.12.2">1.12.2 (Modded)</option>
+      <option value="1.16.5">1.16.5 (Modern)</option>
+      <option value="1.18.2">1.18.2 (Caves & Cliffs)</option>
+      <option value="1.20.1" selected>1.20.1 (Nexus Optimized)</option>
+    </select>
+    <br>
+    <button onclick="launchNexusCraft()">🚀 Launch NexusCraft</button>
+    <div class="note">Note: Some versions may require more RAM and a modern browser.<br>
+      For best performance, use Chrome or Edge on desktop.<br>
+      <b>Experimental:</b> 1.16.5+ browser support is in beta.
+    </div>
+    <iframe id="game-frame" style="display:none;"></iframe>
+  </div>
+  <script>
+    function launchNexusCraft() {
+      const version = document.getElementById('mc-version').value;
+      const frame = document.getElementById('game-frame');
+      // Map version to Eaglercraft/Nexus WASM builds
+      let url = '';
+      switch(version) {
+        case '1.5.2':
+          url = '/games/eaglercraft/index.html';
+          break;
+        case '1.8.8':
+          url = '/games/eaglercraft-1.8.8/index.html';
+          break;
+        case '1.12.2':
+          url = '/games/nexuscraft-1.12.2/index.html';
+          break;
+        case '1.16.5':
+          url = '/games/nexuscraft-1.16.5/index.html';
+          break;
+        case '1.18.2':
+          url = '/games/nexuscraft-1.18.2/index.html';
+          break;
+        case '1.20.1':
+          url = '/games/nexuscraft-1.20.1/index.html';
+          break;
+        default:
+          url = '/games/eaglercraft/index.html';
+      }
+      frame.src = url;
+      frame.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

@@ -223,7 +223,13 @@ const typeColors = {
 
 export default function Updates() {
   const handleRefresh = () => {
-    window.location.reload();
+    if (typeof window !== 'undefined') {
+      try {
+        window.location.reload();
+      } catch (e) {
+        console.error('Reload failed:', e);
+      }
+    }
   };
 
   return (

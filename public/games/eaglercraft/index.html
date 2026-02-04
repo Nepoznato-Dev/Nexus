@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eaglercraft - Minecraft in Browser</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0a0a0f;
+      color: white;
+      overflow: hidden;
+    }
+
+    #game-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    #eagler-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .loading h1 {
+      font-size: 48px;
+      background: linear-gradient(45deg, #00f0ff, #0080ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+
+    .loading p {
+      color: rgba(255, 255, 255, 0.7);
+      margin: 10px 0;
+    }
+
+    .server-info {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 10px;
+      max-width: 600px;
+    }
+
+    .server-info h3 {
+      color: #00f0ff;
+      margin-bottom: 15px;
+    }
+
+    .server-info ul {
+      list-style: none;
+      text-align: left;
+    }
+
+    .server-info li {
+      padding: 8px;
+      margin: 5px 0;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 5px;
+    }
+
+    .play-button {
+      margin-top: 30px;
+      padding: 15px 40px;
+      background: linear-gradient(135deg, #00f0ff, #0080ff);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(0, 240, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .play-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(0, 240, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div class="loading" id="loading-screen">
+      <h1>🎮 Eaglercraft</h1>
+      <p>Minecraft 1.8.8 - Playable in Browser</p>
+      
+      <div class="server-info">
+        <h3>Features:</h3>
+        <ul>
+          <li>✓ Full Minecraft 1.8.8 gameplay</li>
+          <li>✓ Join multiplayer servers</li>
+          <li>✓ No installation required</li>
+          <li>✓ Play with friends</li>
+          <li>✓ Save worlds locally</li>
+        </ul>
+      </div>
+
+      <button class="play-button" onclick="loadGame()">Start Playing</button>
+      
+      <p style="margin-top: 20px; font-size: 14px; color: rgba(255, 255, 255, 0.5);">
+        Note: Eaglercraft files need to be added to /public/games/eaglercraft/<br>
+        You can download from: <a href="https://github.com/LAX1DUDE/eaglercraft" style="color: #00f0ff;">GitHub - Eaglercraft</a>
+      </p>
+    </div>
+    
+    <!-- This iframe will load Eaglercraft when files are added -->
+    <iframe id="eagler-frame" style="display: none;"></iframe>
+  </div>
+
+  <script>
+    function loadGame() {
+      // Check if Eaglercraft is installed
+      fetch('/games/eaglercraft/index.html')
+        .then(response => {
+          if (response.ok) {
+            // Load Eaglercraft
+            document.getElementById('loading-screen').style.display = 'none';
+            const frame = document.getElementById('eagler-frame');
+            frame.src = '/games/eaglercraft/index.html';
+            frame.style.display = 'block';
+          } else {
+            // Show installation instructions
+            alert(`Eaglercraft Not Installed
+
+To add Eaglercraft:
+1. Download from: https://github.com/LAX1DUDE/eaglercraft
+2. Extract to: /public/games/eaglercraft/
+3. Refresh this page
+
+You can also play online at: https://eaglercraft.com/`);
+          }
+        })
+        .catch(() => {
+          alert('Eaglercraft files not found. Please install Eaglercraft to play.');
+        });
+    }
+  </script>
+</body>
+</html>

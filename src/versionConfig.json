@@ -1,0 +1,50 @@
+{
+  "versions": [
+    {
+      "version": "1.0.0",
+      "name": "Initial Release",
+      "releaseDate": "2026-01-27",
+      "releaseType": "release",
+      "status": "stable",
+      "features": {
+        "versionSelector": true,
+        "dashboard": true,
+        "browser": true,
+        "games": true,
+        "music": true,
+        "studyTools": true,
+        "settings": true,
+        "adminPanel": true,
+        "analytics": true,
+        "performanceMonitoring": true,
+        "simpleAI": true,
+        "advancedAI": false,
+        "aiPersonality": false,
+        "aiDropdown": false,
+        "multiModelRouting": false,
+        "conversationContext": false,
+        "responseCaching": false,
+        "environmentVariables": false,
+        "qualityWarnings": false,
+        "retryButton": false
+      }
+    }
+  ],
+  "featureDescriptions": {
+    "versionSelector": "Select which version of Nexus to run (ALWAYS enabled)",
+    "simpleAI": "Basic template-based AI responses",
+    "advancedAI": "Advanced AI with personality and routing",
+    "aiPersonality": "AI personality control (professionalism & mentorship)",
+    "aiDropdown": "ChatGPT-style dropdown UI for AI",
+    "multiModelRouting": "Route questions to best AI model",
+    "conversationContext": "AI remembers conversation history",
+    "responseCaching": "Cache and reuse AI responses",
+    "environmentVariables": "Support for API keys in .env.local",
+    "qualityWarnings": "Display quality indicators on AI responses",
+    "retryButton": "Retry AI responses with fallback"
+  },
+  "releaseTypeDescriptions": {
+    "release": "Stable, tested versions for daily use",
+    "snapshot": "Experimental preview builds - may have bugs"
+  }
+}

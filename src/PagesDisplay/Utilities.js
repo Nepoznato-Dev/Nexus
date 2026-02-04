@@ -13,7 +13,8 @@ import {
   Brain,
   BookOpen,
   Lightbulb,
-  Timer
+  Timer,
+  Gamepad2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from 'utils';
@@ -30,6 +31,7 @@ import PomodoroTimer from '../Components/Study/PomodoroTimer.js';
 import ScientificCalculator from '../Components/Study/ScientificCalculator.js';
 import FormulaSheet from '../Components/Study/FormulaSheet.js';
 import Dictionary from '../Components/Study/Dictionary.js';
+import ModManager from '../Components/Games/ModManager.js';
 
 export default function Utilities() {
   const [activeTab, setActiveTab] = useState('all');
@@ -41,6 +43,7 @@ export default function Utilities() {
     { id: 'calculator', label: 'Calculator', icon: CalcIcon },
     { id: 'converter', label: 'Converter', icon: ArrowLeftRight },
     { id: 'whiteboard', label: 'Whiteboard', icon: PenTool },
+    { id: 'minecraft', label: 'Minecraft Mods', icon: Gamepad2 },
   ];
 
   const quickTools = [
@@ -191,6 +194,17 @@ export default function Utilities() {
             transition={{ delay: 0.4 }}
           >
             <Whiteboard accentColor={accentColor} />
+          </motion.div>
+        )}
+
+        {/* Minecraft Mod Manager */}
+        {(activeTab === 'all' || activeTab === 'minecraft') && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <ModManager />
           </motion.div>
         )}
       </div>

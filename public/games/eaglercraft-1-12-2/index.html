@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eaglercraft 1.12.2</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+    #frame {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      overflow: hidden;
+    }
+    #overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #111 0%, #000 70%);
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      z-index: 2;
+      text-align: center;
+      padding: 24px;
+    }
+    #overlay .card {
+      max-width: 680px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+    #overlay h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+      background: linear-gradient(45deg, #00f0ff, #0080ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    #overlay p {
+      color: rgba(255, 255, 255, 0.75);
+      margin: 10px 0;
+      line-height: 1.5;
+    }
+    #overlay button {
+      margin-top: 16px;
+      padding: 12px 28px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #00f0ff, #0080ff);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(0, 240, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div id="overlay">
+    <div class="card">
+      <h1>⛏️ Eaglercraft 1.12.2</h1>
+      <p>Launching the 1.12.2 browser build in a fullscreen iframe.</p>
+      <p>If you prefer, you can open the source site directly:</p>
+      <p><a href="https://tuffjs.speedslicer.dev" target="_blank" rel="noopener noreferrer" style="color:#00f0ff;">tuffjs.speedslicer.dev</a></p>
+      <button onclick="startGame()">Start Playing</button>
+    </div>
+  </div>
+
+  <iframe id="frame" title="Eaglercraft 1.12.2" allowfullscreen></iframe>
+
+  <script>
+    function startGame() {
+      const frame = document.getElementById('frame');
+      frame.src = 'https://tuffjs.speedslicer.dev';
+      document.getElementById('overlay').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

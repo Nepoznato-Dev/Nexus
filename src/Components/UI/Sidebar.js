@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createPageUrl } from 'utils';
+import { createPageUrl, openInAboutBlank } from 'utils';
 import { useSettings } from '../../hooks/useSettings.js';
-import { Home, Globe, Gamepad2, Brain, Settings as Cog, ChevronsLeft, ChevronsRight, Activity } from 'lucide-react';
+import { Home, Globe, Gamepad2, Brain, Settings as Cog, ChevronsLeft, ChevronsRight, Activity, ExternalLink } from 'lucide-react';
 
 export default function Sidebar({ onWidthChange, onTogglePerformance, performanceOpen }) {
   const navigate = useNavigate();
@@ -67,6 +67,14 @@ export default function Sidebar({ onWidthChange, onTogglePerformance, performanc
         </nav>
 
         <div className="mt-auto p-3 text-white/40 text-xs">
+          <button
+            onClick={() => openInAboutBlank(window.location.href, 'Nexus')}
+            className={`w-full flex items-center ${expanded ? 'gap-3 px-2' : 'justify-center'} py-2 text-white/60 hover:text-white hover:bg-white/10 rounded transition-colors`}
+            title="Open in about:blank"
+          >
+            <ExternalLink className="w-4 h-4" />
+            {expanded && <span className="text-xs">Open in about:blank</span>}
+          </button>
           {expanded ? 'Quick Navigation' : 'Nav'}
         </div>
       </div>

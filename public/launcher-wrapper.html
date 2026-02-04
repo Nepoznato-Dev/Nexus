@@ -10,11 +10,89 @@
     </style>
 </head>
 <body>
+    <div id="status" class="status hidden"></div>
     <iframe id="app" allow="fullscreen; clipboard-read; clipboard-write"></iframe>
     <script>
-        // Load the app with embedded=true parameter
         const iframe = document.getElementById('app');
-        iframe.src = window.location.origin + '/index.html?embedded=true';
+        const status = document.getElementById('status');
+
+        const MAX_RETRIES = 2;
+        const LOAD_TIMEOUT_MS = 6000;
+        let attempt = 0;
+        let loadTimer = null;
+
+        const showStatus = (message, type = 'info') => {
+            status.textContent = message;
+            status.className = `status ${type}`;
+        };
+
+        const hideStatus = () => {
+            status.className = 'status hidden';
+        };
+
+        const handleFailure = (reason) => {
+            if (attempt <= MAX_RETRIES) {
+                showStatus('Please hold. Iframe didn\'t load correctly. I will try it again to see if code is broken or has been removed by Nexus owner.', 'warn');
+                setTimeout(loadApp, 1500);
+                return;
+            }
+            showStatus('Iframe failed to load. It may be unavailable or removed by the Nexus owner. Please try again later.', 'error');
+            console.error('Iframe load failed:', reason);
+        };
+
+        const loadApp = () => {
+            attempt += 1;
+            showStatus('Launching Nexus... Please wait.', 'info');
+            iframe.src = `${window.location.origin}/index.html?embedded=true&retry=${attempt}`;
+
+            if (loadTimer) clearTimeout(loadTimer);
+            loadTimer = setTimeout(() => handleFailure('timeout'), LOAD_TIMEOUT_MS);
+        };
+
+        iframe.addEventListener('load', () => {
+            if (loadTimer) clearTimeout(loadTimer);
+
+            try {
+                const doc = iframe.contentDocument;
+                const hasContent = !!doc && !!doc.body && doc.body.innerHTML.trim().length > 0;
+
+                if (!hasContent) {
+                    handleFailure('empty-document');
+                    return;
+                }
+
+                hideStatus();
+            } catch (err) {
+                // Cross-origin or access blocked
+                handleFailure('access-denied');
+            }
+        });
+
+        iframe.addEventListener('error', () => handleFailure('iframe-error'));
+
+        loadApp();
     </script>
+    <style>
+        .status {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 16px;
+            background: rgba(17, 24, 39, 0.9);
+            color: #e5e7eb;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            font-size: 14px;
+            z-index: 10;
+            max-width: 90vw;
+            text-align: center;
+        }
+        .status.info { border-color: rgba(0, 240, 255, 0.6); }
+        .status.warn { border-color: rgba(245, 158, 11, 0.8); }
+        .status.error { border-color: rgba(239, 68, 68, 0.8); }
+        .status.hidden { display: none; }
+    </style>
 </body>
 </html>

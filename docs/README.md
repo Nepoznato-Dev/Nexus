@@ -1,0 +1,1 @@
+A comprehensive guide to the Nexus Community Project. See other files in this folder for setup, audio, and game integration instructions.

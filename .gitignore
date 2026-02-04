@@ -33,3 +33,40 @@ yarn-error.log*
 # Temp files
 *.zip
 push-to-github.sh
+
+# Hidden testing apparatus (temporary games and test files)
+.testing-apparatus/
+
+# Copyrighted game folders (moved to .testing-apparatus/)
+BeamNG.drive/
+Detroit Become Human/
+FNAF_SOTM/
+Freddy Fazbear's Pizzeria Simulator/
+GarrysMod/
+HenryStickmin/
+IronWolf Free Non-VR Edition/
+Just Cause 3/
+Just Cause 3 Multiplayer Mod/
+Little Nightmares/
+Marble World/
+MicrosoftFlightSimulator/
+Minecraft JAVA/
+No Man's Sky/
+Once Human/
+Perfect Heist 2/
+Poppy Playtime/
+Portal/
+Portal 2/
+Raft/
+Scrap Mechanic/
+Sons Of The Forest/
+Spaceflight Simulator/
+Steam Engine Simulator/
+Stray/
+The Long Drive/
+Titanfall2/
+Tom Clancy's Rainbow Six Siege/
+Trackmania/
+Trailmakers/
+Ultimate Custom Night/
+War Thunder/

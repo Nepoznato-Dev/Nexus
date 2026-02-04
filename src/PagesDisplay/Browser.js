@@ -14,7 +14,7 @@ import {
   X
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { createPageUrl } from 'utils';
+import { createPageUrl, openInAboutBlank } from 'utils';
 import { useNavigateBack } from '../hooks/useNavigateBack.js';
 import { useSettings } from '../hooks/useSettings.js';
 import { storage } from '../Components/Storage/clientStorage.js';
@@ -386,12 +386,20 @@ export default function Browser() {
                         onError={() => setIframeError(true)}
                       />
                       <div className="absolute top-3 right-3 z-10">
-                        <NeonButton
-                          variant="solid"
-                          onClick={() => window.open(activeTab.url, '_blank', 'noopener,noreferrer')}
-                        >
-                          Open in new tab ↗
-                        </NeonButton>
+                        <div className="flex gap-2">
+                          <NeonButton
+                            variant="solid"
+                            onClick={() => window.open(activeTab.url, '_blank', 'noopener,noreferrer')}
+                          >
+                            Open in new tab ↗
+                          </NeonButton>
+                          <NeonButton
+                            variant="ghost"
+                            onClick={() => openInAboutBlank(activeTab.url, activeTab.title || 'Browser')}
+                          >
+                            Open in about:blank
+                          </NeonButton>
+                        </div>
                       </div>
                     </div>
                   )}
