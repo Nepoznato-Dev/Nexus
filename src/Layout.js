@@ -353,8 +353,6 @@ export default function Layout({ children, currentPageName }) {
     }
   };
 
-  if (requireAboutBlank) {
-
   return (
     <div className="min-h-screen bg-[#2a2a3e] flex flex-col">
       <LoadingScreen isLoading={isPageLoading} showDuration={900} />
