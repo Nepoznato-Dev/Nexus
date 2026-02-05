@@ -47,6 +47,7 @@ export default function DashboardAI({ accentColor = '#a55eea' }) {
   const [suggestions, setSuggestions] = useState([]);
   const [settings, setSettings] = useState({ browser: { openLinksIn: 'nexus' }, aiTools: { personality: 'adaptive' } });
   const [personality, setPersonality] = useState('adaptive');
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -147,6 +148,29 @@ export default function DashboardAI({ accentColor = '#a55eea' }) {
       content: userMessage,
       type: 'search'
     }]);
+
+    // Check if I.R.I.S should autonomously search for information
+    if (needsExternalSearch(userMessage)) {
+      setIsSearching(true);
+      
+      const searchResult = await generateSearchEnhancedResponse(
+        userMessage,
+        personality,
+        settings.aiTools?.serpApiKey
+      );
+      
+      setIsSearching(false);
+      
+      if (searchResult) {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: searchResult,
+          type: 'search-result'
+        }]);
+        setIsLoading(false);
+        return;
+      }
+    }
 
     // Determine action
     const lowerInput = userMessage.toLowerCase();

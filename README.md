@@ -110,6 +110,5 @@ This app is designed to work entirely offline and locally:
 - **"Server not running"**: Start the server with `npm start`
 - **"Failed to load Nexus"**: Check that the React server is running on port 3000
 
-## Contributing
-
-This is a personal project, but feel free to fork and modify for your own use!
+## Contributors
+- **Nepoznato-Dev**

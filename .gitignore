@@ -33,3 +33,10 @@ yarn-error.log*
 # Temp files
 *.zip
 push-to-github.sh
+
+# Large game engine files (exceed GitHub 100MB limit)
+"Game Engine's"/
+public/games/
+*.babylon
+three.js-dev/
+

@@ -28,6 +28,8 @@ import {
   Layout,
   MousePointer,
   Sparkles,
+  Wand2,
+  Search as SearchIcon,
   Clock,
   Plus,
   Trash2 as TrashIcon
@@ -41,6 +43,7 @@ import { settingsEmitter } from '../utils/settingsEmitter.js';
 import SoftParticleDrift from '../Components/Backgrounds/SoftParticleDrift.js';
 import SettingsSection from '../Components/Settings/SettingsSection.js';
 import SettingControl from '../Components/Settings/SettingControl.js';
+import APISetupWizard from '../Components/Setup/APISetupWizard.js';
 import DeviceProfileManager from '../Components/Settings/DeviceProfileManager.js';
 import DiscordVerification from '../Components/Settings/DiscordVerification.js';
 
@@ -206,6 +209,7 @@ export default function Settings() {
   const [editUsername, setEditUsername] = useState(false);
   const [newUsername, setNewUsername] = useState('');
   const [editPassword, setEditPassword] = useState(false);
+  const [showAPIWizard, setShowAPIWizard] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [saveNotification, setSaveNotification] = useState('');
@@ -927,6 +931,7 @@ export default function Settings() {
             { value: 'google', label: '📊 Google (Gemini)' }
           ]},
           { path: 'aiTools.apiKey', title: 'API Key', description: settings.aiTools?.apiProvider === 'openai' ? 'Get from platform.openai.com/api-keys' : settings.aiTools?.apiProvider === 'anthropic' ? 'Get from console.anthropic.com' : settings.aiTools?.apiProvider === 'google' ? 'Get from makersuite.google.com' : 'Your API key (stored locally)', type: 'password', value: settings.aiTools?.apiKey || '', placeholder: 'sk-...' },
+          { path: 'aiTools.serpApiKey', title: 'SerpAPI Key (Optional)', description: 'For I.R.I.S autonomous web search - Get from serpapi.com (free tier available)', type: 'password', value: settings.aiTools?.serpApiKey || '', placeholder: 'Your SerpAPI key...' },
           { path: 'aiTools.model', title: 'Model', description: 'AI model to use', type: 'dropdown', value: settings.aiTools?.model || 'gpt-3.5-turbo', options: [
             { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo (Fast & Cheap)' },
             { value: 'gpt-4', label: 'GPT-4 (Smarter)' },
@@ -934,7 +939,74 @@ export default function Settings() {
             { value: 'claude-3-sonnet', label: 'Claude 3 Sonnet' },
             { value: 'claude-3-opus', label: 'Claude 3 Opus' },
             { value: 'gemini-pro', label: 'Gemini Pro' }
-          ]}
+          ]},
+          { 
+            type: 'custom', 
+            component: (
+              <div className="space-y-3">
+                {/* I.R.I.S Info Card */}
+                <div className="p-4 rounded-xl bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center flex-shrink-0">
+                      <SearchIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-white font-semibold mb-1">I.R.I.S Autonomous Search</h4>
+                      <p className="text-white/70 text-sm leading-relaxed">
+                        I.R.I.S (Intelligent Research & Information System) automatically searches the web 
+                        for real-time information when needed - no configuration required!
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="flex items-center gap-2 text-cyan-300">
+                      <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                      <span>Wikipedia Search</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-cyan-300">
+                      <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                      <span>DuckDuckGo API</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-cyan-300">
+                      <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                      <span>Weather Data</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-cyan-300">
+                      <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                      <span>Smart Caching</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-cyan-500/20">
+                    <p className="text-white/50 text-xs">
+                      💡 <strong>Optional:</strong> Add SerpAPI key below for enhanced Google search results
+                    </p>
+                  </div>
+                </div>
+
+                {/* API Setup Wizard Card */}
+                <div className="p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="text-white font-medium flex items-center gap-2">
+                        <Wand2 className="w-4 h-4" />
+                        Need help setting up AI?
+                      </h4>
+                      <p className="text-white/60 text-sm mt-1">
+                        Our setup wizard will guide you through getting an API key
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowAPIWizard(true)}
+                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Launch API Setup Wizard
+                  </button>
+                </div>
+              </div>
+            )
+          }
         ]
       },
       {
@@ -1427,6 +1499,16 @@ export default function Settings() {
           </Link>
         </motion.div>
       </div>
+
+      {/* API Setup Wizard */}
+      <APISetupWizard
+        isOpen={showAPIWizard}
+        onClose={() => setShowAPIWizard(false)}
+        onComplete={() => {
+          setShowAPIWizard(false);
+          loadSettings(); // Reload settings after wizard completes
+        }}
+      />
     </div>
   );
 }
