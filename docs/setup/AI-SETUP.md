@@ -2,11 +2,25 @@
 
 The AI Helper in Nexus can now generate real responses using AI APIs instead of just template responses!
 
+## 🚀 Quick Setup with Wizard
+
+The easiest way to set up AI is using our **API Setup Wizard**:
+
+1. Go to **Settings > AI Tools**
+2. Click **"Launch API Setup Wizard"** button
+3. Follow the step-by-step guide:
+   - Choose your AI provider
+   - Get an API key from the provider
+   - Test and validate your key
+4. Done! Your AI is configured
+
 ## 🎯 How It Works
 
 By default, the AI Helper uses **template responses** - pre-written educational responses that guide you without giving direct answers. But if you configure an AI API, it will use real AI models to generate custom responses!
 
-## 🔑 Setting Up Real AI
+## 🔑 Manual Setup (Alternative)
+
+If you prefer to set up manually without the wizard:
 
 ### Step 1: Choose Your AI Provider
 

@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Sparkles, Loader2, BookOpen, Calculator, FileText, Code, AlertCircle } from 'lucide-react';
+import { Send, Sparkles, Loader2, BookOpen, Calculator, FileText, Code, AlertCircle, Search } from 'lucide-react';
 import GlassCard from '../UI/GlassCard.js';
 import { Input } from '../UI/input.js';
 import { storage } from '../Storage/clientStorage.js';
+import { generateSearchEnhancedResponse } from '../I.R.I.S. — Intelligent Reasoning & Information Synthesizer/IRISSearch.js';
 
 export default function AIHelper({ accentColor = '#a55eea' }) {
   const [query, setQuery] = useState('');
   const [response, setResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [mode, setMode] = useState('explain'); // explain, solve, summarize, code
   const [aiSettings, setAiSettings] = useState(null);
   const [error, setError] = useState('');
@@ -58,7 +60,11 @@ export default function AIHelper({ accentColor = '#a55eea' }) {
 
   const callRealAI = async (query, mode) => {
     if (!aiSettings || aiSettings.apiProvider === 'none' || !aiSettings.apiKey) {
-      return { success: false, useTemplate: true };
+      return { 
+        success: false, 
+        useTemplate: true,
+        message: '💡 Tip: For better AI responses, configure an API key in Settings > AI Tools. Google Gemini is free!'
+      };
     }
 
     const modePrompts = {
@@ -152,6 +158,22 @@ export default function AIHelper({ accentColor = '#a55eea' }) {
     setResponse('');
     setError('');
 
+    // First, try I.R.I.S autonomous search for real-time info
+    setIsSearching(true);
+    const searchResult = await generateSearchEnhancedResponse(
+      query,
+      aiSettings?.personality || 'adaptive',
+      aiSettings?.serpApiKey
+    );
+    setIsSearching(false);
+
+    if (searchResult) {
+      // I.R.I.S found relevant real-time information
+      setResponse(searchResult);
+      setIsLoading(false);
+      return;
+    }
+
     // Try to call real AI first if configured
     const aiResult = await callRealAI(query, mode);
     
@@ -159,7 +181,11 @@ export default function AIHelper({ accentColor = '#a55eea' }) {
       setResponse(aiResult.content);
       setIsLoading(false);
     } else if (aiResult.useTemplate) {
-      // No API configured, use template responses
+      // No API configured, use template responses and show setup tip
+      if (aiResult.message) {
+        setError(aiResult.message);
+        setTimeout(() => setError(''), 5000);
+      }
       setTimeout(() => {
         const result = generateResponse(query, mode);
         setResponse(result);
