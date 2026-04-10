@@ -3,11 +3,13 @@
 ## 📋 Versioning Strategy
 
 ### Semantic Versioning with Intent
+
 - **MAJOR (X.0.0)** = Big new feature/system (AI, mobile, cloud sync, etc.)
 - **MINOR (1.X.0)** = Small new features, improvements
 - **PATCH (1.0.X)** = Bug fixes only
 
 ### Release Cycle
+
 ```
 v1.0.0 (STABLE - Current Release)
   │
@@ -28,6 +30,7 @@ v1.0.0 (STABLE - Current Release)
 ## 📦 Current Release: v1.0.0
 
 ### What's Included
+
 - ✅ Privacy-first student hub
 - ✅ Dashboard, browser, games, music, videos
 - ✅ Study tools (notes, flashcards, timer, calculator)
@@ -37,6 +40,7 @@ v1.0.0 (STABLE - Current Release)
 - ✅ Fully documented
 
 ### What's NOT Included (reserved for v2.0.0)
+
 - ❌ AI Assistant (in development)
 - ❌ Personality controls
 - ❌ Multi-model routing
@@ -47,6 +51,7 @@ v1.0.0 (STABLE - Current Release)
 ## 🚀 Development Workflow
 
 ### Step 1: Release Current Version
+
 ```bash
 # Tag release
 git tag -a v1.0.0 -m "Nexus 1.0.0: Privacy-first student hub"
@@ -56,6 +61,7 @@ git push origin v1.0.0
 ```
 
 ### Step 2: Create Protected Development Folder for Next Major
+
 ```
 Current structure:
 ├── src/                      ← Active code (v1.0.0)
@@ -69,6 +75,7 @@ Current structure:
 **Key principle:** Development folder is NEVER imported or used in current code.
 
 ### Step 3: Bug Fixes & Minor Improvements (v1.0.x)
+
 ```javascript
 // Fix in src/Components/Dashboard/DashboardTile.js
 // Creates v1.0.1
@@ -82,6 +89,7 @@ git push origin v1.0.1
 ```
 
 ### Step 4: Develop Next Major Feature (v2.0.0)
+
 ```
 Work ONLY in protected folder:
 ├── AAS (Advanced AI System)/  ← All v2.0.0 work here
@@ -95,6 +103,7 @@ Users on v1.0.0 not affected
 ```
 
 ### Step 5: Release Next Major (v2.0.0)
+
 ```javascript
 // When ready:
 
@@ -115,6 +124,7 @@ Users on v1.0.0 not affected
 ```
 
 ### Step 6: Repeat
+
 ```
 v2.0.0 (STABLE - New release)
   │
@@ -130,7 +140,9 @@ v2.0.0 (STABLE - New release)
 ## 📁 Folder Organization
 
 ### Active (In src/)
+
 **These folders are actively used by the current release:**
+
 ```
 src/
 ├── Components/
@@ -145,7 +157,9 @@ src/
 ```
 
 ### Protected (Development Folders)
+
 **These are for future releases - NEVER imported into active code:**
+
 ```
 AAS (Advanced AI System)/     ← For v2.0.0 (18 files, ready)
 NEXT_FEATURE_FOR_v3.0.0/      ← For v3.0.0 (create when v2.0.0 ready)
@@ -153,6 +167,7 @@ FUTURE_FEATURE_FOR_v4.0.0/    ← For v4.0.0 (create when v3.0.0 ready)
 ```
 
 ### Archive
+
 ```
 archive/                       ← Old code, migrations, backups
 ```
@@ -162,6 +177,7 @@ archive/                       ← Old code, migrations, backups
 ## ✅ Pre-Release Checklist
 
 ### Before v1.0.0 Release
+
 - [x] All features working
 - [x] No console errors
 - [x] .env.local protected in .gitignore
@@ -172,6 +188,7 @@ archive/                       ← Old code, migrations, backups
 - [ ] Tag release
 
 ### Before v2.0.0 Release (Future)
+
 - [ ] Copy AAS files to src/Components/AAS/
 - [ ] Update imports in Layout.js
 - [ ] Test AI dropdown functionality
@@ -187,6 +204,7 @@ archive/                       ← Old code, migrations, backups
 ## 📝 Git Workflow
 
 ### For Bug Fixes (v1.0.x)
+
 ```bash
 git checkout -b bugfix/issue-name
 # Fix bug
@@ -199,6 +217,7 @@ git push origin v1.0.1
 ```
 
 ### For Next Major (v2.0.0)
+
 ```bash
 # Work ONLY in AAS folder
 git add AAS/
@@ -209,6 +228,7 @@ git push origin Nexus-Main
 ```
 
 ### Release Tags
+
 ```bash
 # Check existing tags
 git tag
@@ -226,11 +246,13 @@ git show v1.0.0
 ## 📋 Version Roadmap
 
 ### ✅ v1.0.0 (Current - Jan 27, 2026)
+
 - Privacy-first student hub
 - Core features complete
 - Status: **READY TO RELEASE**
 
 ### 🔄 v2.0.0 (In Development)
+
 - Advanced AI System (AAS)
 - ChatGPT-style UI
 - Multi-model routing
@@ -239,11 +261,13 @@ git show v1.0.0
 - Location: `AAS (Advanced AI System) EXPERIMENTAL/`
 
 ### 📋 v3.0.0 (Planned)
+
 - Feature TBD
 - Status: Not started
 - Location: Will be `NEXT_FEATURE_FOR_v3.0.0/`
 
 ### 📋 v4.0.0 (Planned)
+
 - Feature TBD
 - Status: Not started
 
@@ -280,11 +304,13 @@ git show v1.0.0
 ## 🎯 Immediate Next Steps
 
 ### Now (v1.0.0 Release)
+
 1. Final smoke test
 2. Tag release: `git tag -a v1.0.0`
 3. Deploy/publish
 
 ### After v1.0.0
+
 1. Start collecting feature requests for v2.0.0+
 2. Plan bug fix schedule for v1.0.x
 3. Continue AAS development in protected folder
@@ -295,6 +321,7 @@ git show v1.0.0
 ## 📞 Questions?
 
 This workflow ensures:
+
 - ✅ Stable releases never affected by development
 - ✅ Clear versioning and roadmap
 - ✅ Easy to manage multiple versions

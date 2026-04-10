@@ -19,6 +19,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const PY_AI_BASE = process.env.PY_AI_BASE || 'http://127.0.0.1:5001';
 const MOD_CACHE_DIR = path.join(__dirname, 'private', 'mods-cache');
 
 // Middleware
@@ -289,6 +290,47 @@ app.get('/api/health', (req, res) => {
       openai: !!process.env.REACT_APP_OPENAI_API_KEY ? 'configured' : 'not set'
     }
   });
+});
+
+app.get('/api/ai/health', async (req, res) => {
+  try {
+    const response = await fetch(`${PY_AI_BASE}/api/ai/health`);
+    if (!response.ok) {
+      return res.status(502).json({ success: false, status: 'python-core-unreachable' });
+    }
+    const data = await response.json();
+    return res.json(data);
+  } catch (error) {
+    return res.status(502).json({ success: false, status: 'python-core-unreachable', error: error.message });
+  }
+});
+
+app.post('/api/ai/spark-ask', async (req, res) => {
+  try {
+    const response = await fetch(`${PY_AI_BASE}/api/ai/spark-ask`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body || {}),
+    });
+    const data = await response.json();
+    return res.status(response.ok ? 200 : 502).json(data);
+  } catch (error) {
+    return res.status(502).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/ai/iris-chat', async (req, res) => {
+  try {
+    const response = await fetch(`${PY_AI_BASE}/api/ai/iris-chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body || {}),
+    });
+    const data = await response.json();
+    return res.status(response.ok ? 200 : 502).json(data);
+  } catch (error) {
+    return res.status(502).json({ success: false, error: error.message });
+  }
 });
 
 /**

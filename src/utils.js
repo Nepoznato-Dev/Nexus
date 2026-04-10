@@ -36,3 +36,64 @@ export function openInAboutBlank(url, title = 'Nexus') {
   win.document.close();
   return true;
 }
+
+function isDevelopmentPortUrl(urlObj) {
+  const host = String(urlObj.hostname || '').toLowerCase();
+  const port = String(urlObj.port || '');
+  const isLocalDevHost = host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0';
+  const hasExplicitNonStandardPort = Boolean(port) && port !== '80' && port !== '443';
+  return isLocalDevHost || hasExplicitNonStandardPort;
+}
+
+export function isDevelopmentUrl(input) {
+  try {
+    const parsed = input instanceof URL ? input : new URL(String(input));
+    return isDevelopmentPortUrl(parsed);
+  } catch (error) {
+    return false;
+  }
+}
+
+export function shouldForceAboutBlankFirst(input) {
+  try {
+    const parsed = input instanceof URL ? input : new URL(String(input));
+    const protocol = String(parsed.protocol || '').toLowerCase();
+    if (protocol !== 'http:' && protocol !== 'https:') {
+      return false;
+    }
+    return !isDevelopmentPortUrl(parsed);
+  } catch (error) {
+    return false;
+  }
+}
+
+export function resolveAboutBlankTargetForAppUrl(rawInput) {
+  if (typeof window === 'undefined') return null;
+
+  const text = String(rawInput || '').trim();
+  if (!text || text.includes(' ')) return null;
+
+  let normalized = text;
+  if (!/^https?:\/\//i.test(normalized)) {
+    if (!normalized.includes('.')) return null;
+    normalized = `https://${normalized}`;
+  }
+
+  let targetUrl;
+  let currentUrl;
+  try {
+    targetUrl = new URL(normalized);
+    currentUrl = new URL(window.location.href);
+  } catch (error) {
+    return null;
+  }
+
+  const sameHost = targetUrl.hostname === currentUrl.hostname;
+  if (!sameHost) return null;
+
+  if (isDevelopmentPortUrl(targetUrl) || isDevelopmentPortUrl(currentUrl)) {
+    return null;
+  }
+
+  return targetUrl.toString();
+}

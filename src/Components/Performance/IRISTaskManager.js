@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { performanceManager } from '../I.R.I.S. — Intelligent Reasoning & Information Synthesizer/irisPerformanceManager.js';
+import { performanceManager } from '../A.L.L.O.Y. - Autonomous Logical Layering & Optimized sYstem/irisPerformanceManager.js';
 import GlassCard from './GlassCard';
 import { NeonButton } from './NeonButton';
 
@@ -66,7 +66,7 @@ export default function IRISTaskManager() {
             {performance?.ram.percentage.toFixed(1)}%
           </div>
           <div className="stat-bar">
-            <div 
+            <div
               className={`stat-fill ${getPerformanceClass(performance?.ram.percentage)}`}
               style={{ width: `${performance?.ram.percentage}%` }}
             />
@@ -82,7 +82,7 @@ export default function IRISTaskManager() {
             {performance?.cpu.estimated.toFixed(0)}%
           </div>
           <div className="stat-bar">
-            <div 
+            <div
               className={`stat-fill ${getPerformanceClass(performance?.cpu.estimated)}`}
               style={{ width: `${performance?.cpu.estimated}%` }}
             />
@@ -98,7 +98,7 @@ export default function IRISTaskManager() {
             {performance?.gpu.fps} FPS
           </div>
           <div className="stat-bar">
-            <div 
+            <div
               className={`stat-fill ${getFPSClass(performance?.gpu.fps)}`}
               style={{ width: `${Math.min(100, (performance?.gpu.fps / 60) * 100)}%` }}
             />
@@ -427,7 +427,7 @@ function ProcessRow({ process, onKill }) {
       <div className="process-info">
         <div className="process-name">{process.name}</div>
         <div className="process-meta">
-          RAM: {getResourceBadge(process.estimatedRAM)} • 
+          RAM: {getResourceBadge(process.estimatedRAM)} •
           CPU: {getResourceBadge(process.estimatedCPU)}
           {!process.active && <span style={{ marginLeft: 8, color: '#fbbf24' }}>• Inactive</span>}
         </div>

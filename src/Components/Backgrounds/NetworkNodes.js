@@ -1,13 +1,38 @@
 import React, { useEffect, useRef } from 'react';
 
-export default function NetworkNodes({ 
+export default function NetworkNodes({
   accentColor = '#00f0ff',
   nodeCount = 50,
   connectionDistance = 150,
   speed = 0.5,
-  opacity = 0.6
+  opacity = 0.6,
+  lowEndMode = false,
+  targetFPS = 60,
+  maxFPS = 60,
+  inactiveFPS = 10,
+  vsyncEnabled = true,
+  refreshRate = 60
 }) {
   const canvasRef = useRef(null);
+  const lastFrameTime = useRef(Date.now());
+  const inactiveRef = useRef(document.hidden);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      inactiveRef.current = document.hidden || !document.hasFocus();
+    };
+
+    handleVisibility();
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('blur', handleVisibility);
+    window.addEventListener('focus', handleVisibility);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('blur', handleVisibility);
+      window.removeEventListener('focus', handleVisibility);
+    };
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -53,7 +78,7 @@ export default function NetworkNodes({
 
             if (distance < connectionDistance) {
               const alpha = 1 - distance / connectionDistance;
-              
+
               ctx.strokeStyle = `rgba(0, 240, 255, ${alpha * 0.4})`;
               ctx.lineWidth = 1;
               ctx.beginPath();
@@ -87,7 +112,32 @@ export default function NetworkNodes({
       });
     };
 
-    const interval = setInterval(draw, 33);
+    const animate = () => {
+      const now = Date.now();
+      const delta = now - lastFrameTime.current;
+      const isInactive = inactiveRef.current;
+      // Cap at vsync refresh rate when enabled, 1200 when disabled
+      let effectiveFPS = Math.min(targetFPS, vsyncEnabled ? refreshRate : 1200);
+
+      if (lowEndMode && (!effectiveFPS || effectiveFPS > 30)) {
+        effectiveFPS = 30;
+      }
+
+      if (isInactive) {
+        effectiveFPS = inactiveFPS;
+      }
+
+      const frameInterval = effectiveFPS ? (1000 / effectiveFPS) : 0;
+
+      if (!effectiveFPS || delta >= frameInterval) {
+        lastFrameTime.current = effectiveFPS ? (now - (delta % frameInterval)) : now;
+        draw();
+      }
+
+      animationId = requestAnimationFrame(animate);
+    };
+
+    let animationId = requestAnimationFrame(animate);
 
     const handleResize = () => {
       canvas.width = window.innerWidth;
@@ -97,10 +147,10 @@ export default function NetworkNodes({
     window.addEventListener('resize', handleResize);
 
     return () => {
-      clearInterval(interval);
+      cancelAnimationFrame(animationId);
       window.removeEventListener('resize', handleResize);
     };
-  }, [accentColor, nodeCount, connectionDistance, speed]);
+  }, [accentColor, nodeCount, connectionDistance, speed, lowEndMode, targetFPS, maxFPS, inactiveFPS, vsyncEnabled]);
 
   return (
     <canvas

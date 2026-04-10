@@ -1,24 +1,46 @@
 import React, { useEffect, useRef } from 'react';
 
-export default function SoftParticleDrift({ 
+export default function SoftParticleDrift({
   particleCount = 50,
   particleSize = 3,
   speed = 0.5,
   accentColor = '#00f0ff',
   opacity = 0.4,
   blur = 2,
-  lowEndMode = false
+  lowEndMode = false,
+  targetFPS = 60,
+  maxFPS = 60,
+  inactiveFPS = 10,
+  vsyncEnabled = true,
+  refreshRate = 60
 }) {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const particlesRef = useRef([]);
   const lastFrameTime = useRef(Date.now());
-  const targetFPS = lowEndMode ? 30 : 60;
+  const inactiveRef = useRef(document.hidden);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      inactiveRef.current = document.hidden || !document.hasFocus();
+    };
+
+    handleVisibility();
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('blur', handleVisibility);
+    window.addEventListener('focus', handleVisibility);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('blur', handleVisibility);
+      window.removeEventListener('focus', handleVisibility);
+    };
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext('2d');
     let mounted = true;
 
@@ -31,7 +53,7 @@ export default function SoftParticleDrift({
     const initParticles = () => {
       const count = lowEndMode ? Math.floor(particleCount * 0.6) : particleCount;
       particlesRef.current = [];
-      
+
       for (let i = 0; i < count; i++) {
         particlesRef.current.push({
           x: Math.random() * canvas.width,
@@ -52,10 +74,22 @@ export default function SoftParticleDrift({
 
       const now = Date.now();
       const delta = now - lastFrameTime.current;
-      const frameInterval = 1000 / targetFPS;
+      const isInactive = inactiveRef.current;
+      // Cap at vsync refresh rate when enabled, 1200 when disabled
+      let effectiveFPS = Math.min(targetFPS, vsyncEnabled ? refreshRate : 1200);
 
-      if (delta >= frameInterval) {
-        lastFrameTime.current = now - (delta % frameInterval);
+      if (lowEndMode && (!effectiveFPS || effectiveFPS > 30)) {
+        effectiveFPS = 30;
+      }
+
+      if (isInactive) {
+        effectiveFPS = inactiveFPS;
+      }
+
+      const frameInterval = effectiveFPS ? (1000 / effectiveFPS) : 0;
+
+      if (!effectiveFPS || delta >= frameInterval) {
+        lastFrameTime.current = effectiveFPS ? (now - (delta % frameInterval)) : now;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -70,12 +104,12 @@ export default function SoftParticleDrift({
 
           ctx.beginPath();
           ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-          
+
           if (blur > 0 && !lowEndMode) {
             ctx.shadowBlur = blur;
             ctx.shadowColor = accentColor;
           }
-          
+
           ctx.fillStyle = accentColor + Math.floor(particle.opacity * 255).toString(16).padStart(2, '0');
           ctx.fill();
 
@@ -112,7 +146,7 @@ export default function SoftParticleDrift({
       }
       window.removeEventListener('resize', resize);
     };
-  }, [particleCount, particleSize, speed, accentColor, opacity, blur, lowEndMode]);
+  }, [particleCount, particleSize, speed, accentColor, opacity, blur, lowEndMode, targetFPS, maxFPS, inactiveFPS, vsyncEnabled]);
 
   return (
     <canvas

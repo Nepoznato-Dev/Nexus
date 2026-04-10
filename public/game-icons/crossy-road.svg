@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Crossy Road Icon - Chicken crossing road -->
+  <!-- Road -->
+  <rect x="0" y="24" width="64" height="16" fill="#404040"/>
+  <rect x="0" y="28" width="16" height="4" fill="#ffeb3b"/>
+  <rect x="20" y="28" width="16" height="4" fill="#ffeb3b"/>
+  <rect x="40" y="28" width="16" height="4" fill="#ffeb3b"/>
+  
+  <!-- Grass -->
+  <rect x="0" y="18" width="64" height="6" fill="#7cb342"/>
+  <rect x="0" y="40" width="64" height="6" fill="#7cb342"/>
+  
+  <!-- Chicken body -->
+  <ellipse cx="32" cy="30" rx="6" ry="8" fill="#fff" stroke="#333" stroke-width="1.5"/>
+  
+  <!-- Head -->
+  <circle cx="32" cy="22" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+  
+  <!-- Beak -->
+  <path d="M 34 22 L 37 22 L 35 24 Z" fill="#ff9800" stroke="#e65100" stroke-width="1"/>
+  
+  <!-- Eyes -->
+  <circle cx="30" cy="21" r="1.5" fill="#333"/>
+  <circle cx="34" cy="21" r="1.5" fill="#333"/>
+  <circle cx="29.5" cy="20.5" r="0.5" fill="#fff"/>
+  <circle cx="33.5" cy="20.5" r="0.5" fill="#fff"/>
+  
+  <!-- Comb (red thing on head) -->
+  <path d="M 30 18 L 31 15 L 32 17 L 33 15 L 34 18" fill="#e53935" stroke="#c62828" stroke-width="1"/>
+  
+  <!-- Wattle (thing under beak) -->
+  <ellipse cx="34" cy="24" rx="2" ry="2.5" fill="#e53935" stroke="#c62828" stroke-width="0.8"/>
+  
+  <!-- Wings -->
+  <ellipse cx="26" cy="30" rx="3" ry="5" fill="#f5f5f5" stroke="#333" stroke-width="1" transform="rotate(-20 26 30)"/>
+  <ellipse cx="38" cy="30" rx="3" ry="5" fill="#f5f5f5" stroke="#333" stroke-width="1" transform="rotate(20 38 30)"/>
+  
+  <!-- Legs -->
+  <path d="M 30 38 L 30 42 L 28 42 M 30 42 L 32 42" stroke="#ff9800" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M 34 38 L 34 42 L 32 42 M 34 42 L 36 42" stroke="#ff9800" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- Car approaching (danger!) -->
+  <rect x="52" y="26" width="10" height="8" fill="#e53935" stroke="#c62828" stroke-width="1.5" rx="1"/>
+  <rect x="53" y="28" width="3" height="2" fill="#fff"/>
+  <rect x="57" y="28" width="3" height="2" fill="#fff"/>
+  <circle cx="54" cy="34" r="2" fill="#333"/>
+  <circle cx="59" cy="34" r="2" fill="#333"/>
+</svg>

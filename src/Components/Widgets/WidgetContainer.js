@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { X, GripVertical, Minimize2, Maximize2, RotateCw } from 'lucide-react';
 
-export default function WidgetContainer({ 
-  id, 
-  title, 
-  children, 
+export default function WidgetContainer({
+  id,
+  title,
+  children,
   onClose,
   onMinimize,
   defaultPosition = { x: 20, y: 100 },
@@ -18,24 +18,24 @@ export default function WidgetContainer({
   const widgetRef = useRef(null);
   const contentKey = useRef(0);
 
-  // Mark widget as protected from IRIS culling when open
+  // Mark widget as protected from RAZONET culling when open
   useEffect(() => {
     if (widgetRef.current) {
       if (isOpen) {
         widgetRef.current.dataset.protected = 'true';
         widgetRef.current.dataset.widgetOpen = 'true';
         widgetRef.current.dataset.widgetId = id;
-        
-        // Notify IRIS that this widget is active
+
+        // Notify RAZONET that this widget is active
         if (window.irisPerformanceManager) {
-          console.log(`[IRIS] Widget "${title}" opened - marked as protected from culling`);
+          console.log(`[RAZONET] Widget "${title}" opened - marked as protected from culling`);
         }
       } else {
         delete widgetRef.current.dataset.protected;
         delete widgetRef.current.dataset.widgetOpen;
-        
+
         if (window.irisPerformanceManager) {
-          console.log(`[IRIS] Widget "${title}" minimized - can be culled if needed`);
+          console.log(`[RAZONET] Widget "${title}" minimized - can be culled if needed`);
         }
       }
     }
@@ -46,7 +46,7 @@ export default function WidgetContainer({
     if (!isOpen && reloadOnOpen) {
       setIsReloading(true);
       contentKey.current += 1;
-      
+
       setTimeout(() => {
         setIsReloading(false);
         setIsOpen(true);
@@ -66,7 +66,7 @@ export default function WidgetContainer({
   const handleReload = () => {
     setIsReloading(true);
     contentKey.current += 1;
-    
+
     setTimeout(() => {
       setIsReloading(false);
     }, 300);
@@ -77,11 +77,11 @@ export default function WidgetContainer({
       ref={widgetRef}
       drag={isOpen}
       dragMomentum={false}
-      dragConstraints={{ 
-        left: 0, 
-        right: typeof window !== 'undefined' ? window.innerWidth - 320 : 1000, 
-        top: 0, 
-        bottom: typeof window !== 'undefined' ? window.innerHeight - 200 : 600 
+      dragConstraints={{
+        left: 0,
+        right: typeof window !== 'undefined' ? window.innerWidth - 320 : 1000,
+        top: 0,
+        bottom: typeof window !== 'undefined' ? window.innerHeight - 200 : 600
       }}
       initial={defaultPosition}
       animate={{
@@ -90,15 +90,15 @@ export default function WidgetContainer({
         height: isOpen ? 'auto' : '50px'
       }}
       className="fixed z-40 w-80"
-      style={{ 
-        x: position.x, 
+      style={{
+        x: position.x,
         y: position.y,
         pointerEvents: isOpen ? 'auto' : 'none'
       }}
     >
       <div className="backdrop-blur-xl bg-black/50 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
         {/* Header - Always visible */}
-        <div 
+        <div
           className="flex items-center justify-between p-3 border-b border-white/10 cursor-move"
           style={{ pointerEvents: 'auto' }}
         >
@@ -132,10 +132,10 @@ export default function WidgetContainer({
             </button>
           </div>
         </div>
-        
+
         {/* Content - Only when open */}
         {isOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: isReloading ? 0.5 : 1 }}
             className="p-4"

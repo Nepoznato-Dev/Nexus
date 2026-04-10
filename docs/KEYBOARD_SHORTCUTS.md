@@ -32,6 +32,7 @@
 ## Panic Mode (ESC)
 
 When you press **ESC**, Nexus will:
+
 1. ⏸️ Pause all audio and video
 2. 🧹 Clear session storage
 3. 🔒 Clear sensitive data
@@ -49,12 +50,14 @@ Perfect for quick exits when you need privacy!
 ## Implementation Details
 
 **Files:**
+
 - `src/utils/keyboardShortcuts.js` - Shortcut definitions
 - `src/Components/UI/KeyboardHandler.js` - Global listener
 - `src/Components/UI/ShortcutsModal.js` - Help modal
 - `src/Layout.js` - Integration point
 
 **How It Works:**
+
 1. Global `keydown` listener attached to window
 2. Checks if user is typing (ignores shortcuts in inputs)
 3. Maps key to action (navigate, panic, help)
@@ -62,6 +65,7 @@ Perfect for quick exits when you need privacy!
 5. Prevents default browser behavior when needed
 
 **Safety Features:**
+
 - Only lowercase letters trigger navigation
 - Modifier keys (Ctrl, Alt, Meta) are ignored (except ESC)
 - Won't navigate if already on target page

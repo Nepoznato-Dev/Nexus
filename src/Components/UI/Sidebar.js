@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { createPageUrl, openInAboutBlank } from 'utils';
 import { useSettings } from '../../hooks/useSettings.js';
 import { Home, Globe, Gamepad2, Brain, Settings as Cog, ChevronsLeft, ChevronsRight, Activity, ExternalLink } from 'lucide-react';
 
 export default function Sidebar({ onWidthChange, onTogglePerformance, performanceOpen }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { settings } = useSettings();
   const [expanded, setExpanded] = useState(false);
 
@@ -40,7 +41,7 @@ export default function Sidebar({ onWidthChange, onTogglePerformance, performanc
             onClick={() => setExpanded(!expanded)}
             title={expanded ? 'Collapse' : 'Expand'}
           >
-            {expanded ? <ChevronsLeft className="w-5 h-5"/> : <ChevronsRight className="w-5 h-5"/>}
+            {expanded ? <ChevronsLeft className="w-5 h-5" /> : <ChevronsRight className="w-5 h-5" />}
           </button>
         </div>
 
@@ -49,7 +50,12 @@ export default function Sidebar({ onWidthChange, onTogglePerformance, performanc
           {navItems.map(({ key, label, icon: Icon, to }) => (
             <button
               key={key}
-              onClick={() => navigate(createPageUrl(to))}
+              onClick={() => {
+                const target = createPageUrl(to);
+                if (location.pathname !== target) {
+                  navigate(target);
+                }
+              }}
               className={`w-full flex items-center ${expanded ? 'gap-3 px-3' : 'justify-center'} py-2 text-white/70 hover:text-white hover:bg-white/10 transition-colors`}
             >
               <Icon className="w-5 h-5" />

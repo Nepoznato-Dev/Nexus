@@ -10,9 +10,39 @@ export function useNotifications() {
 
   useEffect(() => {
     loadNotifications();
-    // Reduced polling from 1s to 5s for better performance
-    const interval = setInterval(loadNotifications, 5000);
-    return () => clearInterval(interval);
+    let tick = 0;
+
+    const pollNotifications = () => {
+      tick += 1;
+      const isVisible = typeof document === 'undefined' || document.visibilityState === 'visible';
+      if (!isVisible && tick % 4 !== 0) {
+        return;
+      }
+      loadNotifications();
+    };
+
+    const handleStorage = (event) => {
+      if (!event || event.key === NOTIFICATIONS_KEY) {
+        loadNotifications();
+      }
+    };
+
+    const handleVisibility = () => {
+      if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+        loadNotifications();
+      }
+    };
+
+    // Poll less frequently and heavily de-emphasize hidden-tab polling.
+    const interval = setInterval(pollNotifications, 15000);
+    window.addEventListener('storage', handleStorage);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorage);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, []);
 
   const loadNotifications = () => {

@@ -10,17 +10,17 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, 
-  Download, 
-  AlertTriangle, 
-  BookOpen, 
+import {
+  Search,
+  Download,
+  AlertTriangle,
+  BookOpen,
   Settings,
   ArrowRight,
   ExternalLink,
   Check,
   X,
-  Loader,
+  Loader2,
   Sparkles,
   Shield,
   Zap
@@ -28,12 +28,12 @@ import {
 import GlassCard from '../UI/GlassCard';
 import { session } from '../Storage/clientStorage.js';
 import modAPIHandler from './modAPIHandler';
-import irisModResolver from '../I.R.I.S. — Intelligent Reasoning & Information Synthesizer/irisModResolver';
-import { IRISPerformanceManager } from '../I.R.I.S. — Intelligent Reasoning & Information Synthesizer/irisPerformanceManager';
-import { analyzeCrashLog } from '../I.R.I.S. — Intelligent Reasoning & Information Synthesizer/irisCrashAnalyzer';
-import { checkModUpdates } from '../I.R.I.S. — Intelligent Reasoning & Information Synthesizer/irisUpdateChecker';
-import { getRecommendations } from '../I.R.I.S. — Intelligent Reasoning & Information Synthesizer/irisRecommendations';
-import irisCacheManager from '../I.R.I.S. — Intelligent Reasoning & Information Synthesizer/irisCacheManager';
+import irisModResolver from '../A.L.L.O.Y. - Autonomous Logical Layering & Optimized sYstem/irisModResolver';
+import { IRISPerformanceManager } from '../A.L.L.O.Y. - Autonomous Logical Layering & Optimized sYstem/irisPerformanceManager';
+import { analyzeCrashLog } from '../A.L.L.O.Y. - Autonomous Logical Layering & Optimized sYstem/irisCrashAnalyzer';
+import { checkModUpdates } from '../A.L.L.O.Y. - Autonomous Logical Layering & Optimized sYstem/irisUpdateChecker';
+import { getRecommendations } from '../A.L.L.O.Y. - Autonomous Logical Layering & Optimized sYstem/irisRecommendations';
+import irisCacheManager from '../A.L.L.O.Y. - Autonomous Logical Layering & Optimized sYstem/irisCacheManager';
 import COMMUNITY_PACKS from './communityModPacks';
 import './ModManager.css';
 
@@ -56,7 +56,7 @@ export default function ModManager() {
   const [downloadingMods, setDownloadingMods] = useState({});
   const [downloadProgress, setDownloadProgress] = useState({});
 
-  // IRIS Integration
+  // RAZONET integration
   const [irisResolving, setIrisResolving] = useState(false);
   const [irisReport, setIrisReport] = useState(null);
   const [compatibilityReport, setCompatibilityReport] = useState(null);
@@ -72,7 +72,7 @@ export default function ModManager() {
   const [modpackImportError, setModpackImportError] = useState('');
   const [safeModeEnabled, setSafeModeEnabled] = useState(false);
   const [cacheDownloadReport, setCacheDownloadReport] = useState(null);
-  
+
   // Browser Cache State
   const [cacheStats, setCacheStats] = useState({ bytes: 0, mb: '0', count: 0 });
   const [cachedMods, setCachedMods] = useState([]);
@@ -151,14 +151,14 @@ export default function ModManager() {
     if (details?.versions?.length > 0) {
       const latestVersion = details.versions[0];
       setSelectedVersion(latestVersion.id);
-      
+
       const deps = await modAPIHandler.resolveDependencies(details, latestVersion.id);
       setDependencies(deps);
 
-      // IRIS: Auto-resolve dependencies
-      console.log('[IRIS] Auto-resolving dependencies for', mod.name);
+      // RAZONET: auto-resolve dependencies
+      console.log('[RAZONET] Auto-resolving dependencies for', mod.name);
       setIrisResolving(true);
-      
+
       const irisResolution = await irisModResolver.resolveDependencies(
         details,
         latestVersion.id,
@@ -170,7 +170,7 @@ export default function ModManager() {
       setIrisResolving(false);
 
       if (irisResolution.warnings.length > 0) {
-        console.warn('[IRIS] Warnings detected:', irisResolution.warnings);
+        console.warn('[RAZONET] Warnings detected:', irisResolution.warnings);
       }
     }
 
@@ -192,7 +192,7 @@ export default function ModManager() {
    */
   const handleDownloadMod = useCallback(async (mod, version, file) => {
     const fileId = file.id || file.url;
-    
+
     // Update UI to show downloading
     setDownloadingMods(prev => ({
       ...prev,
@@ -246,12 +246,12 @@ export default function ModManager() {
   }, []);
 
   /**
-   * Download all dependencies + mod with IRIS
+  * Download all dependencies + mod with RAZONET
    */
   const handleDownloadAll = useCallback(async (mod, version) => {
     if (irisReport && irisReport.downloadQueue.length > 0) {
-      // Use IRIS auto-download
-      console.log('[IRIS] Starting automatic dependency download');
+      // Use RAZONET auto-download
+      console.log('[RAZONET] Starting automatic dependency download');
       setDownloadingMods({ iris: true });
 
       const results = await irisModResolver.downloadAllDependencies(irisReport);
@@ -271,7 +271,7 @@ export default function ModManager() {
       const browserCount = results.successful.length - cachedCount;
 
       alert(
-        `[IRIS] Auto-Download Complete!\n\n` +
+        `[RAZONET] Auto-Download Complete!\n\n` +
         `✅ Cached: ${cachedCount} files\n` +
         `⬇️ Browser downloads: ${browserCount} files\n` +
         `❌ Failed: ${results.failed.length} files\n` +
@@ -317,12 +317,12 @@ export default function ModManager() {
     if (canAccessIris) {
       setActiveTab('iris');
     } else {
-      alert('IRIS is experimental and available for Moderator+ roles.');
+      alert('RAZONET is experimental and available for Moderator+ roles.');
     }
   }, [canAccessIris]);
 
   /**
-   * Run IRIS compatibility check on selected mods
+   * Run RAZONET compatibility check on selected mods
    */
   const handleCompatibilityCheck = useCallback(() => {
     if (selectedMods.length === 0) {
@@ -330,7 +330,7 @@ export default function ModManager() {
       return;
     }
 
-    console.log('[IRIS] Running compatibility check on', selectedMods.length, 'mods');
+    console.log('[RAZONET] Running compatibility check on', selectedMods.length, 'mods');
     const report = irisModResolver.checkCompatibility(
       selectedMods,
       minecraftVersion,
@@ -618,7 +618,7 @@ export default function ModManager() {
     try {
       const stats = await irisCacheManager.getCacheSize();
       setCacheStats(stats);
-      
+
       const cached = await irisCacheManager.getCachedModsForVersion(minecraftVersion);
       setCachedMods(cached);
     } catch (error) {
@@ -644,7 +644,7 @@ export default function ModManager() {
     try {
       const modIds = cachedMods.map(m => m.modId);
       const result = await irisCacheManager.exportCachedMods(modIds, minecraftVersion, modLoader);
-      
+
       if (result.success) {
         // Create download links for each cached mod
         for (const file of result.files) {
@@ -698,7 +698,7 @@ export default function ModManager() {
           <div className="filters-row">
             <div className="filter-group">
               <label>Minecraft Version:</label>
-              <select 
+              <select
                 value={minecraftVersion}
                 onChange={(e) => setMinecraftVersion(e.target.value)}
                 className="filter-select"
@@ -711,7 +711,7 @@ export default function ModManager() {
 
             <div className="filter-group">
               <label>Mod Loader:</label>
-              <select 
+              <select
                 value={modLoader}
                 onChange={(e) => setModLoader(e.target.value)}
                 className="filter-select"
@@ -725,7 +725,7 @@ export default function ModManager() {
           </div>
 
           <button type="submit" className="search-button" disabled={isSearching}>
-            {isSearching ? <Loader size={18} className="spin" /> : <Search size={18} />}
+            {isSearching ? <Loader2 size={18} className="spin" /> : <Search size={18} />}
             {isSearching ? 'Searching...' : 'Search Mods'}
           </button>
         </form>
@@ -746,7 +746,7 @@ export default function ModManager() {
               >
                 <div onClick={() => handleSelectMod(mod)} className="mod-card-content">
                   {mod.icon && <img src={mod.icon} alt={mod.name} className="mod-icon" />}
-                  
+
                   <div className="mod-info">
                     <h4>{mod.name}</h4>
                     <p className="author">by {mod.author}</p>
@@ -768,7 +768,7 @@ export default function ModManager() {
                     handleAddToList(mod);
                   }}
                   className={`add-to-list-button ${selectedMods.some(m => m.id === mod.id) ? 'added' : ''}`}
-                  title={selectedMods.some(m => m.id === mod.id) ? 'Remove from IRIS list' : 'Add to IRIS list'}
+                  title={selectedMods.some(m => m.id === mod.id) ? 'Remove from RAZONET list' : 'Add to RAZONET list'}
                 >
                   {selectedMods.some(m => m.id === mod.id) ? (
                     <Check size={16} />
@@ -791,7 +791,7 @@ export default function ModManager() {
       exit={{ opacity: 0, x: -20 }}
       className="mod-details-container"
     >
-      <button 
+      <button
         onClick={() => {
           setActiveTab('search');
           setSelectedMod(null);
@@ -804,7 +804,7 @@ export default function ModManager() {
 
       {isLoadingDetails ? (
         <div className="loading">
-          <Loader size={32} className="spin" />
+          <Loader2 size={32} className="spin" />
           <p>Loading mod details...</p>
         </div>
       ) : modDetails ? (
@@ -812,7 +812,7 @@ export default function ModManager() {
           {/* Mod Header */}
           <GlassCard className="mod-header">
             {modDetails.icon && <img src={modDetails.icon} alt={modDetails.name} className="large-icon" />}
-            
+
             <div className="header-info">
               <h2>{modDetails.name}</h2>
               <p className="author">Created by {modDetails.author}</p>
@@ -848,7 +848,7 @@ export default function ModManager() {
 
               <div className="version-selector">
                 <label>Choose Version:</label>
-                <select 
+                <select
                   value={selectedVersion}
                   onChange={(e) => handleVersionChange(e.target.value)}
                   className="version-select"
@@ -881,7 +881,7 @@ export default function ModManager() {
                     >
                       {downloadingMods[file.id || file.url] ? (
                         <>
-                          <Loader size={16} className="spin" />
+                          <Loader2 size={16} className="spin" />
                           {downloadProgress[file.id || file.url]?.percent}%
                         </>
                       ) : (
@@ -921,7 +921,7 @@ export default function ModManager() {
                     ))}
                   </div>
 
-                  <button 
+                  <button
                     onClick={() => handleDownloadAll(selectedMod, modDetails.versions.find(v => v.id === selectedVersion))}
                     className="download-all-button"
                   >
@@ -983,7 +983,7 @@ export default function ModManager() {
             <div className="step">
               <h3>What is a Minecraft Mod?</h3>
               <p>A <strong>mod</strong> is a modification to Minecraft that adds new features, items, or changes gameplay.</p>
-              
+
               <h4>Examples:</h4>
               <ul>
                 <li><strong>Sodium</strong> - Makes Minecraft run faster (optimization mod)</li>
@@ -1122,14 +1122,14 @@ export default function ModManager() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="iris-tab-container"
+      className="razonet-tab-container"
     >
-      <GlassCard className="iris-header-card">
-        <div className="iris-header">
+      <GlassCard className="razonet-header-card">
+        <div className="razonet-header">
           <div className="flex items-center gap-3">
             <Sparkles className="w-8 h-8 text-purple-400" />
             <div>
-              <h2>IRIS Mod Assistant</h2>
+              <h2>RAZONET Mod Assistant</h2>
               <p className="text-sm text-white/60">
                 Intelligent dependency resolution & compatibility checking
               </p>
@@ -1185,10 +1185,10 @@ export default function ModManager() {
         </div>
       </GlassCard>
 
-      <GlassCard className="iris-actions-card">
-        <div className="iris-actions-header">
-          <h3>IRIS Quick Actions</h3>
-          <div className="iris-toggle-row">
+      <GlassCard className="razonet-actions-card">
+        <div className="razonet-actions-header">
+          <h3>RAZONET Quick Actions</h3>
+          <div className="razonet-toggle-row">
             <span>Safe Mode</span>
             <button className={`toggle-button ${safeModeEnabled ? 'enabled' : ''}`} onClick={handleToggleSafeMode}>
               {safeModeEnabled ? 'Enabled' : 'Disabled'}
@@ -1196,7 +1196,7 @@ export default function ModManager() {
           </div>
         </div>
 
-        <div className="iris-actions-grid">
+        <div className="razonet-actions-grid">
           <button className="action-button" onClick={handlePinVersions}>
             <Zap size={16} /> Pin Versions
           </button>
@@ -1308,7 +1308,7 @@ export default function ModManager() {
             <div className="report-section suggestions">
               <h4>
                 <Sparkles size={18} className="text-blue-400" />
-                IRIS Suggestions
+                RAZONET Suggestions
               </h4>
               {compatibilityReport.suggestions.map((suggestion, idx) => (
                 <div key={idx} className="suggestion-item">
@@ -1352,7 +1352,7 @@ export default function ModManager() {
       )}
 
       {riskReport && (
-        <GlassCard className="iris-report-card">
+        <GlassCard className="razonet-report-card">
           <h3>Install Risk Simulation</h3>
           <div className={`risk-badge ${riskReport.riskLevel}`}>Risk: {riskReport.riskLevel} ({riskReport.riskScore}/100)</div>
           <ul className="risk-notes">
@@ -1364,7 +1364,7 @@ export default function ModManager() {
       )}
 
       {updateReport?.length > 0 && (
-        <GlassCard className="iris-report-card">
+        <GlassCard className="razonet-report-card">
           <h3>Update Checker</h3>
           <div className="update-list">
             {updateReport.map((item) => (
@@ -1381,7 +1381,7 @@ export default function ModManager() {
       )}
 
       {serverCompatibility && (
-        <GlassCard className="iris-report-card">
+        <GlassCard className="razonet-report-card">
           <h3>Server Compatibility</h3>
           <div className="compat-columns">
             <div>
@@ -1401,7 +1401,7 @@ export default function ModManager() {
       )}
 
       {performanceReport && (
-        <GlassCard className="iris-report-card">
+        <GlassCard className="razonet-report-card">
           <h3>Performance Profiler</h3>
           <div className="perf-grid">
             <div>
@@ -1420,7 +1420,7 @@ export default function ModManager() {
         </GlassCard>
       )}
 
-      <GlassCard className="iris-report-card">
+      <GlassCard className="razonet-report-card">
         <h3>Crash Log Analyzer</h3>
         <textarea
           value={crashLogInput}
@@ -1441,7 +1441,7 @@ export default function ModManager() {
         )}
       </GlassCard>
 
-      <GlassCard className="iris-report-card">
+      <GlassCard className="razonet-report-card">
         <h3>Shader & Resource Pack Recommendations</h3>
         <button className="action-button" onClick={handleGenerateRecommendations}>Generate Recommendations</button>
         {recommendations && (
@@ -1467,7 +1467,7 @@ export default function ModManager() {
         )}
       </GlassCard>
 
-      <GlassCard className="iris-report-card">
+      <GlassCard className="razonet-report-card">
         <h3>Community Packs</h3>
         <div className="community-grid">
           {COMMUNITY_PACKS.map((pack) => (
@@ -1484,18 +1484,18 @@ export default function ModManager() {
       </GlassCard>
 
       {cacheDownloadReport && (
-        <GlassCard className="iris-report-card">
+        <GlassCard className="razonet-report-card">
           <h3>Cache Download Report</h3>
           <p>✅ Cached: {cacheDownloadReport.successful.length}</p>
           <p>❌ Failed: {cacheDownloadReport.failed.length}</p>
         </GlassCard>
       )}
 
-      {/* IRIS Dependency Report */}
+      {/* RAZONET dependency report */}
       {irisReport && (
         <GlassCard className="dependency-report-card">
           <h3>Dependency Resolution</h3>
-          
+
           {irisReport.dependencies.length > 0 && (
             <div className="dependency-list">
               <h4>{irisReport.dependencies.length} Required Dependencies</h4>
@@ -1533,7 +1533,7 @@ export default function ModManager() {
               >
                 {downloadingMods.iris ? (
                   <>
-                    <Loader size={16} className="spin" />
+                    <Loader2 size={16} className="spin" />
                     Downloading...
                   </>
                 ) : (
@@ -1572,7 +1572,7 @@ export default function ModManager() {
             className={`tab-button ${activeTab === 'iris' ? 'active' : ''}`}
             onClick={openIrisTab}
           >
-            <Sparkles size={18} /> IRIS Assistant
+            <Sparkles size={18} /> RAZONET Assistant
             {selectedMods.length > 0 && (
               <span className="badge">{selectedMods.length}</span>
             )}

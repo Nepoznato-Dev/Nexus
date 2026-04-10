@@ -17,17 +17,20 @@ The audio system provides background music for each page and optional sound effe
 ## 🔧 Features
 
 ### Background Music
+
 - Per-page music configuration
 - Volume controls
 - Fade in/out transitions
 - Auto-play on page load (user preference)
 
 ### Sound Effects
+
 - UI interaction sounds (clicks, hovers)
 - Notification sounds
 - Game audio integration
 
 ### Optional Integrations
+
 - Spotify Widget (optional external service)
 - YouTube Widget (music videos)
 
@@ -49,13 +52,16 @@ src/Components/Widgets/
 ## ⚙️ Configuration
 
 Music is configured per-page in the page components:
+
 - Landing: Ambient background
 - Games: Upbeat tracks
 - Study Tools: Focus music
 - Dashboard: Calm instrumental
 
 ### Volume Persistence
+
 User volume preferences saved to `localStorage`:
+
 - Key: `nexus_music_volume`
 - Range: 0.0 - 1.0
 
@@ -64,6 +70,7 @@ User volume preferences saved to `localStorage`:
 ## 🎯 Usage
 
 ### In Components
+
 ```javascript
 import MusicPlayer from '../Components/Music/MusicPlayer';
 
@@ -75,6 +82,7 @@ import MusicPlayer from '../Components/Music/MusicPlayer';
 ```
 
 ### User Controls
+
 - Volume slider (UI)
 - Mute/unmute toggle
 - Track selection (optional)

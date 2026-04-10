@@ -3,12 +3,14 @@
 ## 📋 Workflow at a Glance
 
 ### Current Setup (v1.0.0)
+
 ```
 PRODUCTION: src/           ← Users run this
 STAGING:    AAS/           ← Develop v2.0.0 here
 ```
 
 ### Release a Bug Fix (v1.0.1)
+
 ```bash
 # In src/ (production code):
 1. Fix bug
@@ -21,6 +23,7 @@ STAGING:    AAS/           ← Develop v2.0.0 here
 ```
 
 ### Develop Next Major (v2.0.0)
+
 ```bash
 # In AAS folder (protected):
 1. Add features
@@ -31,6 +34,7 @@ STAGING:    AAS/           ← Develop v2.0.0 here
 ```
 
 ### Release Major Feature (v2.0.0)
+
 ```bash
 # When AAS ready:
 1. Copy: AAS/* → src/Components/AAS/
@@ -59,10 +63,12 @@ Use this pattern for future major versions:
 ```
 
 ### Naming Pattern
+
 - **Active:** Always `src/`
 - **Protected:** `[FEATURE_NAME]_FOR_v[MAJOR].0.0/`
 
 Examples:
+
 - `AAS (Advanced AI System) EXPERIMENTAL/` ← v2.0.0
 - `MOBILE_CLIENT_FOR_v3.0.0/` ← v3.0.0
 - `CLOUD_SYNC_FOR_v4.0.0/` ← v4.0.0
@@ -106,6 +112,7 @@ npm run build
 ## 📊 Version Examples
 
 ### Bug Fixes (Patch)
+
 ```
 v1.0.0 → v1.0.1: Fixed dashboard layout
 v1.0.1 → v1.0.2: Fixed music player pause
@@ -113,12 +120,14 @@ v1.0.2 → v1.0.3: Fixed settings save bug
 ```
 
 ### New Features (Minor)
+
 ```
 v1.0.3 → v1.1.0: Added notification system
 v1.1.0 → v1.2.0: Added keyboard shortcuts
 ```
 
 ### Major Features (Major)
+
 ```
 v1.2.5 → v2.0.0: Added AI system (AAS)
 v2.1.3 → v3.0.0: Added mobile client
@@ -129,6 +138,7 @@ v2.1.3 → v3.0.0: Added mobile client
 ## 🚨 Important Rules
 
 ### ✅ DO
+
 - ✅ Use protected folders for future versions
 - ✅ Test before tagging release
 - ✅ Update package.json version before release
@@ -136,6 +146,7 @@ v2.1.3 → v3.0.0: Added mobile client
 - ✅ Push tags to trigger release
 
 ### ❌ DON'T
+
 - ❌ Import protected folders into src/
 - ❌ Modify protected folders without intending that version
 - ❌ Tag release without testing
@@ -180,6 +191,7 @@ Protected folder ready to release?
 ## 🎓 Examples in Practice
 
 ### Scenario 1: Bug Fix
+
 ```
 Current: v1.0.0 in production
 Issue: Dashboard crashes when adding card
@@ -199,6 +211,7 @@ $ npm run build && deploy
 ```
 
 ### Scenario 2: Major Feature Ready
+
 ```
 Current: v1.0.5 in production, v2.0.0 ready in AAS/
 
@@ -222,6 +235,7 @@ $ npm run build && deploy
 ```
 
 ### Scenario 3: Parallel Development
+
 ```
 Current: v1.0.0 released, users on it
 Development: AAS (v2.0.0) and bug fixes (v1.0.1)
@@ -243,6 +257,7 @@ Day 17+: Bug fixes for v2.0.0 (v2.0.1, etc.)
 ## 🎯 Summary
 
 **Your Release Workflow:**
+
 1. Code in protected folders for future versions
 2. Fix bugs in src/ for current version
 3. Always update package.json before releasing
@@ -251,6 +266,7 @@ Day 17+: Bug fixes for v2.0.0 (v2.0.1, etc.)
 6. Repeat forever
 
 **Everyone wins:**
+
 - ✅ Users get stable releases
 - ✅ You develop features without breaking production
 - ✅ Clear versioning for feature tracking

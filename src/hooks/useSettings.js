@@ -3,16 +3,16 @@ import { storage } from '../Components/Storage/clientStorage.js';
 import { settingsEmitter } from '../utils/settingsEmitter.js';
 
 const DEFAULT_SETTINGS = {
-  theme: { 
+  theme: {
     mode: 'dark',
-    background: '#0a0a0f', 
-    accent: '#00f0ff', 
+    background: '#0a0a0f',
+    accent: '#00f0ff',
     text: '#ffffff',
     contrast: 'normal',
     blur: true,
     transparency: true
   },
-  background: { type: 'soft-particle-drift', particleCount: 50, speed: 0.5, opacity: 0.4, blur: 2 },
+  background: { type: 'soft-particle-drift', particleCount: 50, speed: 0.5, opacity: 0.4, blur: 2, desktopWallpaper: 'nexus-default' },
   layout: { density: 'default' },
   motion: { animations: 'full' },
   input: { holdToConfirm: false, contextMenus: true, scrollSpeed: 1 },
@@ -52,12 +52,14 @@ const DEFAULT_SETTINGS = {
     autoplayControl: true,
     panicButton: true,
     panicSite: 'classroom',
+    tabCloakProfile: 'classroom',
     panicReturnTimeout: 60,
+    fakeTabName: 'Google Classroom',
     focusIndicators: true,
     reducedTransparency: false,
     screenReaderOptimized: false
   },
-  performance: { targetFPS: 60, ramLimit: 1024, animationScale: 1, widgetLimit: 3, adaptivePerf: true, showFPS: false },
+  performance: { targetFPS: 60, fpsCapEnabled: true, vsyncEnabled: true, ramLimit: 1024, pageRAMSoftLimit: 750, pageRAMHardLimit: 1250, gamesRAMSoftLimit: 1024, gamesRAMHardLimit: 4096, animationScale: 1, widgetLimit: 3, adaptivePerf: true, showFPS: false, preloadPages: false, preloadProfile: 'essential' },
   games: { fullscreenOnLaunch: true, escToClose: true, lazyLoadStrength: 'medium' },
   widgets: { enabled: true, spotify: true, youtube: true, tiktok: false, autoDisable: true, dockInSidebar: true },
   aiTools: { enabled: false, autoSuggest: true, personality: 'adaptive', apiProvider: 'none', apiKey: '', model: 'gpt-3.5-turbo' },

@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Cloud, CloudRain, Sun, Wind, Droplets, MapPin, RefreshCw, Loader } from 'lucide-react';
+import { Cloud, CloudRain, Sun, Wind, Droplets, MapPin, RefreshCw, Loader2 } from 'lucide-react';
 
 export default function WeatherWidget() {
   const [weather, setWeather] = useState(null);
@@ -51,11 +51,11 @@ export default function WeatherWidget() {
       const response = await fetch(
         `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=${unit === 'metric' ? 'celsius' : 'fahrenheit'}`
       );
-      
+
       if (!response.ok) throw new Error('Weather fetch failed');
-      
+
       const data = await response.json();
-      
+
       setWeather({
         temp: Math.round(data.current_weather.temperature),
         windSpeed: data.current_weather.windspeed,
@@ -69,7 +69,7 @@ export default function WeatherWidget() {
       );
       const geoData = await geoResponse.json();
       setLocation(geoData.address.city || geoData.address.town || 'Unknown Location');
-      
+
       setLoading(false);
     } catch (err) {
       console.error('Weather API error:', err);
@@ -85,7 +85,7 @@ export default function WeatherWidget() {
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&limit=1`
       );
       const geoData = await geoResponse.json();
-      
+
       if (geoData.length > 0) {
         const { lat, lon } = geoData[0];
         await fetchWeather(parseFloat(lat), parseFloat(lon));
@@ -127,7 +127,7 @@ export default function WeatherWidget() {
     <div className="weather-widget h-full flex flex-col">
       {loading && (
         <div className="flex-1 flex items-center justify-center">
-          <Loader className="w-8 h-8 animate-spin text-white/60" />
+          <Loader2 className="w-8 h-8 animate-spin text-white/60" />
         </div>
       )}
 

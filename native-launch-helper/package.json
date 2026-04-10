@@ -1,0 +1,11 @@
+{
+    "name": "nexus-native-launch-helper",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Custom protocol helper for launching local Minecraft instances from Nexus",
+    "bin": {
+        "nexus-native-launch-helper": "protocol-handler.js",
+        "nexus-launcher-setup": "setup-helper.js"
+    },
+    "type": "commonjs"
+}

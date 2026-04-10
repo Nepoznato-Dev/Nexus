@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Among Us/Impostor Icon -->
+  <!-- Character body -->
+  <path d="M 24 48 Q 24 20, 32 18 Q 40 20, 40 48 Z" fill="#ff4757" stroke="#c23343" stroke-width="2"/>
+  
+  <!-- Bottom/legs -->
+  <rect x="26" y="46" width="6" height="8" fill="#ff4757" stroke="#c23343" stroke-width="2" rx="1"/>
+  <rect x="32" y="46" width="6" height="8" fill="#ff4757" stroke="#c23343" stroke-width="2" rx="1"/>
+  
+  <!-- Visor/Glass -->
+  <ellipse cx="32" cy="28" rx="10" ry="8" fill="#87CEEB" stroke="#6fa3c5" stroke-width="2"/>
+  
+  <!-- Reflection on visor -->
+  <ellipse cx="28" cy="26" rx="3" ry="4" fill="#fff" opacity="0.6"/>
+  <ellipse cx="36" cy="26" rx="2" ry="3" fill="#fff" opacity="0.4"/>
+  
+  <!-- Backpack -->
+  <rect x="38" y="28" width="6" height="12" fill="#c23343" stroke="#a02839" stroke-width="2" rx="2"/>
+  
+  <!-- Knife (impostor weapon) -->
+  <rect x="42" y="32" width="2" height="10" fill="#8B4513" rx="1"/>
+  <path d="M 38 32 L 44 28 L 48 32 Z" fill="#C0C0C0" stroke="#808080" stroke-width="1.5"/>
+  <path d="M 46 30 L 48 28" stroke="#fff" stroke-width="1" opacity="0.7"/>
+  
+  <!-- Blood drip on knife -->
+  <ellipse cx="43" cy="40" rx="1" ry="2" fill="#8B0000"/>
+  <circle cx="42" cy="42" r="0.8" fill="#8B0000"/>
+  
+  <!-- Shadow -->
+  <ellipse cx="32" cy="54" rx="12" ry="3" fill="#000" opacity="0.2"/>
+</svg>

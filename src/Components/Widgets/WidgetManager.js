@@ -4,7 +4,7 @@
  * Features:
  * - Open/close/minimize widgets
  * - Persist widget positions to localStorage
- * - IRIS integration (protected from culling when open)
+ * - RAZONET integration (protected from culling when open)
  * - Auto-reload on open
  */
 
@@ -60,7 +60,7 @@ export default function WidgetManager({ enabledWidgets = ['spotify', 'youtube', 
         console.error('Failed to parse widget state:', e);
       }
     }
-    
+
     // Default: all widgets open
     return enabledWidgets.reduce((acc, id) => {
       acc[id] = {
@@ -148,7 +148,7 @@ export default function WidgetManager({ enabledWidgets = ['spotify', 'youtube', 
           <div className="backdrop-blur-xl bg-black/50 rounded-full border border-white/10 shadow-2xl px-4 py-2 flex items-center gap-2">
             {Object.entries(AVAILABLE_WIDGETS).map(([id, config]) => {
               const isHidden = !widgets[id] || widgets[id].isMinimized;
-              
+
               if (!isHidden) return null;
 
               return (

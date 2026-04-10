@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, ChevronRight, Sparkles, Palette, Lock, Activity, Upload } from 'lucide-react';
+import { Check, ChevronRight, Sparkles, Palette, Lock, Activity, Upload, Brain, Download, X, Zap, Cog, Award } from 'lucide-react';
 import NeonButton from './NeonButton.js';
 import { Input } from './input.js';
+import * as aiModelManager from '../../utils/aiModelManager.js';
+import { TRANSFORMER_TIERS } from '../AI/ollamaModels.js';
 
 const COLOR_PRESETS = [
   { id: 'default', name: 'Nexus Cyan', background: '#0a0a0f', accent: '#00f0ff', text: '#ffffff' },
@@ -21,10 +23,12 @@ export default function FirstTimeSetup({ onComplete, username: initialUsername, 
     password: accessCode || '',
     confirmPassword: accessCode || '',
     colorPreset: 'default',
+    aiDownloadChoice: null,
     aiPersonality: 'adaptive',
+    transformerTier: 'balanced', // Fast, Balanced, Quality
   });
 
-  const totalSteps = 4;
+  const totalSteps = 6;
 
   const updateSetting = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }));
@@ -32,9 +36,15 @@ export default function FirstTimeSetup({ onComplete, username: initialUsername, 
 
   const canProceed = () => {
     if (step === 2) {
-      return settings.username.trim().length >= 3 && 
-             settings.password.length >= 5 && 
-             settings.password === settings.confirmPassword;
+      return settings.username.trim().length >= 3 &&
+        settings.password.length >= 5 &&
+        settings.password === settings.confirmPassword;
+    }
+    if (step === 4) {
+      return settings.aiDownloadChoice !== null;
+    }
+    if (step === 6) {
+      return true; // Translation is optional, step 6 is always completable
     }
     return true;
   };
@@ -51,7 +61,7 @@ export default function FirstTimeSetup({ onComplete, username: initialUsername, 
       reader.onload = (event) => {
         try {
           const importData = JSON.parse(event.target.result);
-          
+
           if (!importData.settings) {
             alert('Invalid settings file format.');
             return;
@@ -92,8 +102,25 @@ export default function FirstTimeSetup({ onComplete, username: initialUsername, 
         username: settings.username,
         password: settings.password,
         theme: COLOR_PRESETS.find(p => p.id === settings.colorPreset) || COLOR_PRESETS[0],
-        aiTools: { personality: settings.aiPersonality },
+        aiTools: {
+          personality: settings.aiPersonality,
+          downloadChoice: settings.aiDownloadChoice || 'later',
+          transformerTier: settings.transformerTier || 'balanced',
+        },
       };
+
+      // Save AI download choice
+      aiModelManager.setAIDownloadChoice(settings.aiDownloadChoice || 'later');
+
+      // Start AI model download if user chose "now"
+      if (settings.aiDownloadChoice === 'now') {
+        // Fire and forget - download will happen in background
+        aiModelManager.initializeAI().catch(err => {
+          console.error('AI model download failed:', err);
+          // Gracefully fallback to templates - no user interruption
+        });
+      }
+
       onComplete(finalSettings);
     }
   };
@@ -114,15 +141,14 @@ export default function FirstTimeSetup({ onComplete, username: initialUsername, 
               <h2 className="text-2xl font-bold text-white mb-2">Performance Monitoring</h2>
               <p className="text-white/60">Track your app's performance</p>
             </div>
-            
+
             <div className="space-y-4">
               <button
                 onClick={() => updateSetting('showFPS', !settings.showFPS)}
-                className={`w-full p-6 rounded-xl border-2 transition-all ${
-                  settings.showFPS
-                    ? 'border-cyan-400 bg-cyan-400/10'
-                    : 'border-white/10 bg-white/5 hover:bg-white/10'
-                }`}
+                className={`w-full p-6 rounded-xl border-2 transition-all ${settings.showFPS
+                  ? 'border-cyan-400 bg-cyan-400/10'
+                  : 'border-white/10 bg-white/5 hover:bg-white/10'
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="text-left">
@@ -132,10 +158,10 @@ export default function FirstTimeSetup({ onComplete, username: initialUsername, 
                   {settings.showFPS && <Check className="w-6 h-6 text-cyan-400" />}
                 </div>
               </button>
-              
+
               <p className="text-white/40 text-sm text-center">
-                {settings.showFPS 
-                  ? 'FPS counter will be visible in the corner' 
+                {settings.showFPS
+                  ? 'FPS counter will be visible in the corner'
                   : 'You can enable this later in Settings'}
               </p>
             </div>
@@ -156,7 +182,7 @@ export default function FirstTimeSetup({ onComplete, username: initialUsername, 
               <h2 className="text-2xl font-bold text-white mb-2">Account Setup</h2>
               <p className="text-white/60">Customize your username and password</p>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="text-white/70 text-sm mb-2 block">Username</label>
@@ -171,7 +197,7 @@ export default function FirstTimeSetup({ onComplete, username: initialUsername, 
                   <p className="text-red-400 text-xs mt-1">Username must be at least 3 characters</p>
                 )}
               </div>
-              
+
               <div>
                 <label className="text-white/70 text-sm mb-2 block">Password</label>
                 <Input
@@ -185,7 +211,7 @@ export default function FirstTimeSetup({ onComplete, username: initialUsername, 
                   <p className="text-red-400 text-xs mt-1">Password must be at least 5 characters</p>
                 )}
               </div>
-              
+
               <div>
                 <label className="text-white/70 text-sm mb-2 block">Confirm Password</label>
                 <Input
@@ -217,17 +243,16 @@ export default function FirstTimeSetup({ onComplete, username: initialUsername, 
               <h2 className="text-2xl font-bold text-white mb-2">Dashboard Colors</h2>
               <p className="text-white/60">Choose your favorite color theme</p>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-3">
               {COLOR_PRESETS.map((preset) => (
                 <button
                   key={preset.id}
                   onClick={() => updateSetting('colorPreset', preset.id)}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    settings.colorPreset === preset.id
-                      ? 'border-cyan-400 ring-2 ring-cyan-400/20'
-                      : 'border-white/10 hover:border-white/20'
-                  }`}
+                  className={`p-4 rounded-xl border-2 transition-all ${settings.colorPreset === preset.id
+                    ? 'border-cyan-400 ring-2 ring-cyan-400/20'
+                    : 'border-white/10 hover:border-white/20'
+                    }`}
                   style={{ background: preset.background }}
                 >
                   <div className="flex items-center justify-between mb-2">
@@ -237,11 +262,11 @@ export default function FirstTimeSetup({ onComplete, username: initialUsername, 
                     )}
                   </div>
                   <div className="flex gap-2">
-                    <div 
+                    <div
                       className="w-6 h-6 rounded-full border border-white/20"
                       style={{ background: preset.accent }}
                     />
-                    <div 
+                    <div
                       className="w-6 h-6 rounded-full border border-white/20"
                       style={{ background: preset.text }}
                     />
@@ -262,11 +287,102 @@ export default function FirstTimeSetup({ onComplete, username: initialUsername, 
             className="space-y-6"
           >
             <div className="text-center mb-8">
+              <Brain className="w-16 h-16 mx-auto mb-4 text-cyan-400" />
+              <h2 className="text-2xl font-bold text-white mb-2">AI Features</h2>
+              <p className="text-white/60">Enable intelligent text generation (~1.5GB)</p>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => updateSetting('aiDownloadChoice', 'now')}
+                className={`w-full p-6 rounded-xl border-2 text-left transition-all ${settings.aiDownloadChoice === 'now'
+                  ? 'border-cyan-400 bg-cyan-400/10'
+                  : 'border-white/10 bg-white/5 hover:bg-white/10'
+                  }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Download className="w-5 h-5 text-cyan-400" />
+                      <h3 className="text-white font-medium text-lg">Download Now</h3>
+                    </div>
+                    <p className="text-white/60 text-sm">Start downloading in the background. AI features will be ready soon.</p>
+                    <p className="text-cyan-400/70 text-xs mt-2">Recommended for best experience</p>
+                  </div>
+                  {settings.aiDownloadChoice === 'now' && (
+                    <Check className="w-6 h-6 text-cyan-400 flex-shrink-0" />
+                  )}
+                </div>
+              </button>
+
+              <button
+                onClick={() => updateSetting('aiDownloadChoice', 'later')}
+                className={`w-full p-6 rounded-xl border-2 text-left transition-all ${settings.aiDownloadChoice === 'later'
+                  ? 'border-cyan-400 bg-cyan-400/10'
+                  : 'border-white/10 bg-white/5 hover:bg-white/10'
+                  }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Activity className="w-5 h-5 text-yellow-400" />
+                      <h3 className="text-white font-medium text-lg">Download Later</h3>
+                    </div>
+                    <p className="text-white/60 text-sm">Use template responses for now. Download when ready in Settings.</p>
+                    <p className="text-white/40 text-xs mt-2">Basic AI will still work</p>
+                  </div>
+                  {settings.aiDownloadChoice === 'later' && (
+                    <Check className="w-6 h-6 text-cyan-400 flex-shrink-0" />
+                  )}
+                </div>
+              </button>
+
+              <button
+                onClick={() => updateSetting('aiDownloadChoice', 'never')}
+                className={`w-full p-6 rounded-xl border-2 text-left transition-all ${settings.aiDownloadChoice === 'never'
+                  ? 'border-cyan-400 bg-cyan-400/10'
+                  : 'border-white/10 bg-white/5 hover:bg-white/10'
+                  }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <X className="w-5 h-5 text-red-400" />
+                      <h3 className="text-white font-medium text-lg">Never Download</h3>
+                    </div>
+                    <p className="text-white/60 text-sm">Stick with template responses only. Saves disk space.</p>
+                    <p className="text-white/40 text-xs mt-2">Templates only - no natural language generation</p>
+                  </div>
+                  {settings.aiDownloadChoice === 'never' && (
+                    <Check className="w-6 h-6 text-cyan-400 flex-shrink-0" />
+                  )}
+                </div>
+              </button>
+            </div>
+
+            <div className="bg-yellow-400/10 border border-yellow-400/20 rounded-lg p-4 mt-4">
+              <p className="text-yellow-400 text-sm">
+                ⚠️ <strong>Note:</strong> Model downloads only once and caches locally. Please keep this tab open during download.
+              </p>
+            </div>
+          </motion.div>
+        );
+
+      case 5:
+        return (
+          <motion.div
+            key="step5"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+          >
+            <div className="text-center mb-8">
               <Sparkles className="w-16 h-16 mx-auto mb-4 text-cyan-400" />
-              <h2 className="text-2xl font-bold text-white mb-2">AI Settings</h2>
+              <h2 className="text-2xl font-bold text-white mb-2">AI Personality</h2>
               <p className="text-white/60">How should your AI assistant communicate?</p>
             </div>
-            
+
             <div className="space-y-3">
               {[
                 { value: 'adaptive', label: '🔄 Adaptive', desc: 'Mirrors your style' },
@@ -279,11 +395,10 @@ export default function FirstTimeSetup({ onComplete, username: initialUsername, 
                 <button
                   key={option.value}
                   onClick={() => updateSetting('aiPersonality', option.value)}
-                  className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                    settings.aiPersonality === option.value
-                      ? 'border-cyan-400 bg-cyan-400/10'
-                      : 'border-white/10 bg-white/5 hover:bg-white/10'
-                  }`}
+                  className={`w-full p-4 rounded-xl border-2 text-left transition-all ${settings.aiPersonality === option.value
+                    ? 'border-cyan-400 bg-cyan-400/10'
+                    : 'border-white/10 bg-white/5 hover:bg-white/10'
+                    }`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -296,6 +411,79 @@ export default function FirstTimeSetup({ onComplete, username: initialUsername, 
                   </div>
                 </button>
               ))}
+            </div>
+          </motion.div>
+        );
+
+      case 6:
+        return (
+          <motion.div
+            key="step6"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+          >
+            <div className="text-center mb-8">
+              <Brain className="w-16 h-16 mx-auto mb-4 text-cyan-400" />
+              <h2 className="text-2xl font-bold text-white mb-2">AI Response Style</h2>
+              <p className="text-white/60">Choose how detailed you want responses to be</p>
+            </div>
+
+            {/* Tier Selection */}
+            <div className="space-y-3">
+              {Object.entries(TRANSFORMER_TIERS).map(([key, tier]) => (
+                <motion.button
+                  key={key}
+                  onClick={() => updateSetting('transformerTier', key)}
+                  whileHover={{ scale: 1.02 }}
+                  className={`w-full p-5 rounded-xl border-2 text-left transition-all ${
+                    settings.transformerTier === key
+                      ? 'border-cyan-400 bg-cyan-400/10'
+                      : 'border-white/10 bg-white/5 hover:bg-white/10'
+                  }`}
+                  style={{
+                    borderColor: settings.transformerTier === key ? tier.accent : undefined,
+                    backgroundColor: settings.transformerTier === key ? `${tier.accent}15` : undefined,
+                  }}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start gap-3">
+                      <span className="text-3xl">{tier.emoji}</span>
+                      <div>
+                        <h3 className="text-white font-bold text-lg">{tier.name}</h3>
+                        <p className="text-white/60 text-sm">{tier.description}</p>
+                      </div>
+                    </div>
+                    {settings.transformerTier === key && (
+                      <Check className="w-6 h-6 text-cyan-400 flex-shrink-0" />
+                    )}
+                  </div>
+                  
+                  <div className="ml-11 space-y-2">
+                    <div className="flex items-center gap-2 text-xs text-white/70">
+                      <span className="text-white/50">⚡ Speed:</span>
+                      <span className="text-white/90">{tier.speed}</span>
+                    </div>
+                    <div className="text-xs text-white/60">
+                      <p className="text-white/50 mb-1">📝 Best for:</p>
+                      <p>{tier.use_cases.join(', ')}</p>
+                    </div>
+                    {tier.examples && (
+                      <div className="text-xs text-white/50 mt-2 p-2 bg-black/20 rounded">
+                        <p className="font-semibold mb-1">Example:</p>
+                        <p className="text-cyan-300">{tier.examples[0].question} → {tier.examples[0].answer}</p>
+                      </div>
+                    )}
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mt-4">
+              <p className="text-blue-400 text-sm">
+                💡 <strong>Balanced (Recommended):</strong> Automatically detects question complexity. Simple questions get instant answers, complex ones get full explanations.
+              </p>
             </div>
           </motion.div>
         );
@@ -317,15 +505,14 @@ export default function FirstTimeSetup({ onComplete, username: initialUsername, 
           <div className="p-6 border-b border-white/10">
             <h1 className="text-3xl font-bold text-white mb-2">Welcome to Nexus</h1>
             <p className="text-white/60">Let's customize your experience</p>
-            
+
             {/* Progress Bar */}
             <div className="mt-4 flex gap-2">
               {Array.from({ length: totalSteps }).map((_, i) => (
                 <div
                   key={i}
-                  className={`flex-1 h-1 rounded-full transition-all ${
-                    i < step ? 'bg-cyan-400' : 'bg-white/10'
-                  }`}
+                  className={`flex-1 h-1 rounded-full transition-all ${i < step ? 'bg-cyan-400' : 'bg-white/10'
+                    }`}
                 />
               ))}
             </div>

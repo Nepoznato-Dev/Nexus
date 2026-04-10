@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#fff"/>
+  <rect x="40" y="40" width="30" height="30" fill="#6CA965"/>
+  <rect x="70" y="40" width="30" height="30" fill="#C9B458"/>
+  <rect x="100" y="40" width="30" height="30" fill="#6CA965"/>
+  <rect x="130" y="40" width="30" height="30" fill="#C9B458"/>
+  <rect x="40" y="70" width="30" height="30" fill="#C9B458"/>
+  <rect x="70" y="70" width="30" height="30" fill="#6CA965"/>
+  <rect x="100" y="70" width="30" height="30" fill="#C9B458"/>
+  <rect x="130" y="70" width="30" height="30" fill="#6CA965"/>
+  <text x="100" y="150" font-family="Arial Black, sans-serif" font-size="40" font-weight="bold" text-anchor="middle">WORDLE</text>
+</svg>

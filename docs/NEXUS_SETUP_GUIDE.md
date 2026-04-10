@@ -8,7 +8,7 @@
 
 | System | Purpose | Quick Start |
 |--------|---------|------------|
-| **I.R.I.S** | AI-powered Minecraft mod management | See [IRIS_FEATURES.md](IRIS_FEATURES.md) |
+| **RAZONET** | AI-powered Minecraft mod management | See [IRIS_FEATURES.md](IRIS_FEATURES.md) |
 | **Games Library** | 80+ open-source games catalog | 50,000+ games indexed in `/Games` |
 | **Audio System** | Background music & sound integration | Configured in `src/Components/Music` |
 | **Study Tools** | Flashcards, notes, Pomodoro timer | See `src/Components/Study` |
@@ -19,12 +19,14 @@
 ## 🚀 Installation & Development
 
 ### Prerequisites
+
 ```bash
 Node.js 16+ (LTS recommended)
 npm 8+
 ```
 
 ### Quick Setup (5 minutes)
+
 ```bash
 # Install dependencies
 npm install
@@ -46,7 +48,7 @@ npm run build
 ```
 src/
 ├── Components/
-│   ├── I.R.I.S/                    # AI mod management system (18 modules)
+│   ├── RAZONET/                    # AI mod management system (18 modules)
 │   ├── Games/                       # Game library & mod profiles
 │   ├── Study/                       # Educational tools
 │   ├── Music/                       # Audio system
@@ -64,16 +66,18 @@ package.json                         # Dependencies & scripts
 
 ---
 
-## 🎮 I.R.I.S System (Minecraft Mod Intelligence)
+## 🎮 RAZONET System (Minecraft Mod Intelligence)
 
-**What is I.R.I.S?**  
+**What is RAZONET?**  
 An intelligent AI system that helps students safely manage Minecraft mods with:
+
 - Crash analysis & prevention
 - Dependency resolution
 - Performance optimization
 - Personalized recommendations
 
 **18 Core Modules:**
+
 1. `aiIntegration.js` - Google Gemini AI integration
 2. `aiMemorySystem.js` - IndexedDB-backed conversation memory
 3. `aiProactiveSuggestions.js` - Anticipatory recommendations
@@ -81,7 +85,7 @@ An intelligent AI system that helps students safely manage Minecraft mods with:
 5. `irisUpdateChecker.js` - Mod version updates
 6. `irisModResolver.js` - Dependency resolution + risk analysis
 7. `irisRecommendations.js` - Shader/resource pack suggestions
-8. + 11 more specialized modules
+8. - 11 more specialized modules
 
 **See**: [`IRIS_FEATURES.md`](IRIS_FEATURES.md) for complete feature list
 
@@ -89,17 +93,20 @@ An intelligent AI system that helps students safely manage Minecraft mods with:
 
 ## 🎯 Phase 2 (2.0.0 Beta) - New Features
 
-**Outcome-Aware Intelligence**: IRIS learns from your actual gameplay
+**Outcome-Aware Intelligence**: RAZONET learns from your actual gameplay
+
 - "Did this setup work?" feedback dialog
 - FPS tracking before/after
 - Crash frequency per mod combo stored locally
 
 **Predictive Crash Prevention**: Warns before launch
+
 - "High risk: This combo crashed 73% of the time"
 - Pre-launch compatibility check
 - Suggest auto-disable unsafe mods
 
 **Personal Failure Memory** (Opt-In): Your personal learning curve
+
 - "On your PC, shaders + [X] always crash"
 - Adaptive warnings tailored to your patterns
 - 100% local, no tracking
@@ -111,6 +118,7 @@ An intelligent AI system that helps students safely manage Minecraft mods with:
 ## 🕹️ Games Library
 
 **80+ Open-Source Games** available in the Games section:
+
 - Portal 2D, Pacman, Snake, Chess, etc.
 - Fully playable in-browser
 - No external dependencies
@@ -123,6 +131,7 @@ An intelligent AI system that helps students safely manage Minecraft mods with:
 ## 🎵 Audio System
 
 **Background Music Integration:**
+
 - Configurable per-page music
 - Volume controls
 - Fade in/out transitions
@@ -134,6 +143,7 @@ An intelligent AI system that helps students safely manage Minecraft mods with:
 ## 📚 Study Tools
 
 **Educational Features:**
+
 - **Flashcard Deck**: Create/study card sets
 - **Notes Panel**: Organize study notes
 - **Pomodoro Timer**: 25-min focus cycles
@@ -148,6 +158,7 @@ An intelligent AI system that helps students safely manage Minecraft mods with:
 ## 🔧 Configuration & Data
 
 ### localStorage Keys (Client-Side Persistence)
+
 ```javascript
 nexus_safe_mode              // Safe mode enabled
 nexus_last_known_good        // Last working mod config
@@ -157,6 +168,7 @@ iris_personal_failures       // Personal failure patterns (Phase 2)
 ```
 
 ### IndexedDB Stores (Long-Term Memory)
+
 ```javascript
 iris_conversations           // AI conversation history
 iris_user_profile           // User expertise level, preferences
@@ -171,13 +183,13 @@ iris_crash_patterns         // Historical crash analysis (Phase 2)
 ### Common Issues
 
 **Issue**: Mods not loading  
-**Solution**: Check `ModManager` → `I.R.I.S` tab → `Run Performance Scan` → check crash log
+**Solution**: Check `ModManager` -> `RAZONET` tab -> `Run Performance Scan` -> check crash log
 
 **Issue**: Performance drops  
-**Solution**: I.R.I.S → `Performance Scan` → identify heavy mods → try `Safe Mode`
+**Solution**: RAZONET -> `Performance Scan` -> identify heavy mods -> try `Safe Mode`
 
 **Issue**: Lost mod configuration  
-**Solution**: I.R.I.S → `Restore Last Known Good` (automatic backup)
+**Solution**: RAZONET -> `Restore Last Known Good` (automatic backup)
 
 **Issue**: Out of disk space  
 **Solution**: See [CLEANUP_GUIDE.md](#cleanup)
@@ -187,12 +199,14 @@ iris_crash_patterns         // Historical crash analysis (Phase 2)
 ## 🔐 Privacy & Safety
 
 **Data Storage:**
+
 - ✅ All data stored **locally** in browser (localStorage + IndexedDB)
 - ✅ No tracking, no analytics, no cloud sync
 - ✅ Optional: Google Gemini API calls (AI fallback only)
 - ✅ Safe mode protection: prevents corrupting configs
 
 **Student Safety:**
+
 - School-friendly (no ads, no trackers)
 - Works offline (except AI chat)
 - Safe mod recommendations
@@ -203,8 +217,9 @@ iris_crash_patterns         // Historical crash analysis (Phase 2)
 ## 🤝 Contributing
 
 **Bug Reports**: File issues with:
+
 1. Steps to reproduce
-2. Error message (from I.R.I.S crash analyzer)
+2. Error message (from RAZONET crash analyzer)
 3. Browser & OS details
 
 **Feature Requests**: Ideas always welcome!
@@ -214,18 +229,20 @@ iris_crash_patterns         // Historical crash analysis (Phase 2)
 ## 📦 Build & Deployment
 
 ### Development Build (with hot reload)
+
 ```bash
 npm start
 ```
 
 ### Production Build
+
 ```bash
 npm run build
 ```
 
 Output: `/build` folder (optimized, minified, tree-shaken)
 
-**Size**: ~3MB gzipped (includes all 200+ IRIS features)
+**Size**: ~3MB gzipped (includes all 200+ RAZONET features)
 
 ---
 
@@ -237,7 +254,7 @@ See [COPYRIGHT.md](COPYRIGHT.md)
 
 ## 🔗 Quick Links
 
-- **I.R.I.S Features**: [IRIS_FEATURES.md](IRIS_FEATURES.md)
+- **RAZONET Features**: [IRIS_FEATURES.md](IRIS_FEATURES.md)
 - **Phase 2 Guide**: [IRIS_2.0.0_PHASE2_GUIDE.md](IRIS_2.0.0_PHASE2_GUIDE.md)
 - **Keyboard Shortcuts**: [KEYBOARD_SHORTCUTS.md](KEYBOARD_SHORTCUTS.md)
 - **License**: [COPYRIGHT.md](COPYRIGHT.md)

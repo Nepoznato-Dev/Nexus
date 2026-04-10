@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#1a1a1a"/>
+  <path d="M 100 50 L 150 100 L 100 150 L 50 100 Z" fill="#FF0000"/>
+  <circle cx="100" cy="100" r="30" fill="#fff"/>
+  <text x="100" y="115" font-family="Arial Black, sans-serif" font-size="30" font-weight="bold" text-anchor="middle" fill="#FF0000">UK</text>
+</svg>

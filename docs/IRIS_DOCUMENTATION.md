@@ -1,8 +1,8 @@
-# I.R.I.S - Intelligent Research & Information System
+# RAZONET - Intelligent Research & Information System
 
-## 🤖 What is I.R.I.S?
+## 🤖 What is RAZONET?
 
-**I.R.I.S** (Intelligent Research & Information System) is Nexus's advanced AI assistant with **autonomous search capabilities**. Unlike traditional AI assistants that only respond based on training data, I.R.I.S can:
+**RAZONET** (Intelligent Research & Information System) is Nexus's advanced AI assistant with **autonomous search capabilities**. Unlike traditional AI assistants that only respond based on training data, RAZONET can:
 
 - ⚡ **Autonomously search the web** for real-time information
 - 🌐 **Fetch current data** from multiple sources  
@@ -13,9 +13,11 @@
 ## 🚀 Features
 
 ### 1. **Autonomous Search Decision Making**
-I.R.I.S automatically detects when a query requires real-time information:
+
+RAZONET automatically detects when a query requires real-time information:
 
 **Triggers autonomous search for:**
+
 - Current events & news ("What's happening today?")
 - Weather information ("Weather in London?")
 - Real-time data ("Stock price of Tesla?")
@@ -24,6 +26,7 @@ I.R.I.S automatically detects when a query requires real-time information:
 - Live data ("What time is it in Tokyo?")
 
 **Uses cached knowledge for:**
+
 - General concepts ("What is photosynthesis?")
 - Study help ("Explain calculus")
 - Code assistance ("How to use React hooks?")
@@ -31,9 +34,10 @@ I.R.I.S automatically detects when a query requires real-time information:
 
 ### 2. **Multiple Search Sources**
 
-I.R.I.S queries multiple free APIs simultaneously:
+RAZONET queries multiple free APIs simultaneously:
 
 #### Wikipedia API (Free, No Key Required)
+
 ``` javascript
 - Best for: General knowledge, historical facts, concepts
 - Speed: Fast
@@ -41,6 +45,7 @@ I.R.I.S queries multiple free APIs simultaneously:
 ```
 
 #### DuckDuckGo Instant Answer API (Free, No Key Required)
+
 ```javascript
 - Best for: Quick facts, definitions, calculations
 - Speed: Very Fast  
@@ -48,6 +53,7 @@ I.R.I.S queries multiple free APIs simultaneously:
 ```
 
 #### SerpAPI (Optional, Requires API Key)
+
 ```javascript
 - Best for: Recent news, detailed search results
 - Speed: Fast
@@ -63,7 +69,7 @@ I.R.I.S queries multiple free APIs simultaneously:
 
 ### 4. **Personality-Aware Responses**
 
-I.R.I.S formats search results based on the user's personality preference:
+RAZONET formats search results based on the user's personality preference:
 
 - **Adaptive**: Mirrors user's style
 - **Kind**: Encouraging and friendly ("Great news! I found something helpful!")
@@ -78,7 +84,7 @@ I.R.I.S formats search results based on the user's personality preference:
 
 ```
 User: "What's the weather in Paris?"
-I.R.I.S: [Automatically searches] 
+RAZONET: [Automatically searches] 
         "I found this: Weather in Paris
         Current: 18°C / 64°F, Partly Cloudy
         Humidity: 65%
@@ -89,7 +95,7 @@ I.R.I.S: [Automatically searches]
 
 ```
 User: "Who won the latest Nobel Prize?"
-I.R.I.S: [Automatically searches Wikipedia/DuckDuckGo]
+RAZONET: [Automatically searches Wikipedia/DuckDuckGo]
         "I found this: Nobel Prize 2025
         [Recent winner information]
         🔗 Read more: [link]
@@ -100,7 +106,8 @@ I.R.I.S: [Automatically searches Wikipedia/DuckDuckGo]
 
 ### Basic Setup (No API Keys Required)
 
-I.R.I.S works out-of-the-box with free APIs:
+RAZONET works out-of-the-box with free APIs:
+
 - Wikipedia  
 - DuckDuckGo
 - Wttr.in (Weather)
@@ -114,11 +121,12 @@ For access to Google search results and more recent news:
 
 1. Go to **Settings > AI Tools**
 2. Add **SerpAPI Key** field (optional enhancement)
-3. Get API key from **https://serpapi.com** (free tier available)
+3. Get API key from **<https://serpapi.com>** (free tier available)
 4. Paste key in settings
 5. Save!
 
-With SerpAPI, I.R.I.S gains access to:
+With SerpAPI, RAZONET gains access to:
+
 - Google search results
 - Featured snippets
 - Knowledge graphs
@@ -132,7 +140,7 @@ With SerpAPI, I.R.I.S gains access to:
 ```javascript
 User Query
     ↓
-I.R.I.S Decision Engine
+RAZONET Decision Engine
     ↓
 ├─→ Needs Search? ──→ Search Multiple sources in parallel
 │   │                      ↓
@@ -157,6 +165,7 @@ I.R.I.S Decision Engine
 ### API Integration Points
 
 **AIHelper** (`src/Components/Study/AIHelper.js`):
+
 ```javascript
 import { generateSearchEnhancedResponse } from '../AI/IRISSearch.js';
 
@@ -169,6 +178,7 @@ const searchResult = await generateSearchEnhancedResponse(
 ```
 
 **DashboardAI** (`src/Components/AI/DashboardAI.js`):
+
 ```javascript
 import { generateSearchEnhancedResponse, needsExternalSearch } from './IRISSearch.js';
 
@@ -183,17 +193,20 @@ if (needsExternalSearch(userMessage)) {
 ## 🎯 Use Cases
 
 ### For Students
+
 - "What's the latest discovery in physics?"
 - "Weather forecast for tomorrow?"
 - "Who invented the transistor?"
 - "Population of China?"
 
 ### For Developers
+
 - "Latest version of Next.js?"
 - "React 19 release date?"
 - "TypeScript documentation?"
 
 ### For General Users
+
 - "Time in New York?"
 - "What's trending today?"
 - "Define 'ephemeral'"
@@ -217,16 +230,19 @@ if (needsExternalSearch(userMessage)) {
 ## 🐛 Troubleshooting
 
 ### "Search Failed"
+
 - Check internet connection
-- I.R.I.S will fall back to cached knowledge
+- RAZONET will fall back to cached knowledge
 - Still provides helpful template response
 
 ### "No Results Found"
+
 - Query may be too specific
 - Try rephrasing
-- I.R.I.S will offer to explain based on training
+- RAZONET will offer to explain based on training
 
 ### Slow Search
+
 - Normal for first search (no cache)
 - Subsequent similar queries are instant
 - Consider adding SerpAPI key for faster results
@@ -300,9 +316,9 @@ Planned for v2.0.0:
 ## 📚 Related Documentation
 
 - [AI Assistant Guide](./AI_ASSISTANT_GUIDE.md)
-- [API Setup Wizard](../API-SYSTEM-UPDATE.md)
+- [API Setup Wizard](./development/API-SYSTEM-UPDATE.md)
 - [Settings Configuration](./SETTINGS.md)
 
 ---
 
-**I.R.I.S** - Making AI assistance truly intelligent, one search at a time. 🌟
+**RAZONET** - Making AI assistance truly intelligent, one search at a time. 🌟

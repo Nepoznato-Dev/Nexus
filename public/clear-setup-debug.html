@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Nexus Debug - Clear Setup Flag</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #1a1a2e;
+            color: #0ff;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #0a0a0f;
+            padding: 20px;
+            border: 1px solid #0ff;
+            border-radius: 8px;
+        }
+
+        button {
+            background: #0ff;
+            color: #000;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        button:hover {
+            background: #00ffff99;
+        }
+
+        .output {
+            background: #0a0a0f;
+            border: 1px solid #0ff;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .success {
+            color: #0f0;
+        }
+
+        .error {
+            color: #f00;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔧 Nexus Debug Console</h1>
+        <p>This tool helps clear the setup flag and fix app state issues.</p>
+
+        <h2>Actions:</h2>
+        <button onclick="clearSetupFlag()">🔄 Clear Setup Complete Flag</button>
+        <button onclick="clearAllData()">🗑️ Clear ALL Data (Factory Reset)</button>
+        <button onclick="checkDbStatus()">📊 Check Database Status</button>
+        <button onclick="location.reload()">🔁 Reload App</button>
+
+        <div class="output" id="output">Waiting for action...</div>
+    </div>
+
+    <script>
+        const log = (...args) => {
+            const output = document.getElementById('output');
+            const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : a).join(' ');
+            output.textContent += '\n' + new Date().toLocaleTimeString() + ' > ' + msg;
+            output.scrollTop = output.scrollHeight;
+        };
+
+        async function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('NexusDB', 1);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('settings')) {
+                        db.createObjectStore('settings', { keyPath: 'id' });
+                    }
+                };
+            });
+        }
+
+        async function clearSetupFlag() {
+            try {
+                log('📌 Clearing setupComplete flag...');
+                const db = await initDB();
+
+                // Read current settings
+                const tx = db.transaction(['settings'], 'readwrite');
+                const store = tx.objectStore('settings');
+
+                // Delete the setupComplete entry
+                const deleteReq = store.delete('setupComplete');
+
+                await new Promise((resolve, reject) => {
+                    deleteReq.onsuccess = resolve;
+                    deleteReq.onerror = reject;
+                });
+
+                log('<span class="success">✅ SUCCESS: Setup flag cleared!</span>');
+                log('Reload the app to see First Time Setup wizard.');
+
+            } catch (err) {
+                log('<span class="error">❌ ERROR:', err.message, '</span>');
+            }
+        }
+
+        async function clearAllData() {
+            if (!confirm('⚠️ WARNING: This will delete ALL app data! Continue?')) {
+                log('Cancelled.');
+                return;
+            }
+
+            try {
+                log('🗑️ Clearing all data...');
+                const db = await initDB();
+                const stores = ['user', 'settings', 'favorites', 'aiHistory', 'widgets'];
+
+                for (const storeName of stores) {
+                    const tx = db.transaction([storeName], 'readwrite');
+                    const store = tx.objectStore(storeName);
+
+                    await new Promise((resolve, reject) => {
+                        const req = store.clear();
+                        req.onsuccess = () => {
+                            log('✓ Cleared:', storeName);
+                            resolve();
+                        };
+                        req.onerror = reject;
+                    });
+                }
+
+                // Also clear localStorage
+                localStorage.clear();
+                sessionStorage.clear();
+
+                log('<span class="success">✅ SUCCESS: All data cleared!</span>');
+                log('Reload to start fresh.');
+
+            } catch (err) {
+                log('<span class="error">❌ ERROR:', err.message, '</span>');
+            }
+        }
+
+        async function checkDbStatus() {
+            try {
+                log('📊 Checking database...');
+                const db = await initDB();
+
+                const tx = db.transaction(['settings'], 'readonly');
+                const store = tx.objectStore('settings');
+                const allReq = store.getAll();
+
+                const all = await new Promise((resolve, reject) => {
+                    allReq.onsuccess = () => resolve(allReq.result);
+                    allReq.onerror = reject;
+                });
+
+                log('Settings store contains:', all.length, 'entries');
+                all.forEach(entry => {
+                    log('  - ID:', entry.id, '| Keys:', Object.keys(entry).join(', '));
+                });
+
+                const setupReq = store.get('setupComplete');
+                const setupFlag = await new Promise((resolve, reject) => {
+                    setupReq.onsuccess = () => resolve(setupReq.result);
+                    setupReq.onerror = reject;
+                });
+
+                if (setupFlag) {
+                    log('<span class="error">setupComplete = true (Setup wizard will NOT show)</span>');
+                } else {
+                    log('<span class="success">setupComplete is NOT SET (Setup wizard will show)</span>');
+                }
+
+            } catch (err) {
+                log('<span class="error">❌ ERROR:', err.message, '</span>');
+            }
+        }
+
+        // Auto-check on load
+        window.addEventListener('load', checkDbStatus);
+    </script>
+</body>
+
+</html>

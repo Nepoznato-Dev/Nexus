@@ -6,19 +6,39 @@ let db = null;
 
 const initDB = () => {
   return new Promise((resolve, reject) => {
-    if (db) return resolve(db);
-    
+    // Check if cached db is still open/valid
+    if (db) {
+      try {
+        // Try to access the database to verify it's still open
+        // If the db is closed, this will throw an error
+        const testTx = db.transaction(['settings'], 'readonly');
+        testTx.abort(); // Immediately abort the test transaction
+        return resolve(db);
+      } catch (e) {
+        // Database is closed or invalid, reset and reinitialize
+        console.warn('[IndexedDB] Cached connection invalid, reinitializing:', e);
+        db = null;
+      }
+    }
+
     const request = indexedDB.open(DB_NAME, DB_VERSION);
-    
+
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
       db = request.result;
+
+      // Listen for unexpected closes
+      db.onclose = () => {
+        console.warn('[IndexedDB] Database connection closed unexpectedly');
+        db = null;
+      };
+
       resolve(db);
     };
-    
+
     request.onupgradeneeded = (event) => {
       const database = event.target.result;
-      
+
       if (!database.objectStoreNames.contains('user')) {
         database.createObjectStore('user', { keyPath: 'id' });
       }
@@ -80,7 +100,7 @@ export const storage = {
   async init() {
     return initDB();
   },
-  
+
   async saveUser(username, accountCode) {
     const db = await initDB();
     const userData = { username, createdAt: new Date().toISOString(), accessCode: accountCode };
@@ -93,7 +113,7 @@ export const storage = {
       request.onerror = () => reject(request.error);
     });
   },
-  
+
   async loadUser(accountCode) {
     const db = await initDB();
     return new Promise((resolve, reject) => {
@@ -168,28 +188,28 @@ export const storage = {
 
   getUserRole(accessCode) {
     const roles = this.getRoleData();
-    
+
     // Check owner
     if (accessCode === roles.owner) {
       return { role: 'owner', verified: true, banned: false, approved: true };
     }
-    
+
     // Check admin
     if (accessCode === roles.admin) {
       return { role: 'admin', verified: true, banned: false, approved: true };
     }
-    
+
     // Check registered users
     const user = roles.users.find(u => u.code === accessCode);
     if (user) {
-      return { 
-        role: user.role || 'verified', 
-        verified: user.verified || false, 
+      return {
+        role: user.role || 'verified',
+        verified: user.verified || false,
         banned: user.banned || false,
         approved: user.approved !== undefined ? user.approved : false
       };
     }
-    
+
     // Default guest
     return { role: 'guest', verified: false, banned: false, approved: false };
   },
@@ -197,13 +217,13 @@ export const storage = {
   saveUserRole(accessCode, roleData) {
     const roles = this.getRoleData();
     const existingIndex = roles.users.findIndex(u => u.code === accessCode);
-    
+
     if (existingIndex >= 0) {
       roles.users[existingIndex] = { ...roles.users[existingIndex], ...roleData };
     } else {
       roles.users.push({ code: accessCode, ...roleData });
     }
-    
+
     this.saveRoleData(roles);
   },
 
@@ -240,7 +260,7 @@ export const storage = {
     const roles = this.getRoleData();
     const user = roles.users.find(u => u.code === accessCode);
     if (!user || !user.banned) return false;
-    
+
     // Check if ban has expired
     if (user.banExpires && Date.now() > user.banExpires) {
       // Auto-unban
@@ -249,7 +269,7 @@ export const storage = {
       this.saveRoleData(roles);
       return false;
     }
-    
+
     return true;
   },
 
@@ -257,7 +277,7 @@ export const storage = {
     const roles = this.getRoleData();
     const user = roles.users.find(u => u.code === accessCode);
     if (!user || !user.banned) return null;
-    
+
     // Check if expired
     if (user.banExpires && Date.now() > user.banExpires) {
       user.banned = false;
@@ -265,7 +285,7 @@ export const storage = {
       this.saveRoleData(roles);
       return null;
     }
-    
+
     return {
       isPermanent: !user.banExpires,
       expiresAt: user.banExpires,
@@ -283,28 +303,28 @@ export const storage = {
     const roles = this.getRoleData();
     const user = roles.users.find(u => u.code === accessCode);
     if (!user) return { warnings: 0, shouldBan: false };
-    
+
     if (!user.violations) {
       user.violations = [];
     }
-    
+
     user.violations.push({
       type: violationType,
       timestamp: Date.now()
     });
-    
+
     // Count recent violations (last 24 hours)
     const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
     const recentViolations = user.violations.filter(v => v.timestamp > oneDayAgo);
-    
+
     // Clean up old violations to prevent array bloat
     user.violations = recentViolations;
-    
+
     const warningCount = recentViolations.length;
     const shouldBan = warningCount >= 3;
-    
+
     this.saveRoleData(roles);
-    
+
     return { warnings: warningCount, shouldBan };
   },
 
@@ -312,7 +332,7 @@ export const storage = {
     const roles = this.getRoleData();
     const user = roles.users.find(u => u.code === accessCode);
     if (!user || !user.violations) return 0;
-    
+
     // Count violations from last 24 hours
     const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
     return user.violations.filter(v => v.timestamp > oneDayAgo).length;
@@ -367,7 +387,7 @@ export const storage = {
     const roleData = this.getUserRole(accessCode);
     return roleData.role === 'moderator';
   },
-  
+
   async saveSettings(settings) {
     const db = await initDB();
     return new Promise((resolve, reject) => {
@@ -378,16 +398,67 @@ export const storage = {
       request.onerror = () => reject(request.error);
     });
   },
-  
+
   async loadSettings() {
-    const db = await initDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['settings'], 'readonly');
-      const store = tx.objectStore('settings');
-      const request = store.get('current');
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error);
-    });
+    try {
+      const db = await initDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(['settings'], 'readonly');
+        const store = tx.objectStore('settings');
+        const request = store.get('current');
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      // If database is closing or unavailable, return null gracefully
+      if (error.name === 'InvalidStateError' || error.message?.includes('closing')) {
+        console.warn('[IndexedDB] Database closing during loadSettings, returning null');
+        return null;
+      }
+      throw error;
+    }
+  },
+
+  async getApiKeys() {
+    try {
+      const settings = await this.loadSettings();
+      if (!settings || !settings.aiTools) {
+        return null;
+      }
+
+      const { apiProvider, apiKey, serpApiKey } = settings.aiTools;
+
+      // Return API keys mapped by provider
+      const keys = {};
+
+      if (apiKey) {
+        if (apiProvider === 'openai') {
+          keys.openai = apiKey;
+        } else if (apiProvider === 'google') {
+          keys.google = apiKey;
+        } else if (apiProvider === 'anthropic') {
+          keys.anthropic = apiKey;
+        } else if (apiKey) {
+          // Fallback: try to detect provider from key format
+          if (apiKey.startsWith('sk-')) {
+            keys.openai = apiKey;
+          } else if (apiKey.startsWith('AI')) {
+            keys.google = apiKey;
+          } else {
+            keys.openai = apiKey; // Default to OpenAI
+          }
+        }
+      }
+
+      if (serpApiKey) {
+        keys.serpapi = serpApiKey;
+      }
+
+      return Object.keys(keys).length > 0 ? keys : null;
+    } catch (error) {
+      console.error('Failed to get API keys:', error);
+      return null;
+    }
   },
 
   async saveBrowserState(browserState) {
@@ -411,7 +482,7 @@ export const storage = {
       request.onerror = () => reject(request.error);
     });
   },
-  
+
   async saveFavorites(favorites) {
     const db = await initDB();
     return new Promise((resolve, reject) => {
@@ -422,7 +493,7 @@ export const storage = {
       request.onerror = () => reject(request.error);
     });
   },
-  
+
   async loadFavorites() {
     const db = await initDB();
     return new Promise((resolve, reject) => {
@@ -433,7 +504,7 @@ export const storage = {
       request.onerror = () => reject(request.error);
     });
   },
-  
+
   async saveAIHistory(message) {
     const db = await initDB();
     return new Promise((resolve, reject) => {
@@ -444,7 +515,7 @@ export const storage = {
       request.onerror = () => reject(request.error);
     });
   },
-  
+
   async loadAIHistory() {
     const db = await initDB();
     return new Promise((resolve, reject) => {
@@ -455,7 +526,7 @@ export const storage = {
       request.onerror = () => reject(request.error);
     });
   },
-  
+
   async clearAIHistory() {
     const db = await initDB();
     return new Promise((resolve, reject) => {
@@ -466,11 +537,17 @@ export const storage = {
       request.onerror = () => reject(request.error);
     });
   },
-  
+
   async deleteAllData() {
     const db = await initDB();
     const stores = ['user', 'settings', 'favorites', 'aiHistory', 'widgets'];
-    return Promise.all(stores.map(storeName => 
+    
+    // Delete specific flags that block setup wizard
+    const tx = db.transaction(['settings'], 'readwrite');
+    const store = tx.objectStore('settings');
+    store.delete('setupComplete');
+    
+    return Promise.all(stores.map(storeName =>
       new Promise((resolve, reject) => {
         const tx = db.transaction([storeName], 'readwrite');
         const store = tx.objectStore(storeName);
@@ -480,12 +557,12 @@ export const storage = {
       })
     ));
   },
-  
+
   async exportData() {
     const db = await initDB();
     const stores = ['user', 'settings', 'favorites', 'aiHistory', 'widgets'];
     const data = {};
-    
+
     for (const storeName of stores) {
       const tx = db.transaction([storeName], 'readonly');
       const store = tx.objectStore(storeName);
@@ -495,22 +572,35 @@ export const storage = {
         request.onerror = () => reject(request.error);
       });
     }
-    
+
     return data;
   }
 };
 
-// Session management
+// Session management with token expiration
+// Regular session: 30 minutes
+// Remember me: 2-3 days (2.5 days = 60 hours)
+const SESSION_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+const REMEMBER_DURATION = 60 * 60 * 60 * 1000; // 60 hours (2.5 days) in milliseconds
+
 export const session = {
   set(accountCode, remember = false, role = 'guest') {
-    const data = JSON.stringify({ code: accountCode, role: role });
+    const now = Date.now();
+    const expiresAt = remember ? now + REMEMBER_DURATION : now + SESSION_DURATION;
+    const data = JSON.stringify({
+      code: accountCode,
+      role: role,
+      timestamp: now,
+      expiresAt: expiresAt,
+      remember: remember
+    });
     if (remember) {
       localStorage.setItem('nexus_session', btoa(data));
     } else {
       sessionStorage.setItem('nexus_session', btoa(data));
     }
   },
-  
+
   get() {
     const persistent = localStorage.getItem('nexus_session');
     const temp = sessionStorage.getItem('nexus_session');
@@ -518,6 +608,15 @@ export const session = {
     if (!encoded) return null;
     try {
       const data = JSON.parse(atob(encoded));
+      const now = Date.now();
+
+      // Check if token has expired
+      if (data.expiresAt && now > data.expiresAt) {
+        // Token expired, clear it
+        this.clear();
+        return null;
+      }
+
       return data.code;
     } catch {
       return null;
@@ -531,12 +630,20 @@ export const session = {
     if (!encoded) return 'guest';
     try {
       const data = JSON.parse(atob(encoded));
+      const now = Date.now();
+
+      // Check if token has expired
+      if (data.expiresAt && now > data.expiresAt) {
+        this.clear();
+        return 'guest';
+      }
+
       return data.role || 'guest';
     } catch {
       return 'guest';
     }
   },
-  
+
   isAdmin() {
     const role = this.getRole();
     return role === 'admin' || role === 'owner';
@@ -554,13 +661,59 @@ export const session = {
   isGuest() {
     return this.getRole() === 'guest';
   },
-  
+
+  // Get session expiration info
+  getExpirationInfo() {
+    const persistent = localStorage.getItem('nexus_session');
+    const temp = sessionStorage.getItem('nexus_session');
+    const encoded = persistent || temp;
+    if (!encoded) return null;
+    try {
+      const data = JSON.parse(atob(encoded));
+      const now = Date.now();
+
+      if (data.expiresAt && now > data.expiresAt) {
+        return { expired: true, timeRemaining: 0 };
+      }
+
+      const timeRemaining = data.expiresAt ? data.expiresAt - now : 0;
+      const minutesRemaining = Math.floor(timeRemaining / 60000);
+
+      return {
+        expired: false,
+        expiresAt: data.expiresAt,
+        timeRemaining: timeRemaining,
+        minutesRemaining: minutesRemaining,
+        remember: data.remember || false,
+        willExpireSoon: minutesRemaining < 5 // Warning if less than 5 minutes
+      };
+    } catch {
+      return null;
+    }
+  },
+
   clear() {
     localStorage.removeItem('nexus_session');
     sessionStorage.removeItem('nexus_session');
   },
-  
+
   isActive() {
     return !!this.get();
+  },
+
+  getUser() {
+    const accountCode = this.get();
+    if (!accountCode) return null;
+
+    // Try to get username from stored user email
+    const username = localStorage.getItem('nexus_user_email') ||
+      sessionStorage.getItem('nexus_user_email') ||
+      'User';
+
+    return {
+      code: accountCode,
+      username: username,
+      role: this.getRole()
+    };
   }
 };

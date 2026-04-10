@@ -1,4 +1,4 @@
-import { classifyReport, isReportLikelyValid } from '../I.R.I.S. — Intelligent Reasoning & Information Synthesizer/irisReportClassifier.js';
+import { classifyReport, isReportLikelyValid } from '../A.L.L.O.Y. - Autonomous Logical Layering & Optimized sYstem/irisReportClassifier.js';
 
 const INBOX_KEY = 'nexus_bug_reports_inbox';
 const REVIEW_KEY = 'nexus_bug_reports_review';

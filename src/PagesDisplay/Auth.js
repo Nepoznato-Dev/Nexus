@@ -14,6 +14,7 @@ export default function Auth() {
   const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,11 +25,11 @@ export default function Auth() {
 
   const isUsernameAppropriate = (name) => {
     const result = moderateContent(name);
-    
+
     // If high severity violations found, record it
     if (result.hasHighSeverity && session.getAccessCode()) {
       const violationResult = storage.recordViolation(session.getAccessCode(), 'inappropriate_username');
-      
+
       // Auto-ban if 3 strikes
       if (violationResult.shouldBan) {
         storage.banUser(session.getAccessCode(), 1440); // 24 hour ban
@@ -36,42 +37,51 @@ export default function Auth() {
         return false;
       }
     }
-    
+
     return result.isClean;
   };
 
   const handleGuestLogin = async () => {
     setLoading(true);
+    setError('');
+    setSuccess('');
     try {
       await storage.init();
       const guestCode = `GUEST_${Date.now()}`;
-      
+
       // Create guest session and mark as approved
       session.set(guestCode, false, 'guest');
       await storage.saveUserRole(guestCode, { role: 'guest', verified: false, approved: true });
-      
+
       await storage.saveSettings({
         theme: { background: '#0a0a0f', accent: '#00f0ff', text: '#ffffff' },
         background: { type: 'soft-particle-drift', particleCount: 50, speed: 0.5, opacity: 0.4, blur: 2 },
-        performance: { targetFPS: 60, ramLimit: 1024, animationScale: 1, widgetLimit: 3, adaptivePerf: true, showFPS: false },
+        performance: { targetFPS: 60, fpsCapEnabled: true, vsyncEnabled: true, ramLimit: 1024, pageRAMSoftLimit: 750, pageRAMHardLimit: 1250, gamesRAMSoftLimit: 1024, gamesRAMHardLimit: 4096, animationScale: 1, widgetLimit: 3, adaptivePerf: true, showFPS: false },
         games: { fullscreenOnLaunch: true, escToClose: true, lazyLoadStrength: 'medium' },
         widgets: { enabled: false, spotify: false, youtube: false, tiktok: false, autoDisable: true },
         aiTools: { enabled: false, autoSuggest: true },
         lowEndMode: false
       });
-      
-      navigate(createPageUrl('Dashboard'));
+
+      // Show success message before navigating
+      setSuccess('✓ Guest mode activated! Loading your dashboard...');
+      setLoading(false);
+
+      // Wait 1 second then navigate (loading screen will take over on Dashboard)
+      setTimeout(() => {
+        navigate(createPageUrl('Dashboard'));
+      }, 1000);
     } catch (err) {
       setError('Failed to start guest mode');
-      console.error(err);
-    } finally {
       setLoading(false);
+      console.error(err);
     }
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
@@ -90,10 +100,10 @@ export default function Auth() {
       }
 
       await storage.init();
-      
+
       // Check role
       const roleData = storage.getUserRole(code);
-      
+
       // Check if banned with expiration check
       if (storage.isBanned(code)) {
         const banInfo = storage.getBanInfo(code);
@@ -131,7 +141,15 @@ export default function Auth() {
         localStorage.setItem('nexus_user_email', userEmail);
         sessionStorage.setItem('nexus_user_email', userEmail);
         session.set(code, remember, 'owner');
-        navigate(createPageUrl('Dashboard'));
+
+        // Show success message before navigating
+        setSuccess('✓ Login successful! Preparing your dashboard...');
+        setLoading(false);
+
+        // Wait 1 second then navigate (loading screen will take over on Dashboard)
+        setTimeout(() => {
+          navigate(createPageUrl('Dashboard'));
+        }, 1000);
         return;
       }
 
@@ -155,13 +173,21 @@ export default function Auth() {
         localStorage.setItem('nexus_user_email', userEmail);
         sessionStorage.setItem('nexus_user_email', userEmail);
         session.set(code, remember, 'admin');
-        navigate(createPageUrl('Dashboard'));
+
+        // Show success message before navigating
+        setSuccess('✓ Login successful! Preparing your dashboard...');
+        setLoading(false);
+
+        // Wait 1 second then navigate (loading screen will take over on Dashboard)
+        setTimeout(() => {
+          navigate(createPageUrl('Dashboard'));
+        }, 1000);
         return;
       }
 
       // Check existing user
       const existingUser = await storage.loadUser(code);
-      
+
       if (existingUser) {
         // Check if account is approved
         if (!storage.isApproved(code)) {
@@ -169,24 +195,32 @@ export default function Auth() {
           setLoading(false);
           return;
         }
-        
+
         // Returning verified user
         session.set(code, remember, roleData.verified ? 'verified' : 'guest');
         // Store user identifier for admin tracking
         const userEmail = existingUser.username || 'User';
         localStorage.setItem('nexus_user_email', userEmail);
         sessionStorage.setItem('nexus_user_email', userEmail);
-        navigate(createPageUrl('Dashboard'));
+
+        // Show success message before navigating
+        setSuccess('✓ Login successful! Preparing your dashboard...');
+        setLoading(false);
+
+        // Wait 1 second then navigate (loading screen will take over on Dashboard)
+        setTimeout(() => {
+          navigate(createPageUrl('Dashboard'));
+        }, 1000);
       } else {
         // New user - check invite code
         const currentInviteCode = storage.getInviteCode();
-        
+
         if (code !== currentInviteCode) {
           setError('Invalid access code. Please ask the admin for the current code or try Guest mode.');
           setLoading(false);
           return;
         }
-        
+
         // Valid invite code - create unverified account
         if (!username.trim()) {
           setError('Please enter a username');
@@ -199,11 +233,11 @@ export default function Auth() {
           return;
         }
         await storage.saveUser(username.trim(), code);
-        
+
         await storage.saveSettings({
           theme: { background: '#0a0a0f', accent: '#00f0ff', text: '#ffffff' },
           background: { type: 'soft-particle-drift', particleCount: 50, speed: 0.5, opacity: 0.4, blur: 2 },
-          performance: { targetFPS: 60, ramLimit: 1024, animationScale: 1, widgetLimit: 3, adaptivePerf: true, showFPS: false },
+          performance: { targetFPS: 60, fpsCapEnabled: true, vsyncEnabled: true, ramLimit: 1024, pageRAMSoftLimit: 750, pageRAMHardLimit: 1250, gamesRAMSoftLimit: 1024, gamesRAMHardLimit: 4096, animationScale: 1, widgetLimit: 3, adaptivePerf: true, showFPS: false },
           games: { fullscreenOnLaunch: true, escToClose: true, lazyLoadStrength: 'medium' },
           widgets: { enabled: false, spotify: false, youtube: false, tiktok: false, autoDisable: true },
           aiTools: { enabled: false, autoSuggest: true },
@@ -221,8 +255,8 @@ export default function Auth() {
         sessionStorage.setItem('nexus_user_email', username);
 
         session.set(code, remember, 'guest');
-        
-        // Redirect to pending approval page
+
+        // Show error message for pending approval (not success)
         setError('Account created! Please wait for admin approval before accessing Nexus.');
         setLoading(false);
         return;
@@ -230,7 +264,6 @@ export default function Auth() {
     } catch (err) {
       setError('Failed to authenticate. Please try again.');
       console.error(err);
-    } finally {
       setLoading(false);
     }
   };
@@ -309,6 +342,23 @@ export default function Auth() {
               >
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{error}</span>
+              </motion.div>
+            )}
+
+            {success && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm flex items-center gap-2"
+              >
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 0.5 }}
+                  className="w-4 h-4 flex-shrink-0"
+                >
+                  ✓
+                </motion.div>
+                <span>{success}</span>
               </motion.div>
             )}
 

@@ -15,7 +15,7 @@ A privacy-first, local-first student hub designed for Chromebooks and personal u
 - 🧮 **Utilities**: Calculator, unit converter, whiteboard, productivity tools
 - 🎮 **Games Hub**: Curated web games
 - 🎵 **Media Tools**: Local music playback and video library
-- 🤖 **I.R.I.S (AI)**: Smart assistant and study helper (local-first design)
+- 🤖 **RAZONET (AI)**: Smart assistant and study helper (local-first design)
 - 🧩 **Minecraft Mod Manager**: Discovery, safety tips, and learning guides
 - 🔄 **Auto-Recovery**: Handles launch failures and retries automatically
 
@@ -28,7 +28,7 @@ npm install
 npm start
 ```
 
-Open http://localhost:3000
+Open <http://localhost:3000>
 
 ### Production Build
 
@@ -73,11 +73,13 @@ The Mod Manager provides a student-friendly way to discover mods, learn safe ins
 ## Troubleshooting
 
 ### Launch Issues
+
 - **Popup blocked**: Allow popups for the site in browser settings
 - **Server not running**: Run `npm start`
 - **Port conflicts**: Ensure port 3000 is free
 
 ### Recovery Options
+
 - **Auto-retry**: Launcher retries failed launches
 - **Manual retry**: Press `R` on the launcher
 - **Refresh**: Press `F5` if the launcher gets stuck

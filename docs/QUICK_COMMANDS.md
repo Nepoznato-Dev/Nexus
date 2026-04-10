@@ -50,8 +50,8 @@ python3 build-scripts/script-name.py
 ## Netlify Deployment
 
 - **Status**: Automatic deployment on `git push`
-- **URL**: https://nexus-community-project.netlify.app/ (or your custom domain)
-- **Dashboard**: https://app.netlify.com
+- **URL**: <https://nexus-community-project.netlify.app/> (or your custom domain)
+- **Dashboard**: <https://app.netlify.com>
 
 ## Project Structure
 

@@ -1,30 +1,54 @@
-import React, { Component, useState, useEffect } from 'react';
+import React, { Component, useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import Layout from './Layout';
-import Landing from './PagesDisplay/Landing.js';
-import Consent from './PagesDisplay/Consent.js';
-import Auth from './PagesDisplay/Auth.js';
-import RegularDashboard from './PagesDisplay/RegularDashboard.js';
-import AdminDashboard from './PagesDisplay/AdminDashboard.js';
-import Settings from './PagesDisplay/Settings.js';
-import Updates from './PagesDisplay/Updates.js';
-import Analytics from './PagesDisplay/Analytics.js';
-import HabitTracker from './PagesDisplay/HabitTracker.js';
-import UserAnalytics from './PagesDisplay/UserAnalytics.js';
-import Games from './PagesDisplay/Games.js';
-import StudyTools from './PagesDisplay/StudyTools.js';
-import Music from './PagesDisplay/Music.js';
-import Videos from './PagesDisplay/Videos.js';
-import Browser from './PagesDisplay/Browser.js';
-import Social from './PagesDisplay/Social.js';
-import Utilities from './PagesDisplay/Utilities.js';
-import Backgrounds from './PagesDisplay/Backgrounds.js';
-import Privacy from './PagesDisplay/Privacy.js';
-import Launcher from './PagesDisplay/Launcher.js';
+const lazyWithRetry = (importer, key) =>
+  lazy(async () => {
+    try {
+      const module = await importer();
+      sessionStorage.removeItem(`lazy-retry-${key}`);
+      return module;
+    } catch (error) {
+      const retryKey = `lazy-retry-${key}`;
+      const alreadyRetried = sessionStorage.getItem(retryKey) === '1';
+
+      if (!alreadyRetried) {
+        sessionStorage.setItem(retryKey, '1');
+        window.location.reload();
+        return new Promise(() => { });
+      }
+
+      throw error;
+    }
+  });
+
+const Landing = lazyWithRetry(() => import('./PagesDisplay/Landing.js'), 'landing');
+const Consent = lazy(() => import('./PagesDisplay/Consent.js'));
+const Auth = lazy(() => import('./PagesDisplay/Auth.js'));
+const AdminDashboard = lazy(() => import('./PagesDisplay/AdminDashboard.js'));
+const Settings = lazy(() => import('./PagesDisplay/Settings.js'));
+const Updates = lazy(() => import('./PagesDisplay/Updates.js'));
+const Analytics = lazy(() => import('./PagesDisplay/Analytics.js'));
+const HabitTracker = lazy(() => import('./PagesDisplay/HabitTracker.js'));
+const UserAnalytics = lazy(() => import('./PagesDisplay/UserAnalytics.js'));
+const Games = lazy(() => import('./PagesDisplay/Games.js'));
+const StudyTools = lazy(() => import('./PagesDisplay/StudyTools.js'));
+const Music = lazy(() => import('./PagesDisplay/Music.js'));
+const Videos = lazy(() => import('./PagesDisplay/Videos.js'));
+const Browser = lazy(() => import('./PagesDisplay/Browser.js'));
+const Social = lazy(() => import('./PagesDisplay/Social.js'));
+const Utilities = lazy(() => import('./PagesDisplay/Utilities.js'));
+const Backgrounds = lazy(() => import('./PagesDisplay/Backgrounds.js'));
+const Privacy = lazy(() => import('./PagesDisplay/Privacy.js'));
+const Launcher = lazy(() => import('./PagesDisplay/Launcher.js'));
+const DashboardWrapper = lazy(() => import('./PagesDisplay/DashboardWrapper.js'));
 import AccessibilityProvider from './Components/Accessibility/AccessibilityProvider.js';
 import FakeErrorScreen from './Components/FakeErrorScreen/FakeErrorScreen.js';
-import { session } from './Components/Storage/clientStorage.js';
+import { session, storage } from './Components/Storage/clientStorage.js';
 import LoadingScreen from './Components/LoadingScreen/LoadingScreen.js';
+import { WindowManagerProvider } from './Components/Desktop/WindowManager';
+const DesktopView = lazy(() => import('./Components/Desktop/DesktopView'));
+import { RenderManagerProvider } from './rendering/RenderManagerProvider';
+import RenderGate from './rendering/RenderGate';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -63,9 +87,9 @@ function ProtectedRoute({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [checked, setChecked] = useState(false);
-  
+
   const isVerified = session.isVerified();
-  
+
   // Protected pages that require authentication
   const protectedPages = [
     '/dashboard',
@@ -121,14 +145,14 @@ function App() {
       if (typeof window !== 'undefined') {
         // Start performance optimization immediately
         try {
-          const performanceManager = require('./Components/I.R.I.S. — Intelligent Reasoning & Information Synthesizer/irisPerformanceManager.js').default;
+          const performanceManager = require('./Components/A.L.L.O.Y. - Autonomous Logical Layering & Optimized sYstem/irisPerformanceManager.js').default;
           if (performanceManager) {
             performanceManager.startMonitoring();
             performanceManager.setAggressiveness('medium');
-            
+
             // Log optimization started
             console.log('[IRIS] Performance optimization active - culling non-essential resources');
-            
+
             // Signal to launcher that page is loading
             if (window.parent && window.parent !== window) {
               try {
@@ -181,45 +205,53 @@ function App() {
   return (
     <ErrorBoundary>
       <AccessibilityProvider>
-        <Router>
-          <ProtectedRoute>
-            <Layout>
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/launcher" element={<Launcher />} />
-                <Route path="/landing" element={<Landing />} />
-                <Route path="/consent" element={<Consent />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/dashboard" element={<RegularDashboard />} />
-                <Route path="/admindashboard" element={<AdminDashboard />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/updates" element={<Updates />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/habits" element={<HabitTracker />} />
-                <Route path="/useranalytics" element={<UserAnalytics />} />
-                <Route path="/games" element={<Games />} />
-                <Route path="/studytools" element={<StudyTools />} />
-                <Route path="/music" element={<Music />} />
-                <Route path="/videos" element={<Videos />} />
-                <Route path="/browser" element={<Browser />} />
-                <Route path="/social" element={<Social />} />
-                <Route path="/utilities" element={<Utilities />} />
-                <Route path="/backgrounds" element={<Backgrounds />} />
-                <Route path="/privacy" element={<Privacy />} />
-                {/* Catch-all 404 route */}
-                <Route path="*" element={
-                  <div style={{ padding: '20px', color: 'white', background: '#0a0a0f', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                    <h1 style={{ fontSize: '2em', marginBottom: '20px' }}>404 - Page Not Found</h1>
-                    <p style={{ marginBottom: '20px', color: '#aaa' }}>The page you're looking for doesn't exist.</p>
-                    <a href="/" style={{ color: '#00f0ff', textDecoration: 'none', padding: '10px 20px', border: '1px solid #00f0ff', borderRadius: '4px' }}>
-                    Return to Home
-                  </a>
-                </div>
-              } />
-              </Routes>
-            </Layout>
-          </ProtectedRoute>
-        </Router>
+        <RenderManagerProvider>
+          <WindowManagerProvider>
+            <Router>
+              <ProtectedRoute>
+                <Layout>
+                  <Suspense fallback={<LoadingScreen isLoading showDuration={500} />}>
+                    <Routes>
+                      <Route path="/" element={<RenderGate id="route:landing" priority="high"><Landing /></RenderGate>} />
+                      <Route path="/launcher" element={<RenderGate id="route:launcher" priority="critical"><Launcher /></RenderGate>} />
+                      <Route path="/landing" element={<RenderGate id="route:landing-alt" priority="high"><Landing /></RenderGate>} />
+                      <Route path="/consent" element={<RenderGate id="route:consent" priority="critical"><Consent /></RenderGate>} />
+                      <Route path="/auth" element={<RenderGate id="route:auth" priority="critical"><Auth /></RenderGate>} />
+                      <Route path="/dashboard" element={<RenderGate id="route:dashboard" priority="high"><DashboardWrapper /></RenderGate>} />
+                      <Route path="/admindashboard" element={<RenderGate id="route:admin" priority="high"><AdminDashboard /></RenderGate>} />
+                      <Route path="/settings" element={<RenderGate id="route:settings" priority="normal"><Settings /></RenderGate>} />
+                      <Route path="/updates" element={<RenderGate id="route:updates" priority="low"><Updates /></RenderGate>} />
+                      <Route path="/analytics" element={<RenderGate id="route:analytics" priority="normal"><Analytics /></RenderGate>} />
+                      <Route path="/habits" element={<RenderGate id="route:habits" priority="normal"><HabitTracker /></RenderGate>} />
+                      <Route path="/useranalytics" element={<RenderGate id="route:useranalytics" priority="normal"><UserAnalytics /></RenderGate>} />
+                      <Route path="/games" element={<RenderGate id="route:games" priority="high"><Games /></RenderGate>} />
+                      <Route path="/studytools" element={<RenderGate id="route:studytools" priority="normal"><StudyTools /></RenderGate>} />
+                      <Route path="/music" element={<RenderGate id="route:music" priority="low"><Music /></RenderGate>} />
+                      <Route path="/videos" element={<RenderGate id="route:videos" priority="low"><Videos /></RenderGate>} />
+                      <Route path="/browser" element={<RenderGate id="route:browser" priority="high"><Browser /></RenderGate>} />
+                      <Route path="/social" element={<RenderGate id="route:social" priority="low"><Social /></RenderGate>} />
+                      <Route path="/utilities" element={<RenderGate id="route:utilities" priority="normal"><Utilities /></RenderGate>} />
+                      <Route path="/backgrounds" element={<RenderGate id="route:backgrounds" priority="background"><Backgrounds /></RenderGate>} />
+                      <Route path="/privacy" element={<RenderGate id="route:privacy" priority="critical"><Privacy /></RenderGate>} />
+                      {/* Catch-all 404 route */}
+                      <Route path="*" element={
+                        <RenderGate id="route:notfound" priority="critical">
+                          <div style={{ padding: '20px', color: 'white', background: '#0a0a0f', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                            <h1 style={{ fontSize: '2em', marginBottom: '20px' }}>404 - Page Not Found</h1>
+                            <p style={{ marginBottom: '20px', color: '#aaa' }}>The page you're looking for doesn't exist.</p>
+                            <a href="/" style={{ color: '#00f0ff', textDecoration: 'none', padding: '10px 20px', border: '1px solid #00f0ff', borderRadius: '4px' }}>
+                              Return to Home
+                            </a>
+                          </div>
+                        </RenderGate>
+                      } />
+                    </Routes>
+                  </Suspense>
+                </Layout>
+              </ProtectedRoute>
+            </Router>
+          </WindowManagerProvider>
+        </RenderManagerProvider>
       </AccessibilityProvider>
     </ErrorBoundary>
   );

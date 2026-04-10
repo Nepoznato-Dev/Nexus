@@ -17,6 +17,7 @@ Access all games through the **Games** page in Nexus app.
 ## 📚 Available Games
 
 ### Arcade Classics
+
 - Pacman Canvas
 - Snake
 - Tetris
@@ -24,6 +25,7 @@ Access all games through the **Games** page in Nexus app.
 - Breakout
 
 ### Strategy & Puzzle
+
 - Chess
 - Sudoku
 - 2048
@@ -31,14 +33,17 @@ Access all games through the **Games** page in Nexus app.
 - Tower Defense
 
 ### Adventure
+
 - Browser Quest
 - Dark Room
 - Portal 2D
 
 ### Simulation
+
 - OpenTTD (Transport Tycoon)
 
 ### Educational
+
 - Math games
 - Typing games
 - Memory games
@@ -50,6 +55,7 @@ Access all games through the **Games** page in Nexus app.
 ## 🔧 Technical Details
 
 ### File Structure
+
 ```
 public/games/
 ├── games-manifest.json       # Master game index
@@ -61,13 +67,16 @@ public/games/
 ```
 
 ### Integration
+
 Games are loaded via the `Games.js` component:
+
 - Fetches `games-manifest.json`
 - Displays game cards with thumbnails
 - Opens games in iframe or new tab
 - Supports filtering and search
 
 ### Adding New Games
+
 1. Add game folder to `public/games/`
 2. Update `games-manifest.json`
 3. Include thumbnail image
@@ -84,6 +93,7 @@ Games are loaded via the `Games.js` component:
 **Casual**: Easy pick-up-and-play
 
 All games are:
+
 - ✅ Open-source
 - ✅ Browser-playable (no install)
 - ✅ School-safe (no ads, no tracking)

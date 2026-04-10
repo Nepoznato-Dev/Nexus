@@ -15,6 +15,7 @@ This document catalogs all available Minecraft mods for IRIS to download on-dema
 ## 📦 Performance Mods (Sodium-Compatible)
 
 ### Core Performance
+
 | Mod | Modrinth ID | Category | Description |
 |-----|-------------|----------|-------------|
 | **Sodium** | `sodium` | Performance | Modern rendering engine, +200-400% FPS |
@@ -26,6 +27,7 @@ This document catalogs all available Minecraft mods for IRIS to download on-dema
 | **ImmediatelyFast** | `immediatelyfast` | Performance | Batches rendering calls |
 
 ### Memory Optimization
+
 | Mod | Modrinth ID | Category | Description |
 |-----|-------------|----------|-------------|
 | **FerriteCore** | `ferrite-core` | Memory | Reduces memory usage by 50% |
@@ -37,6 +39,7 @@ This document catalogs all available Minecraft mods for IRIS to download on-dema
 ## 🎨 Visual Mods (QoL + Enhancements)
 
 ### Shaders & Rendering
+
 | Mod | Modrinth ID | Category | Description |
 |-----|-------------|----------|-------------|
 | **Iris Shaders** | `iris` | Visual | Shader support for Sodium |
@@ -44,6 +47,7 @@ This document catalogs all available Minecraft mods for IRIS to download on-dema
 | **Entity Texture Features** | `entity-texture-features` | Visual | Custom textures (Optifine parity) |
 
 ### UI & HUD
+
 | Mod | Modrinth ID | Category | Description |
 |-----|-------------|----------|-------------|
 | **AppleSkin** | `appleskin` | UI | Food/hunger info overlay |
@@ -52,6 +56,7 @@ This document catalogs all available Minecraft mods for IRIS to download on-dema
 | **Convenient Name Tags** | `convenientnametags` | UI | Better name tag rendering |
 
 ### Animations
+
 | Mod | Modrinth ID | Category | Description |
 |-----|-------------|----------|-------------|
 | **Not Enough Animations** | `not-enough-animations` | Animation | More player animations |
@@ -63,6 +68,7 @@ This document catalogs all available Minecraft mods for IRIS to download on-dema
 ## 🛠️ Quality of Life Mods
 
 ### Inventory & Items
+
 | Mod | Modrinth ID | Category | Description |
 |-----|-------------|----------|-------------|
 | **Inventory Sorter** | `inventory-sorter` | QoL | Auto-sort inventories |
@@ -72,6 +78,7 @@ This document catalogs all available Minecraft mods for IRIS to download on-dema
 | **Sophisticated Backpacks** | `sophisticatedbackpacks` | QoL | Advanced backpack system |
 
 ### Comfort & Utilities
+
 | Mod | Modrinth ID | Category | Description |
 |-----|-------------|----------|-------------|
 | **Comforts** | `comforts` | QoL | Sleeping bags & hammocks |
@@ -82,6 +89,7 @@ This document catalogs all available Minecraft mods for IRIS to download on-dema
 ## 📚 Library/Dependency Mods
 
 ### Required Dependencies
+
 | Mod | Modrinth ID | Category | Description |
 |-----|-------------|----------|-------------|
 | **Fabric API** | `fabric-api` | Library | Core Fabric mod loader API |
@@ -96,11 +104,13 @@ This document catalogs all available Minecraft mods for IRIS to download on-dema
 ## 🎮 Gameplay Mods
 
 ### World Generation
+
 | Mod | Modrinth ID | Category | Description |
 |-----|-------------|----------|-------------|
 | *(To be cataloged)* | | WorldGen | Biome/structure mods |
 
 ### Client-Only Features
+
 | Mod | Modrinth ID | Category | Description |
 |-----|-------------|----------|-------------|
 | *(To be cataloged)* | | Client | Minimap, cosmetics, etc. |
@@ -110,7 +120,9 @@ This document catalogs all available Minecraft mods for IRIS to download on-dema
 ## 📁 Cataloged from Physical Files
 
 ### From: `MinecraftMods sodium, optifine/`
+
 **Structure**:
+
 - `preformace/sodiummods/` - Performance-focused mods
 - `preformace/optifinemods/` - Optifine alternatives
 - `visuals/sodiumvisualsmods/` - Visual enhancement mods
@@ -122,7 +134,9 @@ This document catalogs all available Minecraft mods for IRIS to download on-dema
 - `worldgen/` - World generation
 
 ### From: `VisualMods (organize Into MinecraftMods sodium, optifine)/mods/`
+
 **Actual JAR files found** (example set):
+
 ```
 CrashAssistant-fabric-1.19-1.21.4-1.10.28.jar
 Jade-1.20-Fabric-11.13.1.jar
@@ -151,10 +165,12 @@ sophisticatedbackpacks-1.20.1-3.23.4.5.110.jar
 5. **Dependency Resolution**: Auto-downloads required dependencies
 
 ### API Endpoints Used
+
 - **Modrinth**: `https://api.modrinth.com/v2/project/{mod-id}/version`
 - **CurseForge**: `https://api.curseforge.com/v1/mods/{mod-id}/files`
 
 ### Storage Strategy
+
 ```javascript
 // Instead of 1.6GB in repo:
 IndexedDB: nexus_mod_cache
@@ -170,12 +186,14 @@ IndexedDB: nexus_mod_cache
 
 ## 🗑️ Space Savings
 
-**Before**: 
+**Before**:
+
 - `MinecraftMods sodium, optifine/` = 1.3GB
 - `VisualMods (organize Into MinecraftMods sodium, optifine)/` = 327MB
 - **Total**: ~1.6GB in repository
 
 **After**:
+
 - `docs/MODS_CATALOG.md` = ~15KB
 - IRIS downloads on-demand
 - Browser cache handles storage
@@ -186,6 +204,7 @@ IndexedDB: nexus_mod_cache
 ## 📝 Maintenance
 
 To add new mods to this catalog:
+
 1. Get Modrinth/CurseForge project ID
 2. Add row to appropriate table above
 3. IRIS will auto-detect and offer for download
@@ -196,6 +215,7 @@ To add new mods to this catalog:
 ## 🔗 References
 
 **IRIS Integration**: `src/Components/I.R.I.S (Formally known as AAS)/`
+
 - `irisModResolver.js` - Dependency resolution
 - `modAPIHandler.js` - Modrinth/CurseForge API calls
 - `irisCacheManager.js` - Browser cache management (to be created)

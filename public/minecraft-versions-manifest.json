@@ -1,0 +1,742 @@
+[
+  {
+    "id": "minecraft-1.15",
+    "title": "1.15",
+    "version": "1.15",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.15",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.15",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.15&version=1.15&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.15 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.15.1",
+    "title": "1.15.1",
+    "version": "1.15.1",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.15.1",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.15.1",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.15.1&version=1.15.1&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.15.1 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.15.2",
+    "title": "1.15.2",
+    "version": "1.15.2",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.15.2",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.15.2",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.15.2&version=1.15.2&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.15.2 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.16",
+    "title": "1.16",
+    "version": "1.16",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.16",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.16",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.16&version=1.16&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.16 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.16.1",
+    "title": "1.16.1",
+    "version": "1.16.1",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.16.1",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.16.1",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.16.1&version=1.16.1&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.16.1 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.16.2",
+    "title": "1.16.2",
+    "version": "1.16.2",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.16.2",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.16.2",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.16.2&version=1.16.2&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.16.2 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.16.3",
+    "title": "1.16.3",
+    "version": "1.16.3",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.16.3",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.16.3",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.16.3&version=1.16.3&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.16.3 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.16.4",
+    "title": "1.16.4",
+    "version": "1.16.4",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.16.4",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.16.4",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.16.4&version=1.16.4&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.16.4 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.16.5",
+    "title": "1.16.5",
+    "version": "1.16.5",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.16.5",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.16.5",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.16.5&version=1.16.5&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.16.5 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.17",
+    "title": "1.17",
+    "version": "1.17",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.17",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.17",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.17&version=1.17&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.17 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.17.1",
+    "title": "1.17.1",
+    "version": "1.17.1",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.17.1",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.17.1",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.17.1&version=1.17.1&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.17.1 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.18",
+    "title": "1.18",
+    "version": "1.18",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.18",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.18",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.18&version=1.18&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.18 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.18.1",
+    "title": "1.18.1",
+    "version": "1.18.1",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.18.1",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.18.1",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.18.1&version=1.18.1&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.18.1 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.18.2",
+    "title": "1.18.2",
+    "version": "1.18.2",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.18.2",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.18.2",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.18.2&version=1.18.2&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.18.2 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.19",
+    "title": "1.19",
+    "version": "1.19",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.19",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.19",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.19&version=1.19&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.19 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.19.1",
+    "title": "1.19.1",
+    "version": "1.19.1",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.19.1",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.19.1",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.19.1&version=1.19.1&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.19.1 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.19.2",
+    "title": "1.19.2",
+    "version": "1.19.2",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.19.2",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.19.2",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.19.2&version=1.19.2&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.19.2 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.19.3",
+    "title": "1.19.3",
+    "version": "1.19.3",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.19.3",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.19.3",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.19.3&version=1.19.3&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.19.3 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.19.4",
+    "title": "1.19.4",
+    "version": "1.19.4",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.19.4",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.19.4",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.19.4&version=1.19.4&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.19.4 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.20",
+    "title": "1.20",
+    "version": "1.20",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.20",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.20",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.20&version=1.20&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.20 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.20.1",
+    "title": "1.20.1",
+    "version": "1.20.1",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.20.1",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.20.1",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.20.1&version=1.20.1&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.20.1 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.20.2",
+    "title": "1.20.2",
+    "version": "1.20.2",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.20.2",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.20.2",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.20.2&version=1.20.2&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.20.2 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.20.3",
+    "title": "1.20.3",
+    "version": "1.20.3",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.20.3",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.20.3",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.20.3&version=1.20.3&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.20.3 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.20.4",
+    "title": "1.20.4",
+    "version": "1.20.4",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.20.4",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.20.4",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.20.4&version=1.20.4&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.20.4 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.20.5",
+    "title": "1.20.5",
+    "version": "1.20.5",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.20.5",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.20.5",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.20.5&version=1.20.5&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.20.5 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.20.6",
+    "title": "1.20.6",
+    "version": "1.20.6",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.20.6",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.20.6",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.20.6&version=1.20.6&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.20.6 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.21",
+    "title": "1.21",
+    "version": "1.21.8",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.21.8",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.21",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.21&version=1.21.8&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.21 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.21.1",
+    "title": "1.21.1",
+    "version": "1.21.1",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.21.1",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.21.1",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.21.1&version=1.21.1&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.21.1 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.21.2",
+    "title": "1.21.2",
+    "version": "1.21.2",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.21.2",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.21.2",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.21.2&version=1.21.2&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.21.2 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.21.3",
+    "title": "1.21.3",
+    "version": "1.21.3",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.21.3",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.21.3",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.21.3&version=1.21.3&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.21.3 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.21.4",
+    "title": "1.21.4",
+    "version": "1.21.4",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.21.4",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.21.4",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.21.4&version=1.21.4&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.21.4 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.21.5",
+    "title": "1.21.5",
+    "version": "1.21.5",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.21.5",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.21.5",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.21.5&version=1.21.5&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.21.5 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.21.6",
+    "title": "1.21.6",
+    "version": "1.21.6",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.21.6",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.21.6",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.21.6&version=1.21.6&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.21.6 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.21.7",
+    "title": "1.21.7",
+    "version": "1.21.7",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.21.7",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.21.7",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.21.7&version=1.21.7&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.21.7 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.21.9",
+    "title": "1.21.9",
+    "version": "1.21.9",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.21.9",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.21.9",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.21.9&version=1.21.9&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.21.9 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.21.10",
+    "title": "1.21.10",
+    "version": "1.21.10",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.21.10",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.21.10",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.21.10&version=1.21.10&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.21.10 instance with 1 installed mod."
+  },
+  {
+    "id": "minecraft-1.21.11",
+    "title": "1.21.11",
+    "version": "1.21.11",
+    "category": "minecraft-version",
+    "loader": "fabric",
+    "loaderLabel": "fabric-0.18.4-1.21.11",
+    "modCount": 1,
+    "topMods": [
+      "Fabric API"
+    ],
+    "allocatedMemoryMb": 21408,
+    "playCount": 0,
+    "lastPlayed": "0001-01-01T00:00:00",
+    "relativeInstancePath": "MinecraftVersions/1.21.11",
+    "protocolUrl": "nexus-launcher://minecraft-instance?folder=1.21.11&version=1.21.11&loader=fabric",
+    "emoji": "🧵",
+    "color": "#38bdf8",
+    "description": "1.21.11 instance with 1 installed mod."
+  }
+]

@@ -18,6 +18,9 @@ if (typeof window !== 'undefined') {
   window.__NEXUS_AUTH__ = WATERMARK;
 }
 
+let devToolsIntervalId = null;
+let devToolsVisibilityHandler = null;
+
 const reportTheft = (domain) => {
   try {
     const data = {
@@ -70,6 +73,7 @@ export const verifyDomain = () => {
 
 export const detectDevTools = () => {
   if (process.env.NODE_ENV !== 'production') return;
+  if (devToolsVisibilityHandler) return;
 
   const threshold = 160;
   let open = false;
@@ -88,7 +92,28 @@ export const detectDevTools = () => {
     }
   };
 
-  setInterval(check, 1000);
+  const startChecks = () => {
+    if (devToolsIntervalId) return;
+    devToolsIntervalId = setInterval(check, 1000);
+  };
+
+  const stopChecks = () => {
+    if (!devToolsIntervalId) return;
+    clearInterval(devToolsIntervalId);
+    devToolsIntervalId = null;
+  };
+
+  devToolsVisibilityHandler = () => {
+    if (document.visibilityState === 'hidden') {
+      stopChecks();
+      return;
+    }
+    startChecks();
+  };
+
+  document.addEventListener('visibilitychange', devToolsVisibilityHandler);
+  window.addEventListener('beforeunload', stopChecks, { once: true });
+  devToolsVisibilityHandler();
 };
 
 export const preventInspection = () => {

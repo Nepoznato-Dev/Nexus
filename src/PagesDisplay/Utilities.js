@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft, 
@@ -17,6 +17,7 @@ import {
   Gamepad2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { createPageUrl } from 'utils';
 import AnimatedBackground from '../Components/UI/AnimatedBackground.js';
 import GlassCard from '../Components/UI/GlassCard.js';
@@ -36,6 +37,13 @@ import ModManager from '../Components/Games/ModManager.js';
 export default function Utilities() {
   const [activeTab, setActiveTab] = useState('all');
   const accentColor = '#f368e0';
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.fromIrisHandoff) {
+      setActiveTab('ai');
+    }
+  }, [location.state]);
 
   const tabs = [
     { id: 'all', label: 'All Tools', icon: Wrench },

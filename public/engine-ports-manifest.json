@@ -1,0 +1,112 @@
+[
+    {
+        "id": "engine-babylonjs",
+        "title": "Babylon.js Playground",
+        "url": "https://playground.babylonjs.com/",
+        "category": "engine",
+        "emoji": "🧱",
+        "color": "#8b5cf6",
+        "icon": "https://www.babylonjs.com/img/favicon/favicon.ico",
+        "description": "Official Babylon.js browser playground for testing small scenes and WebGL experiments.",
+        "source": "engine-port"
+    },
+    {
+        "id": "engine-phaser",
+        "title": "Phaser Examples",
+        "url": "https://phaser.io/examples/v3",
+        "category": "engine",
+        "emoji": "🕹️",
+        "color": "#22c55e",
+        "icon": "https://phaser.io/images/favicon/apple-touch-icon.png",
+        "description": "Official Phaser 3 example browser with lightweight HTML5 game engine demos.",
+        "source": "engine-port"
+    },
+    {
+        "id": "engine-threejs",
+        "title": "Three.js Examples",
+        "url": "https://threejs.org/examples/",
+        "category": "engine",
+        "emoji": "🧊",
+        "color": "#38bdf8",
+        "icon": "https://threejs.org/files/favicon.ico",
+        "description": "Official Three.js examples gallery for small browser 3D demos.",
+        "source": "engine-port"
+    },
+    {
+        "id": "engine-playcanvas",
+        "title": "PlayCanvas Explore",
+        "url": "https://playcanvas.com/explore",
+        "category": "engine",
+        "emoji": "🌐",
+        "color": "#f97316",
+        "icon": "https://playcanvas.com/static-assets/images/favicon.ico",
+        "description": "PlayCanvas browser-first engine showcase with web-playable examples.",
+        "source": "engine-port"
+    },
+    {
+        "id": "engine-godot",
+        "title": "Godot Web Editor",
+        "url": "https://editor.godotengine.org/releases/latest/",
+        "category": "engine",
+        "emoji": "⚙️",
+        "color": "#3b82f6",
+        "icon": "https://godotengine.org/assets/press/icon_color.svg",
+        "description": "Godot running in the browser so you can access a lightweight web-based editor instead of storing a full local install.",
+        "source": "engine-port"
+    },
+    {
+        "id": "engine-pixijs",
+        "title": "PixiJS Examples",
+        "url": "https://pixijs.com/8.x/examples/",
+        "category": "engine",
+        "emoji": "✨",
+        "color": "#ec4899",
+        "icon": "https://pixijs.com/images/favicon.ico",
+        "description": "PixiJS browser examples for lightweight 2D rendering experiments.",
+        "source": "engine-port"
+    },
+    {
+        "id": "engine-p5js",
+        "title": "p5.js Web Editor",
+        "url": "https://editor.p5js.org/",
+        "category": "engine",
+        "emoji": "🎨",
+        "color": "#f43f5e",
+        "icon": "https://p5js.org/assets/img/favicon.ico",
+        "description": "Official browser editor for p5.js sketches and small creative coding projects.",
+        "source": "engine-port"
+    },
+    {
+        "id": "engine-gdevelop",
+        "title": "GDevelop Web App",
+        "url": "https://editor.gdevelop.io/",
+        "category": "engine",
+        "emoji": "🚀",
+        "color": "#2563eb",
+        "icon": "https://gdevelop.io/static/images/favicon.ico",
+        "description": "GDevelop running in the browser for no-install 2D game authoring.",
+        "source": "engine-port"
+    },
+    {
+        "id": "engine-melonjs",
+        "title": "melonJS Examples",
+        "url": "https://melonjs.github.io/examples/",
+        "category": "engine",
+        "emoji": "🍈",
+        "color": "#22c55e",
+        "icon": "https://melonjs.org/favicon.ico",
+        "description": "melonJS browser example gallery for compact HTML5 engine demos.",
+        "source": "engine-port"
+    },
+    {
+        "id": "engine-defold",
+        "title": "Defold Examples",
+        "url": "https://defold.com/examples/",
+        "category": "engine",
+        "emoji": "📦",
+        "color": "#14b8a6",
+        "icon": "https://defold.com/favicon.ico",
+        "description": "Defold examples and samples, useful for a lightweight engine reference instead of local installs.",
+        "source": "engine-port"
+    }
+]

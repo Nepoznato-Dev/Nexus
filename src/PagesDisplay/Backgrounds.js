@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Sparkles, Circle, Code, Rocket, Waves, Hexagon, Zap, Bug, Cpu, Share2 } from 'lucide-react';
+import { ArrowLeft, Sparkles, Circle, Hexagon, Bug, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from 'utils';
 import GlassCard from '../Components/UI/GlassCard.js';
@@ -8,13 +8,8 @@ import NeonButton from '../Components/UI/NeonButton.js';
 import { Slider } from '../Components/UI/slider';
 import { Label } from '../Components/UI/label';
 import SoftParticleDrift from '../Components/Backgrounds/SoftParticleDrift.js';
-import MatrixRain from '../Components/Backgrounds/MatrixRain.js';
-import SpaceBackground from '../Components/Backgrounds/SpaceBackground.js';
-import WaveGradient from '../Components/Backgrounds/WaveGradient.js';
 import GeometricPatterns from '../Components/Backgrounds/GeometricPatterns.js';
-import AuroraLights from '../Components/Backgrounds/AuroraLights.js';
 import Fireflies from '../Components/Backgrounds/Fireflies.js';
-import CircuitBoard from '../Components/Backgrounds/CircuitBoard.js';
 import NetworkNodes from '../Components/Backgrounds/NetworkNodes.js';
 
 const BACKGROUNDS = [
@@ -32,45 +27,6 @@ const BACKGROUNDS = [
     ]
   },
   {
-    id: 'matrix-rain',
-    name: 'Matrix Rain',
-    description: 'Falling code characters',
-    icon: Code,
-    component: MatrixRain,
-    settings: [
-      { key: 'speed', label: 'Fall Speed', min: 0.5, max: 3, default: 1, step: 0.1 },
-      { key: 'density', label: 'Character Density', min: 0.7, max: 1, default: 0.95, step: 0.05 },
-      { key: 'fontSize', label: 'Font Size', min: 10, max: 24, default: 16 },
-      { key: 'opacity', label: 'Opacity', min: 0.3, max: 1, default: 0.8, step: 0.1 }
-    ]
-  },
-  {
-    id: 'space',
-    name: 'Space',
-    description: 'Stars, planets, and nebulas',
-    icon: Rocket,
-    component: SpaceBackground,
-    settings: [
-      { key: 'starCount', label: 'Star Count', min: 50, max: 500, default: 200 },
-      { key: 'speed', label: 'Star Speed', min: 0.1, max: 2, default: 0.5, step: 0.1 },
-      { key: 'showPlanets', label: 'Show Planets', type: 'boolean', default: true },
-      { key: 'showNebula', label: 'Show Nebula', type: 'boolean', default: true }
-    ]
-  },
-  {
-    id: 'wave-gradient',
-    name: 'Wave Gradient',
-    description: 'Flowing animated waves',
-    icon: Waves,
-    component: WaveGradient,
-    settings: [
-      { key: 'waveCount', label: 'Wave Count', min: 1, max: 5, default: 3 },
-      { key: 'speed', label: 'Wave Speed', min: 0.1, max: 3, default: 1, step: 0.1 },
-      { key: 'amplitude', label: 'Wave Height', min: 20, max: 100, default: 50 },
-      { key: 'opacity', label: 'Opacity', min: 0.2, max: 1, default: 0.6, step: 0.1 }
-    ]
-  },
-  {
     id: 'geometric',
     name: 'Geometric Patterns',
     description: 'Rotating shapes',
@@ -84,18 +40,6 @@ const BACKGROUNDS = [
     ]
   },
   {
-    id: 'aurora',
-    name: 'Aurora Lights',
-    description: 'Northern lights effect',
-    icon: Zap,
-    component: AuroraLights,
-    settings: [
-      { key: 'intensity', label: 'Intensity', min: 0.3, max: 1, default: 0.7, step: 0.1 },
-      { key: 'speed', label: 'Animation Speed', min: 0.5, max: 3, default: 1, step: 0.1 },
-      { key: 'opacity', label: 'Opacity', min: 0.3, max: 1, default: 0.6, step: 0.1 }
-    ]
-  },
-  {
     id: 'fireflies',
     name: 'Fireflies',
     description: 'Glowing particles',
@@ -106,19 +50,6 @@ const BACKGROUNDS = [
       { key: 'speed', label: 'Movement Speed', min: 0.1, max: 2, default: 0.5, step: 0.1 },
       { key: 'glowSize', label: 'Glow Size', min: 10, max: 40, default: 20 },
       { key: 'opacity', label: 'Opacity', min: 0.4, max: 1, default: 0.8, step: 0.1 }
-    ]
-  },
-  {
-    id: 'circuit',
-    name: 'Circuit Board',
-    description: 'Tech circuit with data flow',
-    icon: Cpu,
-    component: CircuitBoard,
-    settings: [
-      { key: 'nodeCount', label: 'Node Count', min: 20, max: 80, default: 40 },
-      { key: 'speed', label: 'Data Speed', min: 0.5, max: 3, default: 1, step: 0.1 },
-      { key: 'showData', label: 'Show Data Flow', type: 'boolean', default: true },
-      { key: 'opacity', label: 'Opacity', min: 0.4, max: 1, default: 0.7, step: 0.1 }
     ]
   },
   {
@@ -141,13 +72,8 @@ export default function Backgrounds() {
   const [expandedBg, setExpandedBg] = useState(null);
   const [bgSettings, setBgSettings] = useState({
     'soft-particle-drift': { particleCount: 50, speed: 0.5, opacity: 0.4, blur: 2 },
-    'matrix-rain': { speed: 1, density: 0.95, fontSize: 16, opacity: 0.8 },
-    'space': { starCount: 200, speed: 0.5, showPlanets: true, showNebula: true },
-    'wave-gradient': { waveCount: 3, speed: 1, amplitude: 50, opacity: 0.6 },
     'geometric': { pattern: 'hexagons', density: 30, speed: 0.5, opacity: 0.4 },
-    'aurora': { intensity: 0.7, speed: 1, opacity: 0.6 },
     'fireflies': { count: 30, speed: 0.5, glowSize: 20, opacity: 0.8 },
-    'circuit': { nodeCount: 40, speed: 1, showData: true, opacity: 0.7 },
     'network': { nodeCount: 50, connectionDistance: 150, speed: 0.5, opacity: 0.6 }
   });
 

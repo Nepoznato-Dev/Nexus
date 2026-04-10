@@ -1,12 +1,13 @@
-# I.R.I.S Complete Feature Reference
+# RAZONET Complete Feature Reference
 
-> **I.R.I.S (Intelligent Reasoning & Information Synthesizer)** is Nexus's AI-powered automation, diagnostics, and optimization engine. It provides intelligent mod management, crash analysis, performance optimization, conversational AI assistance, and proactive system monitoring.
+> **RAZONET** is Nexus's AI-powered automation, diagnostics, and optimization engine. It provides intelligent mod management, crash analysis, performance optimization, conversational AI assistance, and proactive system monitoring.
 
 ---
 
 ## 🎮 Minecraft Mod Intelligence
 
 ### Dependency Management
+
 - **Recursive Dependency Resolution**
   - Automatically discovers all required and optional dependencies for any mod
   - Traverses the entire dependency tree to find nested dependencies
@@ -21,6 +22,7 @@
   - Batch downloads with staggered timing to avoid rate limits
 
 ### Compatibility & Safety
+
 - **Multi-Layer Compatibility Checking**
   - Detects known incompatible mod pairs (Sodium vs Optifine, etc.)
   - Checks loader conflicts (Fabric-only vs Forge-only mods)
@@ -42,6 +44,7 @@
   - Supports version rollback to known-good configurations
 
 ### Server & Multiplayer Support
+
 - **Server Compatibility Analysis**
   - Categorizes mods into three types:
     - **Client-only**: UI mods, minimaps, shaders (safe for multiplayer)
@@ -51,6 +54,7 @@
   - Prevents installation of server-breaking mods
 
 ### Update Management
+
 - **Intelligent Update Checker**
   - Scans all selected mods for available updates
   - Compares current version against latest compatible version
@@ -59,6 +63,7 @@
   - Provides one-click update flow (future feature)
 
 ### Modpack System
+
 - **Modpack Export (.modpack.json)**
   - Exports current mod list with all metadata
   - Includes pinned versions, sources, loader, and Minecraft version
@@ -68,7 +73,7 @@
 - **Modpack Import**
   - Parses .modpack.json files with validation
   - Restores entire mod list from imported file
-  - Auto-switches to IRIS tab after import
+  - Auto-switches to RAZONET tab after import
   - Error handling for corrupted or invalid files
 
 - **Community Packs (Local)**
@@ -80,6 +85,7 @@
   - Maintained by Nexus community
 
 ### Download & Distribution
+
 - **Server Cache Download Pipeline**
   - Downloads mods directly to server-side cache
   - Makes files ready for instant injection into game folders
@@ -98,6 +104,7 @@
 ## 🔧 Crash Analysis & Diagnostics
 
 ### Crash Log Analyzer
+
 - **Intelligent Log Parsing**
   - Detects common error signatures:
     - `NoClassDefFoundError` → Missing dependency
@@ -130,6 +137,7 @@
 ## ⚡ Performance Management
 
 ### System Performance Profiler
+
 - **Real-Time Resource Monitoring**
   - **RAM Usage**: Tracks JavaScript heap size and percentage
   - **CPU Load**: Estimates via benchmark timing (0-100%)
@@ -138,6 +146,7 @@
   - Updates every 5 seconds with live data
 
 ### Smart Task Manager
+
 - **Active Process Detection**
   - Scans for browser tabs/iframes (games, tools)
   - Detects canvas elements (game engines)
@@ -160,9 +169,10 @@
   - Auto-loads safe mode configuration on crashes
 
 ### Widget Protection System
+
 - **Smart Widget Management**
   - Marks open widgets as `data-protected="true"`
-  - Prevents IRIS from culling active widgets
+  - Prevents RAZONET from culling active widgets
   - Detects widgets by `data-widget-open="true"` attribute
   - Includes widget info in process list
   - Never auto-optimizes protected elements
@@ -172,6 +182,7 @@
 ## 🎯 Recommendations & Guidance
 
 ### Shader Recommendations
+
 - **Context-Aware Suggestions**
   - Detects if Iris/OptiFine is installed
   - Recommends shader packs by performance tier:
@@ -182,6 +193,7 @@
   - Only shows full list if shader mod detected
 
 ### Resource Pack Recommendations
+
 - **Curated Pack Suggestions**
   - **Performance**: VanillaTweaks (minimal changes, optional tweaks)
   - **Balanced**: Faithful 32x (vanilla+ with crisp textures)
@@ -189,6 +201,7 @@
   - Tiered by visual impact and performance cost
 
 ### Installation Guides
+
 - **Step-by-Step Walkthroughs**
   - Auto-generated guides based on selected mods and loader
   - Includes mod loader installation steps
@@ -201,6 +214,7 @@
 ## 🤖 AI Conversational Intelligence
 
 ### Memory System (IndexedDB)
+
 - **Persistent Conversation History**
   - Stores all messages across sessions
   - Organizes by conversation ID
@@ -220,6 +234,7 @@
   - Enables long-term relationship building
 
 ### Proactive Suggestions
+
 - **Context Analysis**
   - Analyzes last 10 messages for topic trends
   - Detects expertise level (beginner/intermediate/advanced)
@@ -239,6 +254,7 @@
   - Explains why each warning matters
 
 ### Personality Enhancement
+
 - **Dynamic Tone Adjustment**
   - Adjustable professionalism (0-1 scale)
   - Mentorship mode for learning contexts
@@ -252,6 +268,7 @@
   - Provides transparent reasoning
 
 ### Common Sense Engine
+
 - **Question-the-Premise Thinking**
   - Challenges false dichotomies
   - Suggests "handbrake" alternatives (unexpected third options)
@@ -265,6 +282,7 @@
   - Always provides some response
 
 ### Search Solver Integration
+
 - **Intelligent Query Routing**
   - Determines if question needs API or can be answered locally
   - Routes based on complexity, specificity, and context
@@ -276,6 +294,7 @@
 ## 📊 Report & Feedback Management
 
 ### Report Classification System
+
 - **Intelligent Report Sorting**
   - Auto-classifies submissions as: bug, complaint, feature request, feedback, or junk
   - Uses keyword matching and pattern detection
@@ -299,6 +318,7 @@
 ## 🔄 Automation & Workflow
 
 ### Auto-Dependency Resolution
+
 - **Triggered on Mod Selection**
   - Runs automatically when viewing mod details
   - Resolves all dependencies in background
@@ -306,6 +326,7 @@
   - Builds download queue automatically
 
 ### Batch Download Orchestration
+
 - **Profile Installation Flow**
   - Selects all mods in profile
   - Checks compatibility automatically
@@ -314,6 +335,7 @@
   - Generates summary report
 
 ### Conflict Auto-Resolution
+
 - **Suggestion Engine**
   - Provides specific fix actions for each conflict
   - Prioritizes easiest-to-implement solutions
@@ -325,6 +347,7 @@
 ## 🛠️ Developer & Advanced Features
 
 ### API Integration Layer
+
 - **Multi-Provider Support**
   - Modrinth API integration
   - CurseForge API support (with key)
@@ -338,6 +361,7 @@
   - Respectful API usage patterns
 
 ### Data Persistence
+
 - **localStorage Integration**
   - Safe mode state
   - Last known good configuration
@@ -351,6 +375,7 @@
   - Long-term data retention
 
 ### Error Handling
+
 - **Graceful Degradation**
   - API failures fall back to local generation
   - Missing dependencies handled gracefully
@@ -362,6 +387,7 @@
 ## 📈 Future-Ready Architecture
 
 ### Planned Enhancements (Hooks Wired)
+
 - **One-Click Modpack Installer**: Direct .modpack file handling
 - **Real-Time Update Monitoring**: Background update checks
 - **Advanced Crash Guidance**: ML-based crash pattern recognition
@@ -371,6 +397,7 @@
 - **Resource Pack Bundling**: Paired packs with mod profiles
 
 ### Extension Points
+
 - Pluggable AI providers
 - Custom compatibility rules
 - User-defined automation scripts
@@ -380,7 +407,8 @@
 
 ## 🎯 Key Differentiators
 
-**Why IRIS is Special:**
+**Why RAZONET is Special:**
+
 1. **Truly Intelligent**: Not just rules-based - uses context, memory, and reasoning
 2. **Proactive**: Suggests next steps before you ask
 3. **Safe by Default**: Safe mode, rollback, and risk analysis built-in
@@ -395,6 +423,7 @@
 ## � Phase 2: Predictive Intelligence (NEW - v2.0.0)
 
 ### Outcome-Aware Mod Intelligence
+
 - **Post-Installation Feedback Loop**
   - Prompts users: "How did your setup perform?" after installation
   - Records FPS baseline before and after mod installation
@@ -417,6 +446,7 @@
   - Alerts if recent mods are degrading system stability
 
 ### Predictive Crash Prevention
+
 - **Pre-Launch Risk Calculator**
   - Analyzes mod combination BEFORE launch against historical failures
   - Predicts crash likelihood with 0-1 confidence score
@@ -442,6 +472,7 @@
   - Confidence-gated automation (only auto-fixes when 95%+ confident)
 
 ### Personal Failure Memory (Opt-In)
+
 - **User-Specific Failure Tracking**
   - Records YOUR personal crash history (100% local, never shared)
   - Learns which mods crash on YOUR specific hardware
@@ -494,10 +525,11 @@ Loop continues: system gets smarter
 ```
 
 **Why This Matters:**
-- IRIS moves from **reactive** (help after crash) to **predictive** (prevent crash before it happens)
+
+- RAZONET moves from **reactive** (help after crash) to **predictive** (prevent crash before it happens)
 - **Learns continuously** from every installation across all users (+ personal history)
 - **Personalization** adapts to each user's unique system and preferences
-- **Transparent confidence** scores show when IRIS is guessing vs confident
+- **Transparent confidence** scores show when RAZONET is guessing vs confident
 - **User control** via opt-in, manual overrides, and easy data deletion
 
 ---

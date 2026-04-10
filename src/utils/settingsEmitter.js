@@ -10,6 +10,7 @@ class SettingsEmitter {
   }
 
   emit(settings) {
+    // Notify all internal listeners
     this.listeners.forEach(callback => {
       try {
         callback(settings);
@@ -17,6 +18,13 @@ class SettingsEmitter {
         console.error('Settings listener error:', err);
       }
     });
+
+    // Also dispatch a global window event for cross-component communication
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('nexus:settings-changed', {
+        detail: settings
+      }));
+    }
   }
 }
 

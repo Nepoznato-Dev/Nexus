@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Happy Wheels Icon - Wheelchair with ragdoll physics theme -->
+  <!-- Wheelchair wheels -->
+  <circle cx="20" cy="44" r="12" fill="#666" stroke="#333" stroke-width="2"/>
+  <circle cx="20" cy="44" r="8" fill="none" stroke="#333" stroke-width="1.5"/>
+  <circle cx="20" cy="44" r="2" fill="#333"/>
+  
+  <circle cx="42" cy="44" r="8" fill="#666" stroke="#333" stroke-width="2"/>
+  <circle cx="42" cy="44" r="5" fill="none" stroke="#333" stroke-width="1.5"/>
+  <circle cx="42" cy="44" r="1.5" fill="#333"/>
+  
+  <!-- Wheelchair frame -->
+  <path d="M 20 32 L 20 44 L 42 44 L 42 36" stroke="#555" stroke-width="3" fill="none"/>
+  <rect x="18" y="28" width="18" height="8" fill="#777" stroke="#333" stroke-width="2"/>
+  
+  <!-- Character (ragdoll style) -->
+  <circle cx="35" cy="20" r="6" fill="#ffcc99" stroke="#333" stroke-width="2"/>
+  <circle cx="33" cy="19" r="1" fill="#333"/>
+  <circle cx="37" cy="19" r="1" fill="#333"/>
+  <path d="M 33 23 Q 35 24, 37 23" stroke="#333" stroke-width="1.5" fill="none"/>
+  
+  <!-- Body (bent/ragdoll) -->
+  <path d="M 35 26 L 30 36" stroke="#e74c3c" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Arms (flailing) -->
+  <path d="M 32 28 L 24 24" stroke="#ffcc99" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 32 30 L 28 38" stroke="#ffcc99" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Blood splatter (iconic Happy Wheels element) -->
+  <circle cx="48" cy="16" r="2" fill="#c0392b"/>
+  <circle cx="52" cy="14" r="1.5" fill="#c0392b"/>
+  <circle cx="50" cy="19" r="1" fill="#c0392b"/>
+  <circle cx="46" cy="20" r="1.5" fill="#c0392b"/>
+</svg>

@@ -9,7 +9,7 @@ import GlassCard from '../Components/UI/GlassCard.js';
 import NeonButton from '../Components/UI/NeonButton.js';
 import AnimatedBackground from '../Components/UI/AnimatedBackground.js';
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ embedded = false }) {
   const [users, setUsers] = useState([]);
   const [pendingUsers, setPendingUsers] = useState([]);
   const [accessCodes, setAccessCodes] = useState([]);
@@ -31,13 +31,27 @@ export default function AdminDashboard() {
     setIsOwner(session.isOwner());
     loadAdminData();
     measurePerformance();
-    
+
+    const pollActiveSessions = () => {
+      if (document.visibilityState === 'visible') {
+        loadActiveSessions();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadActiveSessions();
+      }
+    };
+
     // Poll for active sessions every 3 seconds
-    const interval = setInterval(() => {
-      loadActiveSessions();
-    }, 3000);
-    
-    return () => clearInterval(interval);
+    const interval = setInterval(pollActiveSessions, 3000);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [navigate]);
 
   const loadAdminData = async () => {
@@ -122,14 +136,14 @@ export default function AdminDashboard() {
     // Check permissions
     const currentRole = session.getRole();
     const canKick = currentRole === 'owner' || (currentRole === 'admin' && targetRole !== 'admin' && targetRole !== 'owner');
-    
+
     if (!canKick) {
       alert('You do not have permission to kick this user.');
       return;
     }
-    
+
     if (!confirm(`Kick user ${email}? This will immediately crash their page.`)) return;
-    
+
     try {
       // Add to kick list that clients monitor
       const kickList = JSON.parse(localStorage.getItem('nexus_kick_list') || '[]');
@@ -139,16 +153,16 @@ export default function AdminDashboard() {
         timestamp: Date.now()
       });
       localStorage.setItem('nexus_kick_list', JSON.stringify(kickList));
-      
+
       alert(`User ${email} has been kicked. Their page will crash immediately.`);
-      
+
       // Clean up after 10 seconds
       setTimeout(() => {
         const currentList = JSON.parse(localStorage.getItem('nexus_kick_list') || '[]');
         const filtered = currentList.filter(k => k.sessionId !== sessionId);
         localStorage.setItem('nexus_kick_list', JSON.stringify(filtered));
       }, 10000);
-      
+
       loadActiveSessions();
     } catch (err) {
       console.error('Failed to kick user:', err);
@@ -157,7 +171,7 @@ export default function AdminDashboard() {
 
   const banUser = async (user) => {
     const currentRole = session.getRole();
-    
+
     // Show duration options for Admins, permanent for Owner
     if (currentRole === 'admin') {
       const duration = prompt(
@@ -169,9 +183,9 @@ export default function AdminDashboard() {
         '5 - 24 hours\n' +
         'Enter number (1-5):'
       );
-      
+
       if (!duration) return; // Cancelled
-      
+
       const durationMap = {
         '1': { minutes: 10, label: '10 minutes' },
         '2': { minutes: 30, label: '30 minutes' },
@@ -179,15 +193,15 @@ export default function AdminDashboard() {
         '4': { minutes: 360, label: '6 hours' },
         '5': { minutes: 1440, label: '24 hours' }
       };
-      
+
       const selected = durationMap[duration];
       if (!selected) {
         alert('Invalid selection. Ban cancelled.');
         return;
       }
-      
+
       if (!confirm(`Ban user ${user.code} for ${selected.label}?`)) return;
-      
+
       try {
         storage.banUser(user.code, selected.minutes);
         alert(`User ${user.code} has been banned for ${selected.label}.`);
@@ -244,20 +258,26 @@ export default function AdminDashboard() {
     navigate(createPageUrl('Landing'));
   };
 
+  const containerClassName = embedded
+    ? 'h-full relative overflow-y-auto'
+    : 'min-h-screen relative overflow-hidden';
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+      <div className={`${embedded ? 'h-full' : 'min-h-screen'} bg-transparent flex items-center justify-center`}>
         <p className="text-white/50">Loading admin dashboard...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      <AnimatedBackground type="gradient" accentColor="#ff0055" />
-      
+    <div className={containerClassName}>
+      {!embedded && (
+        <AnimatedBackground type="gradient" accentColor="#ff0055" />
+      )}
+
       <div className="relative z-10 p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
-        <motion.header 
+        <motion.header
           className="mb-8"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -303,7 +323,7 @@ export default function AdminDashboard() {
               </div>
               <div className="space-y-3">
                 {pendingUsers.map((user) => (
-                  <div 
+                  <div
                     key={user.code}
                     className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20"
                   >
@@ -316,18 +336,18 @@ export default function AdminDashboard() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <NeonButton 
-                          variant="primary" 
-                          size="sm" 
+                        <NeonButton
+                          variant="primary"
+                          size="sm"
                           onClick={() => approveUser(user)}
                           className="bg-green-500/20 hover:bg-green-500/30 text-green-400"
                         >
                           <Check className="w-4 h-4 mr-1" />
                           Approve
                         </NeonButton>
-                        <NeonButton 
-                          variant="danger" 
-                          size="sm" 
+                        <NeonButton
+                          variant="danger"
+                          size="sm"
                           onClick={() => rejectUser(user)}
                         >
                           <X className="w-4 h-4 mr-1" />
@@ -342,7 +362,7 @@ export default function AdminDashboard() {
           </motion.div>
         )}
 
-        {/* IRIS Report Inbox - Admin & Owner */}
+        {/* RAZONET Report Inbox - Admin & Owner */}
         {(isOwner || session.isAdmin()) && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -354,7 +374,7 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <Inbox className="w-5 h-5 text-cyan-400" />
-                  <h2 className="text-lg font-semibold text-white">IRIS Report Inbox</h2>
+                  <h2 className="text-lg font-semibold text-white">RAZONET Report Inbox</h2>
                   <span className="px-2 py-1 rounded-full bg-cyan-500/20 text-cyan-400 text-xs">
                     {reportInbox.length} Reports
                   </span>
@@ -448,7 +468,7 @@ export default function AdminDashboard() {
                 {activeSessions.map((session) => {
                   const canKickThisUser = isOwner || (session.role !== 'admin' && session.role !== 'owner');
                   return (
-                    <div 
+                    <div
                       key={session.sessionId}
                       className="p-3 rounded-lg bg-white/5 border border-white/10 flex items-center justify-between"
                     >
@@ -456,16 +476,15 @@ export default function AdminDashboard() {
                         <div className="flex items-center gap-2">
                           <p className="text-white text-sm font-medium">{session.email || 'Anonymous'}</p>
                           {session.role && (
-                            <span className={`px-2 py-1 rounded text-xs ${
-                              session.role === 'owner' ? 'bg-[#ffc6ff]/20 text-[#ffc6ff]' :
+                            <span className={`px-2 py-1 rounded text-xs ${session.role === 'owner' ? 'bg-[#ffc6ff]/20 text-[#ffc6ff]' :
                               session.role === 'admin' ? 'bg-[#bdb2ff]/20 text-[#bdb2ff]' :
-                              'bg-[#ffadad]/20 text-[#ffadad]'
-                            }`}>
+                                'bg-[#ffadad]/20 text-[#ffadad]'
+                              }`}>
                               {session.role.charAt(0).toUpperCase() + session.role.slice(1)}
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-white/40">Session: {session.sessionId.substring(0, 12)}...</p>
+                        <p className="text-xs text-white/40">Session: {session.sessionId?.substring(0, 12) || 'Unknown'}...</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="px-2 py-1 rounded-full bg-green-500/20 text-green-400 text-xs flex items-center gap-1">
@@ -473,9 +492,9 @@ export default function AdminDashboard() {
                           Online
                         </span>
                         {canKickThisUser ? (
-                          <NeonButton 
-                            variant="danger" 
-                            size="sm" 
+                          <NeonButton
+                            variant="danger"
+                            size="sm"
                             onClick={() => kickUser(session.sessionId, session.email, session.role)}
                           >
                             <UserX className="w-4 h-4 mr-1" />
@@ -512,7 +531,7 @@ export default function AdminDashboard() {
               </div>
               <div className="space-y-3">
                 {accessCodes.map((code) => (
-                  <div 
+                  <div
                     key={code.id}
                     className="p-3 rounded-lg bg-white/5 border border-white/10"
                   >
@@ -523,11 +542,10 @@ export default function AdminDashboard() {
                           Used {code.usageCount || 0} times
                         </p>
                       </div>
-                      <div className={`px-2 py-1 rounded text-xs ${
-                        code.isActive 
-                          ? 'bg-green-500/20 text-green-400' 
-                          : 'bg-red-500/20 text-red-400'
-                      }`}>
+                      <div className={`px-2 py-1 rounded text-xs ${code.isActive
+                        ? 'bg-green-500/20 text-green-400'
+                        : 'bg-red-500/20 text-red-400'
+                        }`}>
                         {code.isActive ? 'Active' : 'Inactive'}
                       </div>
                     </div>
@@ -553,7 +571,7 @@ export default function AdminDashboard() {
               </div>
               <div className="space-y-3">
                 {banList.map((ban) => (
-                  <div 
+                  <div
                     key={ban.id}
                     className="p-3 rounded-lg bg-red-500/10 border border-red-500/20"
                   >
@@ -591,27 +609,25 @@ export default function AdminDashboard() {
                 </div>
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {users.map((user) => (
-                    <div 
+                    <div
                       key={user.code}
-                      className={`p-4 rounded-lg border ${
-                        user.banned 
-                          ? 'bg-red-500/10 border-red-500/20' 
-                          : 'bg-white/5 border-white/10'
-                      }`}
+                      className={`p-4 rounded-lg border ${user.banned
+                        ? 'bg-red-500/10 border-red-500/20'
+                        : 'bg-white/5 border-white/10'
+                        }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3">
                             <p className="text-white font-mono text-sm">{user.code}</p>
-                            <span className={`px-2 py-1 rounded text-xs ${
-                              user.role === 'owner' ? 'bg-[#ffc6ff]/20 text-[#ffc6ff]' :
+                            <span className={`px-2 py-1 rounded text-xs ${user.role === 'owner' ? 'bg-[#ffc6ff]/20 text-[#ffc6ff]' :
                               user.role === 'admin' ? 'bg-[#bdb2ff]/20 text-[#bdb2ff]' :
-                              user.verified ? 'bg-[#caffbf]/20 text-[#caffbf]' :
-                              'bg-[#ffadad]/20 text-[#ffadad]'
-                            }`}>
+                                user.verified ? 'bg-[#caffbf]/20 text-[#caffbf]' :
+                                  'bg-[#ffadad]/20 text-[#ffadad]'
+                              }`}>
                               {user.role === 'owner' ? 'Owner' :
-                               user.role === 'admin' ? 'Admin' :
-                               user.verified ? 'Verified' : 'Guest'}
+                                user.role === 'admin' ? 'Admin' :
+                                  user.verified ? 'Verified' : 'Guest'}
                             </span>
                             {user.banned && (
                               <span className="px-2 py-1 rounded text-xs bg-red-500/20 text-red-400">
@@ -658,18 +674,18 @@ export default function AdminDashboard() {
                         <div className="flex items-center gap-2">
                           {!user.banned ? (
                             <>
-                              <NeonButton 
-                                variant="ghost" 
-                                size="sm" 
+                              <NeonButton
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => kickUser(user)}
                                 className="text-orange-400 hover:text-orange-300"
                               >
                                 <UserX className="w-4 h-4 mr-1" />
                                 Kick
                               </NeonButton>
-                              <NeonButton 
-                                variant="danger" 
-                                size="sm" 
+                              <NeonButton
+                                variant="danger"
+                                size="sm"
                                 onClick={() => banUser(user)}
                                 title={isOwner ? 'Ban permanently' : 'Choose ban duration'}
                               >
@@ -678,9 +694,9 @@ export default function AdminDashboard() {
                               </NeonButton>
                             </>
                           ) : (
-                            <NeonButton 
-                              variant="ghost" 
-                              size="sm" 
+                            <NeonButton
+                              variant="ghost"
+                              size="sm"
                               onClick={() => unbanUser(user)}
                               className="text-green-400 hover:text-green-300"
                             >
@@ -714,7 +730,7 @@ export default function AdminDashboard() {
               </div>
               <div className="space-y-3">
                 {notices.map((notice) => (
-                  <div 
+                  <div
                     key={notice.id}
                     className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20"
                   >
@@ -725,11 +741,10 @@ export default function AdminDashboard() {
                           {notice.expiresAt ? `Expires: ${new Date(notice.expiresAt).toLocaleDateString()}` : 'No expiration'}
                         </p>
                       </div>
-                      <div className={`px-2 py-1 rounded text-xs ml-3 ${
-                        notice.isActive 
-                          ? 'bg-green-500/20 text-green-400' 
-                          : 'bg-gray-500/20 text-gray-400'
-                      }`}>
+                      <div className={`px-2 py-1 rounded text-xs ml-3 ${notice.isActive
+                        ? 'bg-green-500/20 text-green-400'
+                        : 'bg-gray-500/20 text-gray-400'
+                        }`}>
                         {notice.isActive ? 'Active' : 'Inactive'}
                       </div>
                     </div>
@@ -801,15 +816,15 @@ export default function AdminDashboard() {
           </motion.div>
         </div>
 
-        <motion.div 
+        <motion.div
           className="mt-8 p-4 rounded-xl bg-white/5 border border-white/10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
         >
           <p className="text-white/60 text-sm">
-            <strong className="text-white">Privacy Notice:</strong> This dashboard shows only minimal metadata 
-            (access codes, ban identifiers, site diagnostics). User settings, favorites, browsing history, and personal data 
+            <strong className="text-white">Privacy Notice:</strong> This dashboard shows only minimal metadata
+            (access codes, ban identifiers, site diagnostics). User settings, favorites, browsing history, and personal data
             are stored client-side only and cannot be accessed from this panel. Admin code: 0915
           </p>
         </motion.div>

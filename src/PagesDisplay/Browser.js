@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  ArrowRight, 
-  RotateCw, 
-  Home, 
-  Plus, 
+import {
+  ArrowLeft,
+  ArrowRight,
+  RotateCw,
+  Home,
+  Plus,
   Star,
   Search,
   Bookmark,
@@ -14,7 +14,7 @@ import {
   X
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { createPageUrl, openInAboutBlank } from 'utils';
+import { createPageUrl, openInAboutBlank, resolveAboutBlankTargetForAppUrl, shouldForceAboutBlankFirst } from 'utils';
 import { useNavigateBack } from '../hooks/useNavigateBack.js';
 import { useSettings } from '../hooks/useSettings.js';
 import { storage } from '../Components/Storage/clientStorage.js';
@@ -45,6 +45,7 @@ export default function Browser() {
   const [showBookmarks, setShowBookmarks] = useState(true);
   const [iframeError, setIframeError] = useState(false);
   const [lastRequestedUrl, setLastRequestedUrl] = useState('');
+  const hydratedRef = useRef(false);
 
   const accentColor = '#3498db';
   const activeTab = tabs.find(t => t.id === activeTabId);
@@ -65,7 +66,12 @@ export default function Browser() {
 
   // Save browser state whenever tabs or activeTabId changes
   useEffect(() => {
-    saveBrowserState();
+    if (!hydratedRef.current) return;
+    const id = setTimeout(() => {
+      saveBrowserState();
+    }, 350);
+
+    return () => clearTimeout(id);
   }, [tabs, activeTabId]);
 
   // Open URL from navigation state
@@ -98,14 +104,22 @@ export default function Browser() {
       }
     } catch (err) {
       console.error('Failed to load browser state:', err);
+    } finally {
+      hydratedRef.current = true;
     }
   };
 
   const saveBrowserState = async () => {
     try {
       await storage.init();
+      const persistentTabs = tabs.map(tab => ({
+        id: tab.id,
+        title: tab.title,
+        url: tab.url,
+        loading: false
+      }));
       await storage.saveBrowserState({
-        tabs,
+        tabs: persistentTabs,
         activeTabId
       });
     } catch (err) {
@@ -143,7 +157,7 @@ export default function Browser() {
 
     // Reset states
     setIframeError(false);
-    
+
     // Add https if not present
     let finalUrl = url;
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
@@ -167,8 +181,25 @@ export default function Browser() {
       return;
     }
 
-    setTabs(prev => prev.map(t => 
-      t.id === activeTabId 
+    const aboutBlankTarget = resolveAboutBlankTargetForAppUrl(finalUrl);
+    if (aboutBlankTarget) {
+      openInAboutBlank(aboutBlankTarget, 'Google Classroom');
+      return;
+    }
+
+    if (shouldForceAboutBlankFirst(finalUrl)) {
+      let launchTitle = 'about:blank';
+      try {
+        launchTitle = new URL(finalUrl).hostname.replace(/^www\./, '') || launchTitle;
+      } catch (error) {
+        // Keep fallback title.
+      }
+      openInAboutBlank(finalUrl, launchTitle);
+      return;
+    }
+
+    setTabs(prev => prev.map(t =>
+      t.id === activeTabId
         ? { ...t, url: finalUrl, title: new URL(finalUrl).hostname, loading: true }
         : t
     ));
@@ -176,8 +207,8 @@ export default function Browser() {
 
     // Simulate loading
     setTimeout(() => {
-      setTabs(prev => prev.map(t => 
-        t.id === activeTabId 
+      setTabs(prev => prev.map(t =>
+        t.id === activeTabId
           ? { ...t, loading: false }
           : t
       ));
@@ -202,8 +233,8 @@ export default function Browser() {
   };
 
   const goHome = () => {
-    setTabs(prev => prev.map(t => 
-      t.id === activeTabId 
+    setTabs(prev => prev.map(t =>
+      t.id === activeTabId
         ? { ...t, url: '', title: 'New Tab' }
         : t
     ));
@@ -212,14 +243,15 @@ export default function Browser() {
 
   const refresh = () => {
     if (activeTab?.url) {
-      setTabs(prev => prev.map(t => 
-        t.id === activeTabId 
+      setIframeError(false);
+      setTabs(prev => prev.map(t =>
+        t.id === activeTabId
           ? { ...t, loading: true }
           : t
       ));
       setTimeout(() => {
-        setTabs(prev => prev.map(t => 
-          t.id === activeTabId 
+        setTabs(prev => prev.map(t =>
+          t.id === activeTabId
             ? { ...t, loading: false }
             : t
         ));
@@ -230,10 +262,10 @@ export default function Browser() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <AnimatedBackground type="gradient" accentColor={accentColor} />
-      
+
       <div className="relative z-10 h-screen flex flex-col">
         {/* Header */}
-        <motion.header 
+        <motion.header
           className="px-4 py-2"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -309,9 +341,9 @@ export default function Browser() {
             <NeonButton variant="ghost" size="icon" onClick={addBookmark}>
               <Star className="w-4 h-4" />
             </NeonButton>
-            <NeonButton 
-              variant="ghost" 
-              size="icon" 
+            <NeonButton
+              variant="ghost"
+              size="icon"
               onClick={() => setShowBookmarks(!showBookmarks)}
             >
               <Bookmark className="w-4 h-4" />
@@ -321,93 +353,99 @@ export default function Browser() {
           {/* Content Area */}
           <div className="flex-grow relative">
             {activeTab?.url ? (
-                <div className="w-full h-full bg-white rounded-lg overflow-hidden relative">
-                  {activeTab.loading ? (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-900">
-                      <div className="text-center">
-                        <div className="inline-block w-8 h-8 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mb-4"></div>
-                        <p className="text-white/60">Loading...</p>
-                      </div>
+              <div className="w-full h-full bg-white rounded-lg overflow-hidden relative">
+                {activeTab.loading ? (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-900">
+                    <div className="text-center">
+                      <div className="inline-block w-8 h-8 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mb-4"></div>
+                      <p className="text-white/60">Loading...</p>
                     </div>
-                  ) : iframeError ? (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-[#f5f5f5]">
-                      <motion.div 
-                        className="text-left p-6 sm:p-8 max-w-lg w-full bg-white border border-gray-200 shadow-md rounded-md"
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                      >
-                        <div className="flex items-start gap-4">
-                          <div className="w-16 h-16 flex items-center justify-center">
-                            <svg viewBox="0 0 64 64" className="w-14 h-14 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2">
-                              <rect x="14" y="12" width="36" height="32" rx="4" ry="4" />
-                              <circle cx="24" cy="30" r="2" />
-                              <circle cx="40" cy="30" r="2" />
-                              <path d="M22 42c4 4 16 4 20 0" />
-                              <path d="M18 12l-4-6" />
-                              <path d="M46 12l4-6" />
-                            </svg>
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-800 mb-1">404. That’s an error.</h3>
-                            <p className="text-sm text-gray-600 mb-2">The requested URL <span className="break-all">{lastRequestedUrl || activeTab.title}</span> could not be displayed here.</p>
-                            <p className="text-sm text-gray-600 mb-4">That’s all we know.</p>
-                            <div className="flex flex-wrap gap-2">
-                              <button
-                                onClick={() => window.open(activeTab.url, '_blank', 'noopener,noreferrer')}
-                                className="px-4 py-2 bg-[#1a73e8] text-white rounded shadow hover:bg-[#1664c4] transition-colors"
-                              >
-                                Open in new tab
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setIframeError(false);
-                                  setTabs(prev => prev.map(t => 
-                                    t.id === activeTabId ? { ...t, url: '', title: 'New Tab' } : t
-                                  ));
-                                  setUrlInput('');
-                                }}
-                                className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-                              >
-                                Go back
-                              </button>
-                            </div>
+                  </div>
+                ) : iframeError ? (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-[#f5f5f5]">
+                    <motion.div
+                      className="text-left p-6 sm:p-8 max-w-lg w-full bg-white border border-gray-200 shadow-md rounded-md"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="w-16 h-16 flex items-center justify-center">
+                          <svg viewBox="0 0 64 64" className="w-14 h-14 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="14" y="12" width="36" height="32" rx="4" ry="4" />
+                            <circle cx="24" cy="30" r="2" />
+                            <circle cx="40" cy="30" r="2" />
+                            <path d="M22 42c4 4 16 4 20 0" />
+                            <path d="M18 12l-4-6" />
+                            <path d="M46 12l4-6" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-800 mb-1">404. That’s an error.</h3>
+                          <p className="text-sm text-gray-600 mb-2">The requested URL <span className="break-all">{lastRequestedUrl || activeTab.title}</span> could not be displayed here.</p>
+                          <p className="text-sm text-gray-600 mb-4">That’s all we know.</p>
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              onClick={() => window.open(activeTab.url, '_blank', 'noopener,noreferrer')}
+                              className="px-4 py-2 bg-[#1a73e8] text-white rounded shadow hover:bg-[#1664c4] transition-colors"
+                            >
+                              Open in new tab
+                            </button>
+                            <button
+                              onClick={() => {
+                                setIframeError(false);
+                                setTabs(prev => prev.map(t =>
+                                  t.id === activeTabId ? { ...t, url: '', title: 'New Tab' } : t
+                                ));
+                                setUrlInput('');
+                              }}
+                              className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                            >
+                              Go back
+                            </button>
                           </div>
                         </div>
-                      </motion.div>
-                    </div>
-                  ) : (
-                    <div className="relative w-full h-full">
-                      <iframe
-                        src={activeTab.url}
-                        className="w-full h-full border-0"
-                        title={activeTab.title}
-                        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
-                        referrerPolicy="no-referrer"
-                        onError={() => setIframeError(true)}
-                      />
-                      <div className="absolute top-3 right-3 z-10">
-                        <div className="flex gap-2">
-                          <NeonButton
-                            variant="solid"
-                            onClick={() => window.open(activeTab.url, '_blank', 'noopener,noreferrer')}
-                          >
-                            Open in new tab ↗
-                          </NeonButton>
-                          <NeonButton
-                            variant="ghost"
-                            onClick={() => openInAboutBlank(activeTab.url, activeTab.title || 'Browser')}
-                          >
-                            Open in about:blank
-                          </NeonButton>
-                        </div>
+                      </div>
+                    </motion.div>
+                  </div>
+                ) : (
+                  <div className="relative w-full h-full">
+                    <iframe
+                      src={activeTab.url}
+                      className="w-full h-full border-0"
+                      title={activeTab.title}
+                      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
+                      referrerPolicy="no-referrer"
+                      onLoad={() => {
+                        setIframeError(false);
+                        setTabs(prev => prev.map(t =>
+                          t.id === activeTabId ? { ...t, loading: false } : t
+                        ));
+                      }}
+                      onError={() => setIframeError(true)}
+                    />
+                    <div className="absolute top-3 right-3 z-10">
+                      <div className="flex gap-2">
+                        <NeonButton
+                          variant="solid"
+                          onClick={() => window.open(activeTab.url, '_blank', 'noopener,noreferrer')}
+                        >
+                          Open in new tab ↗
+                        </NeonButton>
+                        <NeonButton
+                          variant="ghost"
+                          onClick={() => openInAboutBlank(activeTab.url, activeTab.title || 'Browser')}
+                        >
+                          Open in about:blank
+                        </NeonButton>
                       </div>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="h-full flex flex-col items-center justify-center p-8">
                 {/* New Tab Page */}
-                <motion.div 
+                <motion.div
                   className="text-center mb-8"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -418,7 +456,7 @@ export default function Browser() {
 
                 {/* Bookmarks Grid */}
                 {showBookmarks && (
-                  <motion.div 
+                  <motion.div
                     className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}

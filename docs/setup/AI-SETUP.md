@@ -81,6 +81,7 @@ Make sure **AI Assistant** is toggled ON in Settings > AI Tools
 ## ⚠️ Fallback Behavior
 
 If the AI API fails (network error, rate limit, invalid key, etc.):
+
 - You'll see a red error message
 - The system will automatically fall back to template responses
 - The error message disappears after 3 seconds
@@ -88,22 +89,26 @@ If the AI API fails (network error, rate limit, invalid key, etc.):
 ## 💰 Cost Considerations
 
 **OpenAI GPT-3.5 Turbo** (Recommended for students):
+
 - Input: $0.0005 per 1K tokens
 - Output: $0.0015 per 1K tokens
 - Average question + answer: ~500 tokens = $0.001 (one-tenth of a cent!)
 - 1000 questions ≈ $1
 
 **Anthropic Claude 3 Sonnet**:
+
 - More expensive but very smart
 - ~$3 per 1M input tokens
 
 **Google Gemini Pro**:
+
 - Currently FREE with generous limits
 - Great for students!
 
 ## 🎨 AI Personality
 
 The AI adapts to your chosen personality mode:
+
 - **Adaptive** - Matches your communication style
 - **Kind** - Always encouraging and supportive
 - **Moody** - Witty and sarcastic (fun!)
@@ -122,20 +127,24 @@ The AI adapts to your chosen personality mode:
 ## 🐛 Troubleshooting
 
 **"AI unavailable: API Error: 401"**
+
 - Your API key is invalid or expired
 - Check your key in Settings
 
 **"AI unavailable: API Error: 429"**
+
 - You hit the rate limit
 - Wait a moment and try again
 - Consider upgrading your API plan
 
 **"AI unavailable: Failed to fetch"**
+
 - Network connection issue
 - Check your internet connection
 - The AI will fall back to templates
 
 **No response at all**
+
 - Make sure AI Tools is enabled in Settings
 - Check that you've entered an API key
 - Try refreshing the page

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Getting Over It Icon - Man in pot with hammer -->
+  <!-- Mountain/rocks -->
+  <path d="M 0 64 L 0 45 L 12 35 L 20 40 L 28 30 L 36 35 L 44 25 L 52 30 L 64 20 L 64 64 Z" fill="#8B7765" stroke="#6B5D52" stroke-width="2"/>
+  <path d="M 12 35 L 20 40 L 28 30" fill="#A89580" stroke="#8B7765" stroke-width="1.5"/>
+  
+  <!-- Pot -->
+  <ellipse cx="32" cy="48" rx="10" ry="6" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+  <path d="M 22 48 Q 22 38, 32 36 Q 42 38, 42 48" fill="#A0522D" stroke="#654321" stroke-width="2"/>
+  
+  <!-- Character head -->
+  <circle cx="32" cy="28" r="6" fill="#FFD1A3" stroke="#333" stroke-width="1.5"/>
+  
+  <!-- Eyes -->
+  <circle cx="30" cy="27" r="1" fill="#333"/>
+  <circle cx="34" cy="27" r="1" fill="#333"/>
+  
+  <!-- Mouth (determined) -->
+  <path d="M 30 31 Q 32 30, 34 31" stroke="#333" stroke-width="1" fill="none"/>
+  
+  <!-- Body/torso -->
+  <ellipse cx="32" cy="38" rx="5" ry="6" fill="#4169E1" stroke="#2c4a7c" stroke-width="1.5"/>
+  
+  <!-- Arm holding hammer -->
+  <path d="M 30 36 L 24 28 L 18 24" stroke="#FFD1A3" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Sledgehammer -->
+  <!-- Handle -->
+  <line x1="18" y1="24" x2="10" y2="16" stroke="#8B4513" stroke-width="2.5"/>
+  
+  <!-- Hammer head -->
+  <rect x="6" y="12" width="8" height="6" fill="#696969" stroke="#404040" stroke-width="1.5" rx="1"/>
+  <rect x="7" y="13" width="6" height="1" fill="#808080" opacity="0.6"/>
+  
+  <!-- Sweat drops (effort/struggle) -->
+  <ellipse cx="36" cy="24" rx="1.5" ry="2" fill="#87CEEB" transform="rotate(20 36 24)"/>
+  <ellipse cx="38" cy="26" rx="1" ry="1.5" fill="#87CEEB" transform="rotate(15 38 26)"/>
+  
+  <!-- Small rocks falling -->
+  <rect x="45" y="32" width="2" height="2" fill="#8B7765" transform="rotate(15 46 33)"/>
+  <rect x="48" y="36" width="1.5" height="1.5" fill="#8B7765" transform="rotate(-20 48 36)"/>
+</svg>

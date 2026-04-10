@@ -1,0 +1,9 @@
+{
+    "projectRoot": "C:/path/to/Nexus-Community-Project",
+    "launchCommandTemplate": "\"C:/Program Files/PrismLauncher/prismlauncher.exe\" -l \"{instanceName}\"",
+    "workingDirectory": null,
+    "notes": [
+        "Use Prism Launcher, MultiMC, or another launcher that accepts a launch command.",
+        "Available placeholders: {instanceName}, {instanceFolder}, {instancePath}, {version}, {loader}."
+    ]
+}

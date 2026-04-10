@@ -9,9 +9,11 @@ IRIS has been upgraded with **predictive intelligence** that learns from real-wo
 ## 🎯 Three Core Phase 2 Features
 
 ### 1. **Outcome-Aware Mod Intelligence** (`irisOutcomeLearning.js` - 310 lines)
+
 **What it does:** IRIS learns from every mod installation outcome you have.
 
 **Key Methods:**
+
 - `recordBaseline()` - Capture FPS/RAM before installing mods
 - `recordOutcome()` - Log FPS/crashes after mod install
 - `getModCombinationStats()` - Check success rate for specific mod combos
@@ -19,6 +21,7 @@ IRIS has been upgraded with **predictive intelligence** that learns from real-wo
 - `getOutcomeHistory()` - View all past outcomes (filtered)
 
 **Data Collected (Local Only):**
+
 - FPS before/after installation
 - RAM and CPU usage patterns
 - Crash type and frequency
@@ -26,6 +29,7 @@ IRIS has been upgraded with **predictive intelligence** that learns from real-wo
 - Minecraft version and loader type
 
 **Example Use Case:**
+
 ```javascript
 // Before installing mods
 const baselineId = irisOutcomeLearning.recordBaseline({ fps: 120, ramUsage: 4000 });
@@ -48,20 +52,24 @@ const stats = await irisOutcomeLearning.getModCombinationStats(
 ---
 
 ### 2. **Predictive Crash Prevention** (`irisPredictiveCrashPrevention.js` - 380 lines)
+
 **What it does:** Warn users BEFORE launching Minecraft if setup has high crash risk.
 
 **Key Methods:**
+
 - `analyzeLaunchRisk()` - Get pre-launch risk assessment
 - `recordCrashEvent()` - Log crashes to improve predictions
 - `recordSuccessfulLaunch()` - Log successful launches
 
 **Risk Analysis (4 Factors):**
+
 1. **Historical Data** (40% weight) - Has this exact combo failed before?
 2. **Known Conflicts** (30% weight) - Sodium + Optifine, Phosphor + Starlight, etc.
 3. **RAM Requirements** (20% weight) - Do mods exceed allocated memory?
 4. **Mod Maturity** (10% weight) - Are mods compatible with MC version?
 
 **Returns:**
+
 ```javascript
 {
   riskScore: 0.65,          // 0-1 scale (65% = medium risk)
@@ -82,6 +90,7 @@ const stats = await irisOutcomeLearning.getModCombinationStats(
 ```
 
 **Example Use Case:**
+
 ```javascript
 // Before user clicks "Launch Minecraft"
 const riskAssessment = await irisPredictiveCrashPrevention.analyzeLaunchRisk(
@@ -101,9 +110,11 @@ if (riskAssessment.shouldWarnUser) {
 ---
 
 ### 3. **Personal Failure Memory** (`irisPersonalFailureMemory.js` - 380 lines)
+
 **What it does:** Learns YOUR specific crash patterns and gives personalized warnings.
 
 **Key Methods:**
+
 - `requestOptIn()` - User explicitly enables (with privacy notice)
 - `recordPersonalFailure()` - Log crash on YOUR system
 - `getPersonalWarnings()` - Get warnings specific to YOUR history
@@ -112,6 +123,7 @@ if (riskAssessment.shouldWarnUser) {
 - `deleteAllPersonalMemory()` - User can erase data anytime
 
 **Privacy-First Design:**
+
 - ✅ 100% local storage (IndexedDB) - no cloud upload
 - ✅ Completely opt-in - user must explicitly enable
 - ✅ User can export data (GDPR data access)
@@ -119,6 +131,7 @@ if (riskAssessment.shouldWarnUser) {
 - ✅ Transparent - shows what data is collected
 
 **Example Use Case:**
+
 ```javascript
 // User enables Personal Failure Memory
 irisPersonalFailureMemory.requestOptIn();
@@ -185,6 +198,7 @@ The three systems create a **feedback loop**:
 ```
 
 **The Loop Gets Smarter With Every Install:**
+
 - Week 1: "Based on 5 data points, I'm 40% confident this is risky"
 - Week 2: "Based on 15 data points, I'm 75% confident about this pattern"
 - Week 3: "Based on 50 data points and YOUR history, I'm 95% confident"
@@ -196,6 +210,7 @@ The three systems create a **feedback loop**:
 These three systems will be integrated into the IRIS tab with:
 
 **Pre-Launch Risk Check:**
+
 ```javascript
 // Before "Launch Minecraft" button
 const risk = await irisPredictiveCrashPrevention.analyzeLaunchRisk(selectedMods, config);
@@ -205,6 +220,7 @@ if (risk.shouldWarnUser) {
 ```
 
 **Post-Launch Feedback:**
+
 ```javascript
 // After user returns from Minecraft
 showFeedbackDialog("How did it go?");
@@ -213,6 +229,7 @@ showFeedbackDialog("How did it go?");
 ```
 
 **Personalized Suggestions:**
+
 ```javascript
 // When user browses mods
 const personalWarnings = await irisPersonalFailureMemory.getPersonalWarnings(modToAdd);
@@ -225,14 +242,16 @@ if (personalWarnings.warnings.length > 0) {
 
 ## 🎯 What This Enables for IRIS 2.0.0
 
-### ✅ Immediate Capabilities:
+### ✅ Immediate Capabilities
+
 - **Prevent Crashes** - Warn before launch, not after crash
 - **Learn from Users** - Gets smarter every day
 - **Personalize Advice** - Learns your system's quirks
 - **Build Trust** - Shows confidence scores so you know when IRIS is guessing
 - **Respect Privacy** - All local, user-controlled, transparent
 
-### 🚀 Future Enhancements:
+### 🚀 Future Enhancements
+
 - **Configuration Intelligence** - Parse mod config files for conflicts
 - **Skill-Aware Assistance** - Adapt difficulty based on user expertise
 - **Time-Based Intelligence** - "Your setups last ~8 days before crashing"
@@ -259,17 +278,20 @@ docs/
 ## 🔒 Data Storage Strategy
 
 **Outcome Learning:**
+
 - IndexedDB store: `iris_outcomes.installations`
 - Stores: modIds, FPS data, RAM usage, crash info, timestamps
 - Privacy: Mod IDs are hashed for combination comparison
 
 **Personal Failure Memory:**
+
 - IndexedDB store: `iris_personal_memory.failures`
 - Stores: modIds, crash type, hardware profile, severity
 - Privacy: User must opt-in explicitly
 - User can delete all data anytime
 
 **Both systems:**
+
 - ✅ 100% local - never leaves the user's computer
 - ✅ No telemetry - no analytics, no tracking
 - ✅ User-controlled - user can export or delete
@@ -302,18 +324,21 @@ docs/
 ## 📈 For the 2.0.0 Release
 
 **Marketing Points:**
+
 - "IRIS Now Predicts Crashes Before You Launch"
 - "Personal Intelligence That Gets Smarter Every Day"
 - "100% Private - Your Data Never Leaves Your Computer"
 - "Prevent Problems, Not Fix Them"
 
 **Documentation Points:**
+
 - Clear opt-in for Personal Failure Memory
 - Privacy policy explaining data collection
 - How to export/delete personal data
 - Example use cases
 
 **Version Bump:**
+
 ```json
 {
   "version": "2.0.0",
@@ -328,4 +353,3 @@ docs/
 **Testing:** All modules syntax-checked, no errors  
 **Privacy:** All systems are local-first and user-controlled  
 **Performance:** Async-first, won't block main thread  
-

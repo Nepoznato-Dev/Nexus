@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,6 +42,7 @@
     .loading h1 {
       font-size: 48px;
       background: linear-gradient(45deg, #00f0ff, #0080ff);
+      background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: 20px;
@@ -97,12 +99,13 @@
     }
   </style>
 </head>
+
 <body>
   <div id="game-container">
     <div class="loading" id="loading-screen">
       <h1>🎮 Eaglercraft</h1>
       <p>Minecraft 1.8.8 - Playable in Browser</p>
-      
+
       <div class="server-info">
         <h3>Features:</h3>
         <ul>
@@ -115,44 +118,62 @@
       </div>
 
       <button class="play-button" onclick="loadGame()">Start Playing</button>
-      
+
       <p style="margin-top: 20px; font-size: 14px; color: rgba(255, 255, 255, 0.5);">
-        Note: Eaglercraft files need to be added to /public/games/eaglercraft/<br>
-        You can download from: <a href="https://github.com/LAX1DUDE/eaglercraft" style="color: #00f0ff;">GitHub - Eaglercraft</a>
+        Not installed yet. See setup instructions below.
       </p>
+
+      <div
+        style="margin-top: 20px; padding: 15px; background: rgba(255, 100, 100, 0.1); border: 1px solid rgba(255, 100, 100, 0.3); border-radius: 8px; max-width: 600px; text-align: left;">
+        <h3 style="color: #ff6464; margin-bottom: 10px;">📦 Setup Instructions</h3>
+        <ol style="padding-left: 20px;">
+          <li style="margin: 8px 0;"><strong>Download Eaglercraft:</strong> Visit <a
+              href="https://github.com/LAX1DUDE/eaglercraft/releases" style="color: #00f0ff;">GitHub Releases</a></li>
+          <li style="margin: 8px 0;"><strong>Extract files:</strong> Unzip to a temp folder</li>
+          <li style="margin: 8px 0;"><strong>Copy to Nexus:</strong> Copy the extracted files to <code
+              style="background: rgba(0,0,0,0.5); padding: 2px 6px;">/public/games/eaglercraft/</code></li>
+          <li style="margin: 8px 0;"><strong>Refresh:</strong> Reload this page</li>
+        </ol>
+        <p style="margin-top: 10px; font-size: 12px; opacity: 0.8;">See <code
+            style="background: rgba(0,0,0,0.5); padding: 2px 6px;">docs/BROWSER_GAMES_GUIDE.md</code> for detailed setup
+        </p>
+      </div>
     </div>
-    
-    <!-- This iframe will load Eaglercraft when files are added -->
-    <iframe id="eagler-frame" style="display: none;"></iframe>
+
+    <!-- iframe is shown once marker file is detected -->
+    <iframe id="eagler-frame"
+      style="display:none; width:100%; height:100%; border:none; position:fixed; inset:0;"></iframe>
   </div>
 
   <script>
     function loadGame() {
-      // Check if Eaglercraft is installed
-      fetch('/games/eaglercraft/index.html')
-        .then(response => {
-          if (response.ok) {
-            // Load Eaglercraft
+      // Check for the real compiled Eaglercraft entry point.
+      // eaglercraftX.teavm.html only exists in a real build — never in this placeholder.
+      fetch('/games/eaglercraft/eaglercraftX.teavm.html')
+        .then(r => {
+          if (r.ok) {
             document.getElementById('loading-screen').style.display = 'none';
             const frame = document.getElementById('eagler-frame');
-            frame.src = '/games/eaglercraft/index.html';
+            frame.src = '/games/eaglercraft/eaglercraftX.teavm.html';
             frame.style.display = 'block';
           } else {
-            // Show installation instructions
-            alert(`Eaglercraft Not Installed
-
-To add Eaglercraft:
-1. Download from: https://github.com/LAX1DUDE/eaglercraft
-2. Extract to: /public/games/eaglercraft/
-3. Refresh this page
-
-You can also play online at: https://eaglercraft.com/`);
+            showInstallInstructions();
           }
         })
-        .catch(() => {
-          alert('Eaglercraft files not found. Please install Eaglercraft to play.');
-        });
+        .catch(showInstallInstructions);
+    }
+
+    function showInstallInstructions() {
+      alert(
+        'Eaglercraft Not Installed\n\n' +
+        'To add Eaglercraft:\n' +
+        '1. Get the compiled Eaglercraft build files\n' +
+        '2. Copy all files into: /public/games/eaglercraft/\n' +
+        '   (eaglercraftX.teavm.html must be present)\n' +
+        '3. Refresh this page'
+      );
     }
   </script>
 </body>
+
 </html>

@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Send, Sparkles, Loader2, BookOpen, Calculator, FileText, Code, AlertCircle, Search } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, Sparkles, Loader2, BookOpen, Calculator, FileText, Code, AlertCircle, Search, Users, ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';
 import GlassCard from '../UI/GlassCard.js';
 import { Input } from '../UI/input.js';
 import { storage } from '../Storage/clientStorage.js';
-import { generateSearchEnhancedResponse } from '../I.R.I.S. — Intelligent Reasoning & Information Synthesizer/IRISSearch.js';
+import { generateSearchEnhancedResponse } from '../A.L.L.O.Y. - Autonomous Logical Layering & Optimized sYstem/IRISSearch.js';
+import { isHandoffValid } from '../F.L.U.X. - Fast Logic & URL eXtraction/sparkQueryEngine.js';
+import { runParallelDiagnostics } from '../A.L.L.O.Y. - Autonomous Logical Layering & Optimized sYstem/collaborativeDiagnostics.js';
+
+const RAZONET_HANDOFF_EVENT = 'nexus:razonet-handoff-ready';
+const LEGACY_IRIS_HANDOFF_EVENT = 'nexus:iris-handoff-ready';
+const RAZONET_HANDOFF_SESSION_KEY = 'nexus_razonet_handoff';
+const LEGACY_IRIS_HANDOFF_SESSION_KEY = 'nexus_iris_handoff';
 
 export default function AIHelper({ accentColor = '#a55eea' }) {
   const [query, setQuery] = useState('');
@@ -14,6 +21,11 @@ export default function AIHelper({ accentColor = '#a55eea' }) {
   const [mode, setMode] = useState('explain'); // explain, solve, summarize, code
   const [aiSettings, setAiSettings] = useState(null);
   const [error, setError] = useState('');
+  const [handoffContext, setHandoffContext] = useState(null);
+  const [contextApplied, setContextApplied] = useState(false);
+  const [collaborativeReport, setCollaborativeReport] = useState(null);
+  const [isCollaborativeMode, setIsCollaborativeMode] = useState(false);
+  const [showThinkingProcess, setShowThinkingProcess] = useState(false);
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -21,6 +33,59 @@ export default function AIHelper({ accentColor = '#a55eea' }) {
       setAiSettings(settings?.aiTools);
     };
     loadSettings();
+  }, []);
+
+  useEffect(() => {
+    const inferModeFromText = (text) => {
+      if (!text) return 'explain';
+      const lower = text.toLowerCase();
+      if (/code|function|javascript|python|debug|api|algorithm/.test(lower)) return 'code';
+      if (/solve|equation|algebra|math|calculate|integral|derivative/.test(lower)) return 'solve';
+      if (/summary|summarize|overview|tl;dr/.test(lower)) return 'summarize';
+      return 'explain';
+    };
+
+    const consumeHandoff = (payload) => {
+      if (!payload || !isHandoffValid(payload)) return;
+
+      setHandoffContext(payload);
+      setContextApplied(false);
+      setMode(inferModeFromText(payload.originalUserQuery));
+
+      if (payload.originalUserQuery) {
+        setQuery(payload.originalUserQuery);
+      }
+
+      if (payload.sparkResponse) {
+        setResponse(payload.sparkResponse);
+      }
+
+      setError('');
+      sessionStorage.removeItem(RAZONET_HANDOFF_SESSION_KEY);
+      sessionStorage.removeItem(LEGACY_IRIS_HANDOFF_SESSION_KEY);
+    };
+
+    try {
+      const raw = sessionStorage.getItem(RAZONET_HANDOFF_SESSION_KEY) || sessionStorage.getItem(LEGACY_IRIS_HANDOFF_SESSION_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        consumeHandoff(parsed);
+      }
+    } catch {
+      sessionStorage.removeItem(RAZONET_HANDOFF_SESSION_KEY);
+      sessionStorage.removeItem(LEGACY_IRIS_HANDOFF_SESSION_KEY);
+    }
+
+    const handleHandoffEvent = (event) => {
+      consumeHandoff(event?.detail);
+    };
+
+    window.addEventListener(RAZONET_HANDOFF_EVENT, handleHandoffEvent);
+    window.addEventListener(LEGACY_IRIS_HANDOFF_EVENT, handleHandoffEvent);
+    return () => {
+      window.removeEventListener(RAZONET_HANDOFF_EVENT, handleHandoffEvent);
+      window.removeEventListener(LEGACY_IRIS_HANDOFF_EVENT, handleHandoffEvent);
+    };
   }, []);
 
   const modes = [
@@ -53,15 +118,15 @@ export default function AIHelper({ accentColor = '#a55eea' }) {
         `Let's tackle "${query}" in code!\n\n**What You Need to Know**:\n- This pattern helps with...\n- It makes code more...\n- It prevents...\n\n**Structure**:\nStart by... then... finally...\n\n**Example Scenario**: Use this approach when...\n\n**Pro Tip**: Watch out for... and remember to...\n\nWant to try implementing it? I'll help if you get stuck!`
       ]
     };
-    
+
     const modeResponses = variations[mode] || variations.explain;
     return modeResponses[Math.floor(Math.random() * modeResponses.length)];
   };
 
   const callRealAI = async (query, mode) => {
     if (!aiSettings || aiSettings.apiProvider === 'none' || !aiSettings.apiKey) {
-      return { 
-        success: false, 
+      return {
+        success: false,
         useTemplate: true,
         message: '💡 Tip: For better AI responses, configure an API key in Settings > AI Tools. Google Gemini is free!'
       };
@@ -133,7 +198,7 @@ export default function AIHelper({ accentColor = '#a55eea' }) {
       }
 
       const data = await response.json();
-      
+
       let content;
       if (aiSettings.apiProvider === 'openai') {
         content = data.choices[0]?.message?.content;
@@ -154,31 +219,56 @@ export default function AIHelper({ accentColor = '#a55eea' }) {
     e.preventDefault();
     if (!query.trim()) return;
 
+    const userQuery = query.trim();
+
+    // Build query with handoff context and mod environment if present
+    let effectiveQuery = handoffContext && !contextApplied
+      ? `[COLLABORATIVE DIAGNOSTIC MODE]
+S.P.A.R.K's Initial Analysis:
+Original question: ${handoffContext.originalUserQuery || ''}
+S.P.A.R.K's findings: ${handoffContext.sparkResponse || ''}
+
+${handoffContext.modEnvironment && handoffContext.modEnvironment.modCount > 0
+        ? `\n[Mod Environment Data]:\n${handoffContext.modEnvironment.summary}\n`
+        : ''}
+
+Your task as RAZONET: Review S.P.A.R.K's diagnosis above. Then:
+1. Identify what S.P.A.R.K got right (confirm findings)
+2. Point out anything S.P.A.R.K missed or skipped
+3. Provide additional insights from a different analytical angle
+4. If you disagree with any conclusion, explain why
+
+User's follow-up question: ${userQuery}
+
+Approach this as a "second opinion" - complement S.P.A.R.K's work, don't just repeat it.`
+      : userQuery;
+
     setIsLoading(true);
     setResponse('');
     setError('');
 
-    // First, try I.R.I.S autonomous search for real-time info
+    // First, try RAZONET autonomous search for real-time info
     setIsSearching(true);
     const searchResult = await generateSearchEnhancedResponse(
-      query,
+      effectiveQuery,
       aiSettings?.personality || 'adaptive',
       aiSettings?.serpApiKey
     );
     setIsSearching(false);
 
     if (searchResult) {
-      // I.R.I.S found relevant real-time information
+      // RAZONET found relevant real-time information
       setResponse(searchResult);
       setIsLoading(false);
       return;
     }
 
     // Try to call real AI first if configured
-    const aiResult = await callRealAI(query, mode);
-    
+    const aiResult = await callRealAI(effectiveQuery, mode);
+
     if (aiResult.success) {
       setResponse(aiResult.content);
+      setContextApplied(true);
       setIsLoading(false);
     } else if (aiResult.useTemplate) {
       // No API configured, use template responses and show setup tip
@@ -187,19 +277,52 @@ export default function AIHelper({ accentColor = '#a55eea' }) {
         setTimeout(() => setError(''), 5000);
       }
       setTimeout(() => {
-        const result = generateResponse(query, mode);
+        const result = generateResponse(userQuery, mode);
         setResponse(result);
+        setContextApplied(true);
         setIsLoading(false);
       }, 1500);
     } else {
       // API call failed, show error and fall back to template
       setError(`AI unavailable: ${aiResult.error || 'Unknown error'}`);
       setTimeout(() => {
-        const result = generateResponse(query, mode);
+        const result = generateResponse(userQuery, mode);
         setResponse(result);
+        setContextApplied(true);
         setIsLoading(false);
         setTimeout(() => setError(''), 3000); // Clear error after 3s
       }, 1500);
+    }
+  };
+
+  const handleCollaborativeDiagnostic = async () => {
+    if (!query.trim()) return;
+
+    const userQuery = query.trim();
+    setIsLoading(true);
+    setIsCollaborativeMode(true);
+    setResponse('');
+    setError('');
+    setCollaborativeReport(null);
+
+    try {
+      const report = await runParallelDiagnostics(userQuery, {
+        userName: 'User',
+        apiKeys: {
+          openai: aiSettings?.openaiApiKey,
+          google: aiSettings?.googleApiKey,
+        },
+        generateLocal: null, // Could wire to local model if available
+      });
+
+      setCollaborativeReport(report);
+      setResponse(report.unifiedReport);
+      setContextApplied(true);
+    } catch (error) {
+      console.error('[Collaborative Diagnostic] Error:', error);
+      setError(`Collaborative diagnostic failed: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -224,11 +347,10 @@ export default function AIHelper({ accentColor = '#a55eea' }) {
             key={m.id}
             whileTap={{ scale: 0.95 }}
             onClick={() => setMode(m.id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              mode === m.id 
-                ? 'text-white' 
-                : 'bg-white/5 text-white/50 hover:text-white/70'
-            }`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${mode === m.id
+              ? 'text-white'
+              : 'bg-white/5 text-white/50 hover:text-white/70'
+              }`}
             style={{ backgroundColor: mode === m.id ? accentColor : undefined }}
           >
             <m.icon className="w-3 h-3" />
@@ -242,6 +364,57 @@ export default function AIHelper({ accentColor = '#a55eea' }) {
         <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-start gap-2">
           <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
           <span className="text-xs text-red-300">{error}</span>
+        </div>
+      )}
+
+      {handoffContext && (
+        <div className="mb-4 p-3 rounded-lg bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/30">
+          <div className="flex items-center justify-between gap-3 mb-1">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-purple-200">🤝 Collaborative Mode</span>
+              <span className="text-xs text-purple-300/70">S.P.A.R.K + RAZONET</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setHandoffContext(null);
+                setContextApplied(false);
+              }}
+              className="text-xs text-purple-200/70 hover:text-purple-200 transition-colors"
+            >
+              Clear context
+            </button>
+          </div>
+          <p className="text-xs text-purple-100/80 line-clamp-2 mb-2">
+            {handoffContext.originalUserQuery}
+          </p>
+
+          {/* Collaborative explanation */}
+          <div className="text-xs text-purple-200/60 bg-purple-500/5 rounded px-2 py-1.5 mb-2">
+            <span className="font-medium text-purple-200">How this works:</span> S.P.A.R.K provided initial analysis.
+            RAZONET will now review it, confirm what's correct, catch missed details, and add different perspectives.
+          </div>
+
+          {/* 🔥 NEW: Display mod environment if present */}
+          {handoffContext.modEnvironment && handoffContext.modEnvironment.modCount > 0 && (
+            <div className="mt-2 pt-2 border-t border-purple-500/20">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-medium text-purple-200">
+                  📦 {handoffContext.modEnvironment.modCount} Minecraft Mods Detected
+                </span>
+              </div>
+              <p className="text-xs text-purple-100/70">
+                {handoffContext.modEnvironment.minecraftVersions.join(', ')} • {handoffContext.modEnvironment.modLoaders.join(', ')}
+              </p>
+              {(handoffContext.modEnvironment.potentialIssues.hasMultipleLoaders ||
+                handoffContext.modEnvironment.potentialIssues.hasMultipleMinecraftVersions) && (
+                  <p className="text-xs text-orange-300 mt-1">
+                    ⚠️ {handoffContext.modEnvironment.potentialIssues.hasMultipleLoaders && 'Multiple loaders detected! '}
+                    {handoffContext.modEnvironment.potentialIssues.hasMultipleMinecraftVersions && 'Version mismatch detected!'}
+                  </p>
+                )}
+            </div>
+          )}
         </div>
       )}
 
@@ -267,14 +440,109 @@ export default function AIHelper({ accentColor = '#a55eea' }) {
       {(response || isLoading) && (
         <div className="mb-4 p-4 rounded-xl bg-white/5 min-h-[120px]">
           {isLoading ? (
-            <div className="flex items-center gap-2 text-white/50">
+            <div className="flex flex-col items-center gap-2 text-white/50">
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Thinking...</span>
+              <span>{isCollaborativeMode ? 'Running parallel diagnostics...' : 'Thinking...'}</span>
+              {isCollaborativeMode && (
+                <div className="flex items-center gap-3 mt-2 text-xs">
+                  <div className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                    <span>S.P.A.R.K analyzing...</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+                    <span>RAZONET analyzing...</span>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="text-sm text-white/80 whitespace-pre-wrap">
-              {response}
-            </div>
+            <>
+              {collaborativeReport && (
+                <div className="mb-4 pb-4 border-b border-white/10">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Users className="w-4 h-4 text-purple-400" />
+                    <span className="text-xs font-bold text-purple-200">Collaborative Diagnostic Results</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="bg-green-500/10 rounded p-2 border border-green-500/20">
+                      <div className="text-green-300 font-medium">✅ Confirmed</div>
+                      <div className="text-white/60">{collaborativeReport.confirmedByBoth?.length || 0} issues</div>
+                    </div>
+                    <div className="bg-blue-500/10 rounded p-2 border border-blue-500/20">
+                      <div className="text-blue-300 font-medium">🔵 S.P.A.R.K</div>
+                      <div className="text-white/60">{collaborativeReport.sparkOnly?.length || 0} unique</div>
+                    </div>
+                    <div className="bg-purple-500/10 rounded p-2 border border-purple-500/20">
+                      <div className="text-purple-300 font-medium">🟣 RAZONET</div>
+                      <div className="text-white/60">{collaborativeReport.irisOnly?.length || 0} unique</div>
+                    </div>
+                  </div>
+                  <div className="mt-2 text-xs text-white/40">
+                    Total: {collaborativeReport.totalIssuesFound || 0} issues found •
+                    Analyzed in {((collaborativeReport.metadata?.totalTime || 0) / 1000).toFixed(1)}s
+                  </div>
+
+                  {/* Thinking Process Dialogue */}
+                  {collaborativeReport.dialogue && collaborativeReport.dialogue.length > 0 && (
+                    <div className="mt-3">
+                      <button
+                        onClick={() => setShowThinkingProcess(!showThinkingProcess)}
+                        className="flex items-center gap-2 text-xs text-purple-200 hover:text-purple-100 transition-colors w-full"
+                      >
+                        {showThinkingProcess ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        <MessageCircle className="w-4 h-4" />
+                        <span className="font-medium">View Thinking Process</span>
+                        <span className="text-white/40">({collaborativeReport.dialogue.length} exchanges)</span>
+                      </button>
+
+                      <AnimatePresence>
+                        {showThinkingProcess && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="mt-3 space-y-2 overflow-hidden"
+                          >
+                            {collaborativeReport.dialogue.map((exchange, idx) => (
+                              <div
+                                key={idx}
+                                className={`p-2.5 rounded-lg text-xs ${exchange.agent === 'SPARK'
+                                  ? 'bg-blue-500/10 border border-blue-500/20'
+                                  : 'bg-purple-500/10 border border-purple-500/20'
+                                  }`}
+                              >
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className={`font-bold ${exchange.agent === 'SPARK' ? 'text-blue-300' : 'text-purple-300'
+                                    }`}>
+                                    {exchange.agent === 'SPARK' ? '🔵 S.P.A.R.K' : '🟣 RAZONET'}
+                                  </span>
+                                  <span className="text-white/40">•</span>
+                                  <span className={`text-white/50 text-[10px] px-1.5 py-0.5 rounded ${exchange.action === 'critique' ? 'bg-orange-500/20 text-orange-300' :
+                                    exchange.action === 'acknowledge' ? 'bg-green-500/20 text-green-300' :
+                                      exchange.action === 'agreement' ? 'bg-green-500/20 text-green-300' :
+                                        'bg-white/10'
+                                    }`}>
+                                    {exchange.action.replace('_', ' ')}
+                                  </span>
+                                </div>
+                                <div className="text-white/80 leading-relaxed">
+                                  {exchange.content}
+                                </div>
+                              </div>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className="text-sm text-white/80 whitespace-pre-wrap">
+                {response}
+              </div>
+            </>
           )}
         </div>
       )}
@@ -295,12 +563,28 @@ export default function AIHelper({ accentColor = '#a55eea' }) {
           disabled={isLoading || !query.trim()}
           className="w-10 h-10 rounded-xl flex items-center justify-center text-white disabled:opacity-50"
           style={{ backgroundColor: accentColor }}
+          title="Ask one AI"
         >
           <Send className="w-4 h-4" />
+        </motion.button>
+        <motion.button
+          type="button"
+          onClick={handleCollaborativeDiagnostic}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          disabled={isLoading || !query.trim()}
+          className="w-10 h-10 rounded-xl flex items-center justify-center text-white disabled:opacity-50 bg-gradient-to-br from-purple-500 to-blue-500"
+          title="Run collaborative diagnostic (S.P.A.R.K + RAZONET)"
+        >
+          <Users className="w-4 h-4" />
         </motion.button>
       </form>
 
       <p className="text-xs text-white/30 mt-3 text-center">
+        💡 <strong className="text-white/50">New:</strong> Click <Users className="inline w-3 h-3" /> for S.P.A.R.K + RAZONET collaborative diagnostics!
+      </p>
+
+      <p className="text-xs text-white/30 mt-1 text-center">
         I help you learn, not do your homework for you!
       </p>
     </GlassCard>

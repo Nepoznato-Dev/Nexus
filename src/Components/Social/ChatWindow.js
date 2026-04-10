@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Hash, Smile, Plus, Image as ImageIcon, Trash2, Edit2, Reply, MoreVertical, Bell, BellOff } from 'lucide-react';
+import { Send, Hash, Smile, Plus, Image as ImageIcon, Trash2, PencilLine, Reply, MoreVertical, Bell, BellOff } from 'lucide-react';
 import { session } from '../Storage/clientStorage.js';
 import { Message } from '../../entities/Message.js';
 
@@ -25,25 +25,18 @@ export default function ChatWindow({ channel, currentUser }) {
 
   useEffect(() => {
     loadMessages();
-    // Reduced polling from 1s to 5s for better performance
-    const interval = setInterval(loadMessages, 5000);
-    return () => clearInterval(interval);
-  }, [channel.id]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    const pollTyping = () => {
+      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
+        return;
+      }
 
-  useEffect(() => {
-    // Monitor typing indicators
-    const interval = setInterval(() => {
       try {
         const typingData = JSON.parse(localStorage.getItem(TYPING_KEY) || '{}');
         const channelTyping = typingData[channel.id] || [];
         const now = Date.now();
         const activeTyping = channelTyping
           .filter(t => {
-            // Validate timestamp is a number
             if (typeof t.timestamp !== 'number' || isNaN(t.timestamp)) {
               return false;
             }
@@ -55,9 +48,63 @@ export default function ChatWindow({ channel, currentUser }) {
         console.error('Failed to load typing indicators:', err);
         setTyping([]);
       }
-    }, 2000); // Reduced from 500ms to 2s for better performance
-    return () => clearInterval(interval);
+    };
+
+    const pollMessages = () => {
+      if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+        loadMessages();
+      }
+    };
+
+    const handleStorage = (event) => {
+      if (!event) {
+        loadMessages();
+        pollTyping();
+        return;
+      }
+
+      if (event.key === STORAGE_KEY || event.key === CHANNELS_KEY) {
+        loadMessages();
+        return;
+      }
+
+      if (event.key === TYPING_KEY) {
+        pollTyping();
+      }
+    };
+
+    const handleVisibility = () => {
+      if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+        loadMessages();
+        pollTyping();
+      }
+    };
+
+    pollTyping();
+    const messageInterval = setInterval(pollMessages, 10000);
+    const typingInterval = setInterval(pollTyping, 4000);
+    window.addEventListener('storage', handleStorage);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      clearInterval(messageInterval);
+      clearInterval(typingInterval);
+      window.removeEventListener('storage', handleStorage);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [channel.id, currentUser.id]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const loadMessages = () => {
     try {

@@ -104,8 +104,26 @@ export default function Social() {
     loadChannels();
     loadCurrentUser();
     monitorOnlineUsers();
-    const interval = setInterval(monitorOnlineUsers, 3000);
-    return () => clearInterval(interval);
+
+    const tick = () => {
+      if (document.visibilityState === 'visible') {
+        monitorOnlineUsers();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        monitorOnlineUsers();
+      }
+    };
+
+    const interval = setInterval(tick, 3000);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   const loadChannels = () => {
@@ -178,8 +196,12 @@ export default function Social() {
         return now - p.lastSeen < STALE_THRESHOLD;
       });
       
-      // Update localStorage with cleaned array
-      localStorage.setItem('nexus_presence', JSON.stringify(cleaned));
+      // Update localStorage only when cleanup changed the payload
+      const originalSerialized = JSON.stringify(presence);
+      const cleanedSerialized = JSON.stringify(cleaned);
+      if (cleanedSerialized !== originalSerialized) {
+        localStorage.setItem('nexus_presence', cleanedSerialized);
+      }
       
       // Show only users who are currently online (within 10 seconds)
       const online = cleaned.filter(p => now - p.lastSeen < 10000);

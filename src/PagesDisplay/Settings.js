@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  User, 
-  Palette, 
-  Monitor, 
+import {
+  ArrowLeft,
+  User,
+  Palette,
+  Monitor,
   Cpu,
   Layers,
   Gamepad2,
@@ -40,7 +40,7 @@ import NeonButton from '../Components/UI/NeonButton.js';
 import { Input } from '../Components/UI/input.js';
 import { storage, session } from '../Components/Storage/clientStorage.js';
 import { settingsEmitter } from '../utils/settingsEmitter.js';
-import SoftParticleDrift from '../Components/Backgrounds/SoftParticleDrift.js';
+import BackgroundRenderer from '../Components/Backgrounds/BackgroundRenderer.js';
 import SettingsSection from '../Components/Settings/SettingsSection.js';
 import SettingControl from '../Components/Settings/SettingControl.js';
 import APISetupWizard from '../Components/Setup/APISetupWizard.js';
@@ -65,19 +65,19 @@ const parseTimeToMinutes = (timeStr) => {
 const checkPeriodsOverlap = (periods) => {
   // Returns array of overlap messages, empty if no overlaps
   const overlaps = [];
-  
+
   for (let i = 0; i < periods.length; i++) {
     for (let j = i + 1; j < periods.length; j++) {
       const period1 = periods[i];
       const period2 = periods[j];
-      
+
       if (!period1.enabled || !period2.enabled) continue;
-      
+
       const start1 = parseTimeToMinutes(period1.startTime);
       const end1 = parseTimeToMinutes(period1.endTime);
       const start2 = parseTimeToMinutes(period2.startTime);
       const end2 = parseTimeToMinutes(period2.endTime);
-      
+
       // Check if periods overlap
       if ((start1 < end2 && end1 > start2)) {
         overlaps.push(
@@ -86,24 +86,29 @@ const checkPeriodsOverlap = (periods) => {
       }
     }
   }
-  
+
   return overlaps;
 };
 
-export default function Settings() {
+export default function Settings({ embedded = false }) {
   const [settings, setSettings] = useState({
-    theme: { 
+    theme: {
       mode: 'dark', // light, dark, amoled
-      background: '#0a0a0f', 
-      accent: '#00f0ff', 
+      background: '#0a0a0f',
+      accent: '#00f0ff',
+      primaryColor: '#ffffff', // Main theme color for Dark Theme Pro mod
       text: '#ffffff',
       contrast: 'normal', // normal, high
       blur: true,
       transparency: true
     },
-    background: { type: 'soft-particle-drift', particleCount: 50, speed: 0.5, opacity: 0.4, blur: 2 },
+    background: { type: 'soft-particle-drift', particleCount: 50, speed: 0.5, opacity: 0.4, blur: 2, desktopWallpaper: 'nexus-default' },
     layout: {
       density: 'default', // compact, default, comfortable
+      desktopMode: false, // Enable Windows-style desktop interface
+      taskbarPosition: 'bottom', // bottom, left
+      taskbarStyle: 'modern', // modern, classic
+      windowsVersion: '11', // 10 or 11 - affects START menu and taskbar centering
     },
     motion: {
       animations: 'full', // full, reduced, none
@@ -156,19 +161,35 @@ export default function Settings() {
       autoplayControl: true,
       panicButton: true,
       panicSite: 'classroom',
+      tabCloakProfile: 'classroom',
       panicReturnTimeout: 60,
-      fakeTabName: 'IXL | Math, Language Arts, Science, Social Studies, and Spanish',
+      fakeTabName: 'Google Classroom',
       // General
       focusIndicators: true,
       reducedTransparency: false,
       screenReaderOptimized: false
     },
-    performance: { targetFPS: 60, ramLimit: 1024, animationScale: 1, widgetLimit: 3, adaptivePerf: true, showFPS: false },
+    performance: {
+      targetFPS: 60,
+      fpsCapEnabled: true,
+      vsyncEnabled: true,
+      ramLimit: 1024,
+      pageRAMSoftLimit: 750,
+      pageRAMHardLimit: 1250,
+      gamesRAMSoftLimit: 1024,
+      gamesRAMHardLimit: 4096,
+      animationScale: 1,
+      widgetLimit: 3,
+      adaptivePerf: true,
+      showFPS: false,
+      preloadPages: false,
+      preloadProfile: 'essential'
+    },
     games: { fullscreenOnLaunch: true, escToClose: true, lazyLoadStrength: 'medium' },
     widgets: { enabled: true, spotify: true, youtube: true, tiktok: false, autoDisable: true, dockInSidebar: true },
-    aiTools: { 
-      enabled: false, 
-      autoSuggest: true, 
+    aiTools: {
+      enabled: false,
+      autoSuggest: true,
       personality: 'adaptive',
       apiProvider: 'none',
       apiKey: '',
@@ -189,7 +210,7 @@ export default function Settings() {
     },
     lowEndMode: false
   });
-  
+
   const [user, setUser] = useState(null);
   const [profiles, setProfiles] = useState([
     { id: 'default', name: 'Default', device: 'Standard' }
@@ -216,12 +237,29 @@ export default function Settings() {
   const [periodValidationWarnings, setPeriodValidationWarnings] = useState([]);
   const navigate = useNavigate();
 
+  const syncSettingsToLocalStorage = (value) => {
+    try {
+      localStorage.setItem('nexus_settings', JSON.stringify(value));
+    } catch (err) {
+      console.error('Failed to sync settings to localStorage:', err);
+    }
+  };
+
   useEffect(() => {
     loadSettings();
+  }, [embedded, navigate]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
-      if (regenerateCooldown > 0) setRegenerateCooldown(prev => prev - 1);
+      setRegenerateCooldown(prev => (prev > 0 ? prev - 1 : 0));
     }, 1000);
-    
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
     // ESC key handler
     const handleEscape = (e) => {
       if (e.key === 'Escape' && window.location.pathname.includes('updates')) {
@@ -229,17 +267,20 @@ export default function Settings() {
       }
     };
     window.addEventListener('keydown', handleEscape);
-    
+
     return () => {
-      clearInterval(interval);
       window.removeEventListener('keydown', handleEscape);
     };
-  }, [regenerateCooldown]);
+  }, [navigate]);
 
   const loadSettings = async () => {
     try {
       const accountCode = session.get();
       if (!accountCode) {
+        if (embedded) {
+          setLoading(false);
+          return;
+        }
         navigate(createPageUrl('Landing'));
         return;
       }
@@ -248,7 +289,7 @@ export default function Settings() {
       setUserRole(role);
       setIsAdmin(session.isAdmin());
       setAccessCode(accountCode);
-      
+
       // Load invite code if admin or owner
       if (session.isAdmin()) {
         const code = storage.getInviteCode();
@@ -261,7 +302,31 @@ export default function Settings() {
 
       setUser(userData);
       if (userSettings) {
-        setSettings(prev => ({ ...prev, ...userSettings }));
+        setSettings(prev => {
+          const mergedSettings = { ...prev, ...userSettings };
+          syncSettingsToLocalStorage(mergedSettings);
+          return mergedSettings;
+        });
+      }
+
+      // Sync desktop mode from localStorage
+      const desktopMode = localStorage.getItem('desktop_mode') === 'true';
+      const taskbarPosition = localStorage.getItem('desktop_taskbar_position') || 'bottom';
+      const taskbarStyle = localStorage.getItem('desktop_taskbar_style') || 'modern';
+      const windowsVersion = localStorage.getItem('desktop_windows_version') || '11';
+      setSettings(prev => ({
+        ...prev,
+        layout: {
+          ...prev.layout,
+          desktopMode,
+          taskbarPosition,
+          taskbarStyle,
+          windowsVersion
+        }
+      }));
+
+      if (!userSettings) {
+        syncSettingsToLocalStorage(settings);
       }
     } catch (err) {
       console.error('Failed to load settings:', err);
@@ -280,17 +345,43 @@ export default function Settings() {
         current = current[keys[i]];
       }
       current[keys[keys.length - 1]] = value;
-      
+
+      // Special handling for desktop mode toggle
+      if (path === 'layout.desktopMode') {
+        localStorage.setItem('desktop_mode', value ? 'true' : 'false');
+        // Show notification that page will reload
+        if (value !== prev.layout.desktopMode) {
+          setSaveNotification('Desktop mode changed - Reloading...');
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        }
+      }
+
+      // Special handling for taskbar settings
+      if (path === 'layout.taskbarPosition') {
+        localStorage.setItem('desktop_taskbar_position', value);
+      }
+      if (path === 'layout.taskbarStyle') {
+        localStorage.setItem('desktop_taskbar_style', value);
+      }
+      if (path === 'layout.windowsVersion') {
+        localStorage.setItem('desktop_windows_version', value);
+      }
+
       // Auto-save to IndexedDB immediately
       storage.saveSettings(updated).catch(err => console.error('Failed to save settings:', err));
-      
+      syncSettingsToLocalStorage(updated);
+
       // Emit settings change event to notify other components
       settingsEmitter.emit(updated);
-      
+
       // Show brief save notification
-      setSaveNotification('Saved');
-      setTimeout(() => setSaveNotification(''), 1500);
-      
+      if (path !== 'layout.desktopMode') {
+        setSaveNotification('Saved');
+        setTimeout(() => setSaveNotification(''), 1500);
+      }
+
       return updated;
     });
   };
@@ -350,7 +441,7 @@ export default function Settings() {
         reader.onload = async (event) => {
           try {
             const importData = JSON.parse(event.target.result);
-            
+
             if (!importData.settings) {
               alert('Invalid settings file format.');
               return;
@@ -370,8 +461,9 @@ export default function Settings() {
 
             await storage.saveSettings(mergedSettings);
             setSettings(mergedSettings);
+            syncSettingsToLocalStorage(mergedSettings);
             settingsEmitter.emit(mergedSettings);
-            
+
             alert('Settings imported successfully! Page will reload to apply changes.');
             setTimeout(() => {
               if (typeof window !== 'undefined') {
@@ -413,7 +505,7 @@ export default function Settings() {
       alert('Username cannot be empty');
       return;
     }
-    
+
     try {
       const updatedUser = { ...user, username: newUsername };
       await storage.saveUser(newUsername, accessCode);
@@ -432,12 +524,12 @@ export default function Settings() {
       alert('Password must be at least 5 characters');
       return;
     }
-    
+
     if (newPassword !== confirmPassword) {
       alert('Passwords do not match');
       return;
     }
-    
+
     try {
       // Update access code (password)
       const newCode = newPassword;
@@ -456,13 +548,13 @@ export default function Settings() {
 
   const regenerateInviteCode = () => {
     if (regenerateCooldown > 0) return;
-    
+
     if (!confirm('Generate a new invite code? The old one will no longer work for new users!')) return;
-    
+
     const newCode = storage.regenerateInviteCode();
     setInviteCode(newCode);
     setRegenerateCooldown(10);
-    
+
     alert(`New invite code: ${newCode}\n\nShare this with new users. It will auto-regenerate after someone uses it.`);
   };
 
@@ -504,7 +596,7 @@ export default function Settings() {
             {/* Role Upgrade Options */}
             <div className="p-4 rounded-xl bg-gradient-to-r from-purple-500/10 to-cyan-500/10 border border-purple-500/20">
               <h4 className="text-white font-medium mb-3">Upgrade Your Account</h4>
-              
+
               {userRole === 'guest' && (
                 <div className="space-y-2">
                   <p className="text-white/60 text-sm mb-3">
@@ -525,7 +617,7 @@ export default function Settings() {
                   </p>
                 </div>
               )}
-              
+
               {userRole === 'verified' && (
                 <div className="space-y-2">
                   <p className="text-white/60 text-sm mb-3">
@@ -542,7 +634,7 @@ export default function Settings() {
                   </div>
                 </div>
               )}
-              
+
               {(userRole === 'admin' || userRole === 'owner') && (
                 <div className="flex items-center gap-2 text-green-400">
                   <Check className="w-5 h-5" />
@@ -633,25 +725,38 @@ export default function Settings() {
         icon: Palette,
         keywords: ['color', 'theme', 'accent', 'background', 'appearance', 'dark', 'light', 'amoled', 'contrast'],
         controls: [
-          { path: 'theme.mode', title: 'Theme Mode', description: 'Overall color scheme', type: 'dropdown', value: settings.theme.mode, options: [
-            { value: 'light', label: '☀️ Light - Bright & airy' },
-            { value: 'dark', label: '🌙 Dark - Easy on eyes' },
-            { value: 'amoled', label: '⚫ AMOLED - Pure black' }
-          ]},
-          { path: 'theme.accent', title: 'Accent Color', description: 'Buttons, links & highlights', type: 'dropdown', value: settings.theme.accent, options: [
-            { value: '#00f0ff', label: '🔵 Cyan (Default)' },
-            { value: '#a55eea', label: '🟣 Purple' },
-            { value: '#26de81', label: '🟢 Green' },
-            { value: '#fc5c65', label: '🔴 Red' },
-            { value: '#fd9644', label: '🟠 Orange' },
-            { value: '#fed330', label: '🟡 Yellow' },
-            { value: '#45aaf2', label: '🔵 Blue' },
-            { value: '#f368e0', label: '🟣 Pink' }
-          ]},
-          { path: 'theme.contrast', title: 'Contrast Level', description: 'Text & UI contrast', type: 'dropdown', value: settings.theme.contrast, options: [
-            { value: 'normal', label: 'Normal - Balanced' },
-            { value: 'high', label: 'High - Maximum readability' }
-          ]},
+          {
+            path: 'theme.mode', title: 'Theme Mode', description: 'Overall color scheme', type: 'dropdown', value: settings.theme.mode, options: [
+              { value: 'light', label: '☀️ Light - Bright & airy' },
+              { value: 'dark', label: '🌙 Dark - Easy on eyes' },
+              { value: 'amoled', label: '⚫ AMOLED - Pure black' }
+            ]
+          },
+          {
+            path: 'theme.primaryColor',
+            title: 'Primary Theme Color',
+            description: '🌈 Main color for Dark Theme Pro mod - changes dark mode tint',
+            type: 'color',
+            value: settings.theme.primaryColor || '#ffffff'
+          },
+          {
+            path: 'theme.accent', title: 'Accent Color', description: 'Buttons, links & highlights', type: 'dropdown', value: settings.theme.accent, options: [
+              { value: '#00f0ff', label: '🔵 Cyan (Default)' },
+              { value: '#a55eea', label: '🟣 Purple' },
+              { value: '#26de81', label: '🟢 Green' },
+              { value: '#fc5c65', label: '🔴 Red' },
+              { value: '#fd9644', label: '🟠 Orange' },
+              { value: '#fed330', label: '🟡 Yellow' },
+              { value: '#45aaf2', label: '🔵 Blue' },
+              { value: '#f368e0', label: '🟣 Pink' }
+            ]
+          },
+          {
+            path: 'theme.contrast', title: 'Contrast Level', description: 'Text & UI contrast', type: 'dropdown', value: settings.theme.contrast, options: [
+              { value: 'normal', label: 'Normal - Balanced' },
+              { value: 'high', label: 'High - Maximum readability' }
+            ]
+          },
           { path: 'theme.blur', title: 'Blur Effects', description: 'Glassmorphism blur', type: 'toggle', value: settings.theme.blur },
           { path: 'theme.transparency', title: 'Transparency', description: 'Semi-transparent UI', type: 'toggle', value: settings.theme.transparency }
         ]
@@ -660,13 +765,36 @@ export default function Settings() {
         id: 'layout',
         title: 'Layout & Density',
         icon: Layout,
-        keywords: ['layout', 'density', 'spacing', 'compact', 'comfortable', 'padding'],
+        keywords: ['layout', 'density', 'spacing', 'compact', 'comfortable', 'padding', 'desktop', 'windows', 'mode', 'taskbar', 'sidebar'],
         controls: [
-          { path: 'layout.density', title: 'Layout Density', description: 'Spacing & element size', type: 'dropdown', value: settings.layout.density, options: [
-            { value: 'compact', label: 'Compact - Tight spacing, more content' },
-            { value: 'default', label: 'Default - Balanced' },
-            { value: 'comfortable', label: 'Comfortable - Touch-friendly, spacious' }
-          ]}
+          { path: 'layout.desktopMode', title: 'Desktop Mode (Windows Style)', description: 'Enable draggable windows interface like Windows/Linux', type: 'toggle', value: settings.layout.desktopMode },
+          ...(settings.layout.desktopMode ? [
+            {
+              path: 'layout.windowsVersion', title: 'Windows Version', description: 'Choose Windows 10 or 11 style', type: 'dropdown', value: settings.layout.windowsVersion || '11', options: [
+                { value: '10', label: 'Windows 10 - Classic left-aligned START menu' },
+                { value: '11', label: 'Windows 11 - Modern centered START menu' }
+              ]
+            },
+            {
+              path: 'layout.taskbarPosition', title: 'Taskbar Position', description: 'Where to show the taskbar', type: 'dropdown', value: settings.layout.taskbarPosition || 'bottom', options: [
+                { value: 'bottom', label: 'Bottom - Traditional Windows style' },
+                { value: 'left', label: 'Left Side - Vertical sidebar style' }
+              ]
+            },
+            {
+              path: 'layout.taskbarStyle', title: 'Taskbar Style', description: 'Visual theme for taskbar', type: 'dropdown', value: settings.layout.taskbarStyle || 'modern', options: [
+                { value: 'modern', label: 'Modern - Dark & sleek' },
+                { value: 'classic', label: 'Classic - Traditional gray' }
+              ]
+            }
+          ] : []),
+          {
+            path: 'layout.density', title: 'Layout Density', description: 'Spacing & element size', type: 'dropdown', value: settings.layout.density, options: [
+              { value: 'compact', label: 'Compact - Tight spacing, more content' },
+              { value: 'default', label: 'Default - Balanced' },
+              { value: 'comfortable', label: 'Comfortable - Touch-friendly, spacious' }
+            ]
+          }
         ]
       },
       {
@@ -675,11 +803,13 @@ export default function Settings() {
         icon: Sparkles,
         keywords: ['animation', 'motion', 'transition', 'reduced', 'accessibility'],
         controls: [
-          { path: 'motion.animations', title: 'Animation Level', description: 'UI motion & transitions', type: 'dropdown', value: settings.motion.animations, options: [
-            { value: 'full', label: 'Full - Smooth animations' },
-            { value: 'reduced', label: 'Reduced - Minimal motion' },
-            { value: 'none', label: 'None - Instant transitions' }
-          ]}
+          {
+            path: 'motion.animations', title: 'Animation Level', description: 'UI motion & transitions', type: 'dropdown', value: settings.motion.animations, options: [
+              { value: 'full', label: 'Full - Smooth animations' },
+              { value: 'reduced', label: 'Reduced - Minimal motion' },
+              { value: 'none', label: 'None - Instant transitions' }
+            ]
+          }
         ]
       },
       {
@@ -701,75 +831,83 @@ export default function Settings() {
         controls: [
           // Visual Assistance
           { path: 'accessibility.grayscale', title: '🎨 Grayscale Mode', description: 'Remove all colors (focus aid)', type: 'toggle', value: settings.accessibility?.grayscale },
-          { path: 'accessibility.colorblindMode', title: '🌈 Colorblind Filter', description: 'Adjust colors for color vision deficiency', type: 'dropdown', value: settings.accessibility?.colorblindMode || 'none', options: [
-            { value: 'none', label: 'None - Standard colors' },
-            { value: 'deuteranopia', label: 'Deuteranopia (Red-Green)' },
-            { value: 'protanopia', label: 'Protanopia (Red-Weak)' },
-            { value: 'tritanopia', label: 'Tritanopia (Blue-Yellow)' },
-            { value: 'achromatopsia', label: 'Achromatopsia (Complete)' }
-          ]},
-          { path: 'accessibility.cursorSize', title: '🖱️ Cursor Size', description: 'Make cursor easier to see', type: 'dropdown', value: settings.accessibility?.cursorSize || 'normal', options: [
-            { value: 'normal', label: 'Normal' },
-            { value: 'large', label: 'Large (1.5x)' },
-            { value: 'xlarge', label: 'Extra Large (2x)' }
-          ]},
+          {
+            path: 'accessibility.colorblindMode', title: '🌈 Colorblind Filter', description: 'Adjust colors for color vision deficiency', type: 'dropdown', value: settings.accessibility?.colorblindMode || 'none', options: [
+              { value: 'none', label: 'None - Standard colors' },
+              { value: 'deuteranopia', label: 'Deuteranopia (Red-Green)' },
+              { value: 'protanopia', label: 'Protanopia (Red-Weak)' },
+              { value: 'tritanopia', label: 'Tritanopia (Blue-Yellow)' },
+              { value: 'achromatopsia', label: 'Achromatopsia (Complete)' }
+            ]
+          },
+          {
+            path: 'accessibility.cursorSize', title: '🖱️ Cursor Size', description: 'Make cursor easier to see', type: 'dropdown', value: settings.accessibility?.cursorSize || 'normal', options: [
+              { value: 'normal', label: 'Normal' },
+              { value: 'large', label: 'Large (1.5x)' },
+              { value: 'xlarge', label: 'Extra Large (2x)' }
+            ]
+          },
           { path: 'accessibility.cursorHighlight', title: '⭕ Cursor Highlight', description: 'Circle around cursor for visibility', type: 'toggle', value: settings.accessibility?.cursorHighlight },
           { path: 'accessibility.linkUnderlines', title: '🔗 Always Underline Links', description: 'Show underlines on all links', type: 'toggle', value: settings.accessibility?.linkUnderlines },
           { path: 'accessibility.iconLabels', title: '🏷️ Always Show Labels', description: 'Text labels on icon buttons', type: 'toggle', value: settings.accessibility?.iconLabels },
-          
+
           // Reading Support
           { path: 'accessibility.dyslexiaFont', title: '📖 Dyslexia-Friendly Font', description: 'OpenDyslexic for easier reading', type: 'toggle', value: settings.accessibility?.dyslexiaFont },
           { path: 'accessibility.readingRuler', title: '📏 Reading Ruler', description: 'Highlight current line', type: 'toggle', value: settings.accessibility?.readingRuler },
-          { path: 'accessibility.lineHeight', title: '📐 Line Spacing', description: 'Space between text lines', type: 'dropdown', value: settings.accessibility?.lineHeight || 'normal', options: [
-            { value: 'compact', label: 'Compact (1.4)' },
-            { value: 'normal', label: 'Normal (1.6)' },
-            { value: 'relaxed', label: 'Relaxed (1.8)' },
-            { value: 'loose', label: 'Loose (2.0)' }
-          ]},
+          {
+            path: 'accessibility.lineHeight', title: '📐 Line Spacing', description: 'Space between text lines', type: 'dropdown', value: settings.accessibility?.lineHeight || 'normal', options: [
+              { value: 'compact', label: 'Compact (1.4)' },
+              { value: 'normal', label: 'Normal (1.6)' },
+              { value: 'relaxed', label: 'Relaxed (1.8)' },
+              { value: 'loose', label: 'Loose (2.0)' }
+            ]
+          },
           { path: 'accessibility.focusMode', title: '🎯 Focus Mode', description: 'Hide distractions, show current content', type: 'toggle', value: settings.accessibility?.focusMode },
           { path: 'accessibility.bionicReading', title: '⚡ Bionic Reading', description: 'Bold first letters for faster scanning', type: 'toggle', value: settings.accessibility?.bionicReading },
           { path: 'accessibility.readingGuide', title: '📍 Reading Guide', description: 'Vertical line following cursor', type: 'toggle', value: settings.accessibility?.readingGuide },
           { path: 'accessibility.largeText', title: '🔤 Large Text', description: 'Increase all text sizes (125%)', type: 'toggle', value: settings.accessibility?.largeText },
-          
+
           // Audio & Feedback
           { path: 'accessibility.soundEffects', title: '🔊 Sound Effects', description: 'Audio feedback for actions', type: 'toggle', value: settings.accessibility?.soundEffects },
           { path: 'accessibility.screenReaderAnnouncements', title: '📢 Live Announcements', description: 'Announce dynamic content changes', type: 'toggle', value: settings.accessibility?.screenReaderAnnouncements },
           { path: 'accessibility.alertTones', title: '🔔 Alert Tones', description: 'Different sounds for notifications', type: 'toggle', value: settings.accessibility?.alertTones },
           { path: 'accessibility.reducedSound', title: '🔉 Reduce Sound', description: 'Lower volume for UI sounds', type: 'toggle', value: settings.accessibility?.reducedSound },
-          
+
           // Timing & Breaks
           { path: 'accessibility.extendedTimeout', title: '⏱️ Extended Timeout', description: 'Disable auto-logout timeouts', type: 'toggle', value: settings.accessibility?.extendedTimeout },
           { path: 'accessibility.breakReminders', title: '☕ Break Reminders', description: 'Pomodoro-style rest notifications', type: 'toggle', value: settings.accessibility?.breakReminders },
           { path: 'accessibility.breakInterval', title: '⏲️ Break Interval', description: 'Minutes between break reminders', type: 'slider', value: settings.accessibility?.breakInterval || 25, min: 15, max: 90, step: 5, suffix: ' min' },
           { path: 'accessibility.timeLimitWarnings', title: '⚠️ Timeout Warnings', description: 'Alert before auto-logout', type: 'toggle', value: settings.accessibility?.timeLimitWarnings },
-          
+
           // Input Alternatives
           { path: 'accessibility.stickyKeys', title: '🔐 Sticky Keys', description: 'Hold modifiers without holding', type: 'toggle', value: settings.accessibility?.stickyKeys },
           { path: 'accessibility.clickAssist', title: '👆 Click Assist', description: 'Auto-click on hover after delay', type: 'toggle', value: settings.accessibility?.clickAssist },
           { path: 'accessibility.clickDelay', title: '⏳ Click Delay', description: 'Hover time before auto-click', type: 'slider', value: settings.accessibility?.clickDelay || 1000, min: 500, max: 3000, step: 100, suffix: ' ms' },
           { path: 'accessibility.oneHandedMode', title: '🤚 One-Handed Mode', description: 'Optimized for single-hand use', type: 'toggle', value: settings.accessibility?.oneHandedMode },
-          
+
           // Cognitive Support
           { path: 'accessibility.simplifiedUI', title: '🎪 Simplified UI', description: 'Essential features only', type: 'toggle', value: settings.accessibility?.simplifiedUI },
           { path: 'accessibility.plainLanguage', title: '💬 Plain Language', description: 'Simpler explanations', type: 'toggle', value: settings.accessibility?.plainLanguage },
           { path: 'accessibility.extraConfirmations', title: '✅ Extra Confirmations', description: 'Confirm important actions', type: 'toggle', value: settings.accessibility?.extraConfirmations },
           { path: 'accessibility.undoBuffer', title: '↩️ Undo Actions', description: 'Ability to undo recent changes', type: 'toggle', value: settings.accessibility?.undoBuffer },
-          
+
           // Safety & Warnings
           { path: 'accessibility.photosensitiveMode', title: '⚡ Photosensitive Protection', description: 'Reduce flashing & strobing', type: 'toggle', value: settings.accessibility?.photosensitiveMode },
           { path: 'accessibility.autoplayControl', title: '▶️ Prevent Autoplay', description: 'Stop auto-playing media', type: 'toggle', value: settings.accessibility?.autoplayControl },
           { path: 'accessibility.panicButton', title: '🚨 Panic Button (ESC)', description: 'Quick switch to innocent site', type: 'toggle', value: settings.accessibility?.panicButton },
-          { path: 'accessibility.panicSite', title: '🎯 Panic Redirect', description: 'Site to open when ESC pressed', type: 'dropdown', value: settings.accessibility?.panicSite || 'classroom', options: [
-            { value: 'classroom', label: '📚 Google Classroom' },
-            { value: 'ixl', label: '📊 IXL Learning' },
-            { value: 'canva', label: '🎨 Canva' },
-            { value: 'docs', label: '📝 Google Docs' },
-            { value: 'drive', label: '💾 Google Drive' },
-            { value: 'gmail', label: '📧 Gmail' },
-            { value: 'newtab', label: '🌐 New Tab (Google)' },
-            { value: 'blank', label: '⚪ Blank Page' }
-          ]},
-          { 
+          {
+            path: 'accessibility.panicSite', title: '🎯 Panic Redirect', description: 'Site to open when ESC pressed', type: 'dropdown', value: settings.accessibility?.panicSite || 'classroom', options: [
+              { value: 'classroom', label: '📚 Google Classroom' },
+              { value: 'ixl', label: '📊 IXL Learning' },
+              { value: 'canva', label: '🎨 Canva' },
+              { value: 'docs', label: '📝 Google Docs' },
+              { value: 'drive', label: '💾 Google Drive' },
+              { value: 'gmail', label: '📧 Gmail' },
+              { value: 'newtab', label: '🌐 New Tab (Google)' },
+              { value: 'blank', label: '⚪ Blank Page' }
+            ]
+          },
+          {
             path: 'accessibility.panicReturnTimeout',
             title: '⏱️ Return Link Expires',
             description: 'Auto-clear local return data after inactivity (applies to panic return + general leave)',
@@ -786,26 +924,31 @@ export default function Settings() {
               return `${val} min`;
             }
           },
-          { 
-            path: 'accessibility.fakeTabName',
-            title: '📑 Tab Name Disguise',
-            description: 'Tab name shown when you switch away (makes it look like you\'re studying)',
-            type: 'dropdown',
-            value: settings.accessibility?.fakeTabName ?? 'IXL | Math, Language Arts, Science, Social Studies, and Spanish',
-            options: [
-              { value: 'Google Classroom', label: '📚 Google Classroom' },
-              { value: 'IXL | Math, Language Arts, Science, Social Studies, and Spanish', label: '📊 IXL (Full Title)' },
-              { value: 'IXL - Math Practice', label: '🔢 IXL - Math Practice' },
-              { value: 'Google Docs', label: '📄 Google Docs' },
-              { value: 'Google Drive', label: '💾 Google Drive' },
-              { value: 'Canvas', label: '🎨 Canvas' },
-              { value: 'Quizlet', label: '📇 Quizlet' },
-              { value: 'Assignments - Google Classroom', label: '✏️ Assignments' },
-              { value: 'Untitled document - Google Docs', label: '📝 Untitled Doc' },
-              { value: 'My Drive - Google Drive', label: '🗂️ My Drive' }
+          {
+            path: 'accessibility.tabCloakProfile', title: '🕶️ Tab Cloak Profile', description: 'Default hidden-tab disguise source', type: 'dropdown', value: settings.accessibility?.tabCloakProfile || 'classroom', options: [
+              { value: 'classroom', label: '📚 Google Classroom (Default)' },
+              { value: 'ixl', label: '📊 IXL Learning' },
+              { value: 'docs', label: '📝 Google Docs' },
+              { value: 'drive', label: '💾 Google Drive' },
+              { value: 'canva', label: '🎨 Canva' },
+              { value: 'quizlet', label: '📇 Quizlet' },
+              { value: 'aboutblank', label: '🕳️ about:blank Launcher' },
+              { value: 'custom', label: '🔗 Custom Site (set with "(")' }
             ]
           },
-          
+          {
+            path: 'accessibility.fakeTabName',
+            title: '📑 Tab Name Disguise',
+            description: 'Manual hidden-tab title (supports custom text including parentheses)',
+            type: 'text',
+            value: settings.accessibility?.fakeTabName ?? 'Google Classroom',
+            placeholder: 'Google Classroom (Algebra)',
+            textQuickActions: [
+              { label: '(', value: '(', title: 'Insert opening parenthesis' },
+              { label: ')', value: ')', title: 'Insert closing parenthesis' }
+            ]
+          },
+
           // General
           { path: 'accessibility.focusIndicators', title: '🔍 Enhanced Focus', description: 'Stronger keyboard focus outlines', type: 'toggle', value: settings.accessibility?.focusIndicators },
           { path: 'accessibility.reducedTransparency', title: '🪟 Reduce Transparency', description: 'Solid backgrounds for clarity', type: 'toggle', value: settings.accessibility?.reducedTransparency },
@@ -818,21 +961,75 @@ export default function Settings() {
         icon: Monitor,
         keywords: ['background', 'particle', 'animation', 'blur', 'motion'],
         controls: [
+          {
+            path: 'background.type',
+            title: 'Background Style',
+            description: 'Choose your animated background',
+            type: 'dropdown',
+            value: settings.background.type,
+            options: [
+              { value: 'soft-particle-drift', label: 'Soft Particle Drift' },
+              { value: 'fireflies', label: 'Fireflies' },
+              { value: 'geometric', label: 'Geometric Patterns' },
+              { value: 'network-nodes', label: 'Network Nodes' },
+              { value: 'none', label: 'None (Solid Background)' }
+            ]
+          },
           { path: 'background.particleCount', title: 'Particle Count', description: 'Number of animated particles', type: 'slider', value: settings.background.particleCount, min: 20, max: 100 },
           { path: 'background.speed', title: 'Motion Speed', description: 'Particle movement speed', type: 'slider', value: settings.background.speed, min: 0.1, max: 2, step: 0.1 },
           { path: 'background.opacity', title: 'Opacity', description: 'Particle visibility', type: 'slider', value: settings.background.opacity, min: 0.1, max: 1, step: 0.1 },
-          { path: 'background.blur', title: 'Blur Intensity', description: 'Glow effect strength', type: 'slider', value: settings.background.blur, min: 0, max: 5 }
+          { path: 'background.blur', title: 'Blur Intensity', description: 'Glow effect strength', type: 'slider', value: settings.background.blur, min: 0, max: 5 },
+          {
+            path: 'background.desktopWallpaper',
+            title: 'Desktop Wallpaper Pack',
+            description: 'Desktop mode wallpaper theme',
+            type: 'dropdown',
+            value: settings.background.desktopWallpaper || 'nexus-default',
+            options: [
+              { value: 'nexus-default', label: 'Nexus Default (Current)' },
+              { value: 'windows-7', label: 'Windows 7 Classic' },
+              { value: 'windows-8', label: 'Windows 8 Bloom' },
+              { value: 'windows-10', label: 'Windows 10 Hero' },
+              { value: 'season-halloween', label: 'Seasonal: Halloween' },
+              { value: 'season-christmas', label: 'Seasonal: Christmas' },
+              { value: 'season-easter', label: 'Seasonal: Easter' },
+              { value: 'season-newyear', label: 'Seasonal: New Year\'s Eve' }
+            ]
+          }
         ]
       },
       {
         id: 'performance',
         title: 'Performance Behavior',
         icon: Cpu,
-        keywords: ['fps', 'performance', 'ram', 'animation', 'adaptive', 'optimize'],
+        keywords: ['fps', 'performance', 'ram', 'animation', 'adaptive', 'optimize', 'page', 'games', 'limiter'],
         controls: [
           { path: 'performance.showFPS', title: 'FPS Counter', description: 'Show FPS monitor', type: 'toggle', value: settings.performance.showFPS },
-          { path: 'performance.targetFPS', title: 'Target FPS', description: 'Preferred frame rate', type: 'slider', value: settings.performance.targetFPS, min: 15, max: 60, suffix: ' FPS' },
-          { path: 'performance.ramLimit', title: 'RAM Soft Limit', description: 'Memory threshold (MB)', type: 'slider', value: settings.performance.ramLimit, min: 512, max: 4096, suffix: ' MB' },
+          { path: 'performance.fpsCapEnabled', title: 'FPS Cap Enabled', description: 'Limit rendering to your selected FPS', type: 'toggle', value: settings.performance.fpsCapEnabled ?? true },
+          { path: 'performance.targetFPS', title: 'Target FPS', description: 'Frame cap target when FPS cap is enabled', type: 'slider', value: settings.performance.targetFPS ?? 60, min: 5, max: 165, formatValue: (val) => `${val} FPS` },
+          { path: 'performance.vsyncEnabled', title: 'V-Sync Preference', description: 'Prefer smooth frame pacing when supported', type: 'toggle', value: settings.performance.vsyncEnabled ?? true },
+          { path: 'performance.ramLimit', title: 'RAM Soft Limit', description: 'Memory threshold', type: 'slider', value: settings.performance.ramLimit, min: 512, max: 4096, suffix: 'MB', isRAM: true },
+          { path: 'performance.preloadPages', title: 'Performance Mode (Preload Pages)', description: 'Preload core pages for faster opening', type: 'toggle', value: settings.performance.preloadPages ?? false },
+          {
+            path: 'performance.preloadProfile',
+            title: 'Preload Profile',
+            description: 'How many pages to preload when Performance Mode is enabled',
+            type: 'dropdown',
+            value: settings.performance.preloadProfile || 'essential',
+            options: [
+              { value: 'essential', label: 'Essential (Games, Browser, Settings, Utilities)' },
+              { value: 'aggressive', label: 'Aggressive (+ Music, Videos, Social, Study Tools)' }
+            ]
+          },
+
+          // Page RAM Limits
+          { path: 'performance.pageRAMSoftLimit', title: 'Page RAM (Soft Limit)', description: 'Warning threshold for page operations', type: 'slider', value: settings.performance.pageRAMSoftLimit, min: 250, max: 2000, suffix: 'MB', isRAM: true },
+          { path: 'performance.pageRAMHardLimit', title: 'Page RAM (Hard Limit)', description: 'Max allowed for page operations', type: 'slider', value: settings.performance.pageRAMHardLimit, min: 250, max: 2500, suffix: 'MB', isRAM: true },
+
+          // Games RAM Limits
+          { path: 'performance.gamesRAMSoftLimit', title: 'Games RAM (Soft Limit)', description: 'Warning threshold for games', type: 'slider', value: settings.performance.gamesRAMSoftLimit, min: 500, max: 4000, suffix: 'MB', isRAM: true },
+          { path: 'performance.gamesRAMHardLimit', title: 'Games RAM (Hard Limit)', description: 'Max allowed for games', type: 'slider', value: settings.performance.gamesRAMHardLimit, min: 500, max: 4000, suffix: 'MB', isRAM: true },
+
           { path: 'performance.animationScale', title: 'Animation Scaling', description: 'Detail reduction strength', type: 'slider', value: settings.performance.animationScale, min: 0.5, max: 1, step: 0.1 },
           { path: 'performance.widgetLimit', title: 'Widget Limit', description: 'Max concurrent widgets', type: 'slider', value: settings.performance.widgetLimit, min: 1, max: 5 },
           { path: 'performance.adaptivePerf', title: 'Adaptive Performance', description: 'Auto-adjust quality', type: 'toggle', value: settings.performance.adaptivePerf }
@@ -853,11 +1050,13 @@ export default function Settings() {
         controls: [
           { path: 'games.fullscreenOnLaunch', title: 'Fullscreen on Launch', description: 'Auto-fullscreen games', type: 'toggle', value: settings.games.fullscreenOnLaunch },
           { path: 'games.escToClose', title: 'ESC to Close', description: 'Press ESC to exit games', type: 'toggle', value: settings.games.escToClose },
-          { path: 'games.lazyLoadStrength', title: 'Lazy Load Strength', description: 'Resource loading strategy', type: 'dropdown', value: settings.games.lazyLoadStrength, options: [
-            { value: 'low', label: 'Low (load all)' },
-            { value: 'medium', label: 'Medium (smart)' },
-            { value: 'high', label: 'High (minimal)' }
-          ]}
+          {
+            path: 'games.lazyLoadStrength', title: 'Lazy Load Strength', description: 'Resource loading strategy', type: 'dropdown', value: settings.games.lazyLoadStrength, options: [
+              { value: 'low', label: 'Low (load all)' },
+              { value: 'medium', label: 'Medium (smart)' },
+              { value: 'high', label: 'High (minimal)' }
+            ]
+          }
         ]
       },
       {
@@ -889,18 +1088,22 @@ export default function Settings() {
         icon: Globe,
         keywords: ['browser', 'links', 'open', 'external', 'nexus', 'search', 'engine'],
         controls: [
-          { path: 'browser.openLinksIn', title: 'Open Links In', description: 'Where to open game & video links', type: 'dropdown', value: settings.browser?.openLinksIn || 'nexus', options: [
-            { value: 'nexus', label: 'Nexus Browser (Built-in)' },
-            { value: 'external', label: 'External Browser' }
-          ]},
-          { path: 'browser.searchEngine', title: 'Search Engine', description: 'Default search engine for queries (iframe-friendly)', type: 'dropdown', value: settings.browser?.searchEngine || 'startpage', options: [
-            { value: 'startpage', label: 'Startpage' },
-            { value: 'searx', label: 'SearX' },
-            { value: 'metager', label: 'MetaGer' },
-            { value: 'mojeek', label: 'Mojeek' },
-            { value: 'qwant', label: 'Qwant' },
-            { value: 'swisscows', label: 'Swisscows' }
-          ]}
+          {
+            path: 'browser.openLinksIn', title: 'Open Links In', description: 'Where to open game & video links', type: 'dropdown', value: settings.browser?.openLinksIn || 'nexus', options: [
+              { value: 'nexus', label: 'Nexus Browser (Built-in)' },
+              { value: 'external', label: 'External Browser' }
+            ]
+          },
+          {
+            path: 'browser.searchEngine', title: 'Search Engine', description: 'Default search engine for queries (iframe-friendly)', type: 'dropdown', value: settings.browser?.searchEngine || 'startpage', options: [
+              { value: 'startpage', label: 'Startpage' },
+              { value: 'searx', label: 'SearX' },
+              { value: 'metager', label: 'MetaGer' },
+              { value: 'mojeek', label: 'Mojeek' },
+              { value: 'qwant', label: 'Qwant' },
+              { value: 'swisscows', label: 'Swisscows' }
+            ]
+          }
         ]
       },
       {
@@ -924,44 +1127,50 @@ export default function Settings() {
         controls: [
           { path: 'aiTools.enabled', title: 'AI Assistant', description: 'Enable AI features', type: 'toggle', value: settings.aiTools.enabled },
           { path: 'aiTools.autoSuggest', title: 'Auto Suggestions', description: 'AI-powered hints', type: 'toggle', value: settings.aiTools.autoSuggest },
-          { path: 'aiTools.personality', title: 'AI Personality Mode', description: 'How your AI assistant communicates', type: 'dropdown', value: settings.aiTools?.personality || 'adaptive', options: [
-            { value: 'adaptive', label: '🔄 Adaptive - Mirrors your style' },
-            { value: 'kind', label: '💚 Kind - Always encouraging' },
-            { value: 'moody', label: '😏 Moody - Witty and sarcastic' },
-            { value: 'professional', label: '💼 Professional - Direct and efficient' },
-            { value: 'mentor', label: '🎓 Mentor - Educational & detailed' },
-            { value: 'chill', label: '😎 Chill - Relaxed and friendly' }
-          ]},
-          { path: 'aiTools.apiProvider', title: 'AI Provider', description: 'Choose AI service (requires API key)', type: 'dropdown', value: settings.aiTools?.apiProvider || 'none', options: [
-            { value: 'none', label: '❌ None - Template responses only' },
-            { value: 'openai', label: '🤖 OpenAI (GPT-3.5/GPT-4)' },
-            { value: 'anthropic', label: '🧠 Anthropic (Claude)' },
-            { value: 'google', label: '📊 Google (Gemini)' }
-          ]},
+          {
+            path: 'aiTools.personality', title: 'AI Personality Mode', description: 'How your AI assistant communicates', type: 'dropdown', value: settings.aiTools?.personality || 'adaptive', options: [
+              { value: 'adaptive', label: '🔄 Adaptive - Mirrors your style' },
+              { value: 'kind', label: '💚 Kind - Always encouraging' },
+              { value: 'moody', label: '😏 Moody - Witty and sarcastic' },
+              { value: 'professional', label: '💼 Professional - Direct and efficient' },
+              { value: 'mentor', label: '🎓 Mentor - Educational & detailed' },
+              { value: 'chill', label: '😎 Chill - Relaxed and friendly' }
+            ]
+          },
+          {
+            path: 'aiTools.apiProvider', title: 'AI Provider', description: 'Choose AI service (requires API key)', type: 'dropdown', value: settings.aiTools?.apiProvider || 'none', options: [
+              { value: 'none', label: '❌ None - Template responses only' },
+              { value: 'openai', label: '🤖 OpenAI (GPT-3.5/GPT-4)' },
+              { value: 'anthropic', label: '🧠 Anthropic (Claude)' },
+              { value: 'google', label: '📊 Google (Gemini)' }
+            ]
+          },
           { path: 'aiTools.apiKey', title: 'API Key', description: settings.aiTools?.apiProvider === 'openai' ? 'Get from platform.openai.com/api-keys' : settings.aiTools?.apiProvider === 'anthropic' ? 'Get from console.anthropic.com' : settings.aiTools?.apiProvider === 'google' ? 'Get from makersuite.google.com' : 'Your API key (stored locally)', type: 'password', value: settings.aiTools?.apiKey || '', placeholder: 'sk-...' },
-          { path: 'aiTools.serpApiKey', title: 'SerpAPI Key (Optional)', description: 'For I.R.I.S autonomous web search - Get from serpapi.com (free tier available)', type: 'password', value: settings.aiTools?.serpApiKey || '', placeholder: 'Your SerpAPI key...' },
-          { path: 'aiTools.model', title: 'Model', description: 'AI model to use', type: 'dropdown', value: settings.aiTools?.model || 'gpt-3.5-turbo', options: [
-            { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo (Fast & Cheap)' },
-            { value: 'gpt-4', label: 'GPT-4 (Smarter)' },
-            { value: 'gpt-4-turbo', label: 'GPT-4 Turbo (Best)' },
-            { value: 'claude-3-sonnet', label: 'Claude 3 Sonnet' },
-            { value: 'claude-3-opus', label: 'Claude 3 Opus' },
-            { value: 'gemini-pro', label: 'Gemini Pro' }
-          ]},
-          { 
-            type: 'custom', 
+          { path: 'aiTools.serpApiKey', title: 'SerpAPI Key (Optional)', description: 'For RAZONET autonomous web search - Get from serpapi.com (free tier available)', type: 'password', value: settings.aiTools?.serpApiKey || '', placeholder: 'Your SerpAPI key...' },
+          {
+            path: 'aiTools.model', title: 'Model', description: 'AI model to use', type: 'dropdown', value: settings.aiTools?.model || 'gpt-3.5-turbo', options: [
+              { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo (Fast & Cheap)' },
+              { value: 'gpt-4', label: 'GPT-4 (Smarter)' },
+              { value: 'gpt-4-turbo', label: 'GPT-4 Turbo (Best)' },
+              { value: 'claude-3-sonnet', label: 'Claude 3 Sonnet' },
+              { value: 'claude-3-opus', label: 'Claude 3 Opus' },
+              { value: 'gemini-pro', label: 'Gemini Pro' }
+            ]
+          },
+          {
+            type: 'custom',
             component: (
               <div className="space-y-3">
-                {/* I.R.I.S Info Card */}
+                {/* RAZONET Info Card */}
                 <div className="p-4 rounded-xl bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20">
                   <div className="flex items-start gap-3 mb-3">
                     <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center flex-shrink-0">
                       <SearchIcon className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-white font-semibold mb-1">I.R.I.S Autonomous Search</h4>
+                      <h4 className="text-white font-semibold mb-1">RAZONET Autonomous Search</h4>
                       <p className="text-white/70 text-sm leading-relaxed">
-                        I.R.I.S (Intelligent Research & Information System) automatically searches the web 
+                        RAZONET automatically searches the web
                         for real-time information when needed - no configuration required!
                       </p>
                     </div>
@@ -1029,9 +1238,9 @@ export default function Settings() {
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-white font-medium">Username</h4>
                 {!editUsername && (
-                  <NeonButton 
-                    variant="ghost" 
-                    size="sm" 
+                  <NeonButton
+                    variant="ghost"
+                    size="sm"
                     onClick={() => {
                       setEditUsername(true);
                       setNewUsername(user?.username || '');
@@ -1073,9 +1282,9 @@ export default function Settings() {
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-white font-medium">Password / Access Code</h4>
                 {!editPassword && (
-                  <NeonButton 
-                    variant="ghost" 
-                    size="sm" 
+                  <NeonButton
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setEditPassword(true)}
                   >
                     Change
@@ -1169,7 +1378,7 @@ export default function Settings() {
               <h4 className="text-red-400 font-medium mb-2">Admin Access Active</h4>
               <p className="text-white/60 text-sm">You have elevated privileges. Use responsibly.</p>
             </div>
-            <Link to={createPageUrl('AdminDashboard')}>
+            <Link to="/admindashboard">
               <NeonButton variant="primary" className="w-full">
                 <Shield className="w-4 h-4 mr-2" />
                 Open Admin Console
@@ -1184,19 +1393,25 @@ export default function Settings() {
   }, [settings, user, profiles, activeProfile, accessCode, regenerateCooldown, isAdmin]);
 
   const filteredSections = useMemo(() => {
-    if (!searchQuery.trim()) return sections;
-    
+    if (!searchQuery.trim()) {
+      // Filter out Performance section in embedded mode
+      return embedded ? sections.filter(s => s.id !== 'performance') : sections;
+    }
+
     const query = searchQuery.toLowerCase();
     return sections.filter(section => {
-      const titleMatch = section.title.toLowerCase().includes(query);
-      const keywordMatch = section.keywords?.some(k => k.includes(query));
-      const controlMatch = section.controls?.some(c => 
-        c.title.toLowerCase().includes(query) || 
-        c.description.toLowerCase().includes(query)
+      // Skip Performance section in embedded mode
+      if (embedded && section.id === 'performance') return false;
+
+      const titleMatch = (section.title || '').toLowerCase().includes(query);
+      const keywordMatch = section.keywords?.some(k => (k || '').includes(query));
+      const controlMatch = section.controls?.some(c =>
+        (c.title || '').toLowerCase().includes(query) ||
+        (c.description || '').toLowerCase().includes(query)
       );
       return titleMatch || keywordMatch || controlMatch;
     });
-  }, [sections, searchQuery]);
+  }, [sections, searchQuery, embedded]);
 
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -1212,24 +1427,38 @@ export default function Settings() {
     setExpandedSections(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const containerClassName = embedded
+    ? 'h-full relative overflow-y-auto'
+    : 'min-h-screen relative overflow-hidden';
+  const containerStyle = {
+    background: embedded ? 'transparent' : settings.theme.background,
+    color: settings.theme.text
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+      <div className={`${embedded ? 'h-full' : 'min-h-screen'} bg-transparent flex items-center justify-center`}>
         <p className="text-white/50">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: settings.theme.background, color: settings.theme.text }}>
-      <SoftParticleDrift 
-        accentColor={settings.theme.accent}
-        particleCount={settings.background.particleCount}
-        speed={settings.background.speed}
-        opacity={settings.background.opacity}
-        blur={settings.background.blur}
-        lowEndMode={settings.lowEndMode}
-      />
+    <div className={containerClassName} style={containerStyle}>
+      {!embedded && (
+        <BackgroundRenderer
+          type={settings.background.type}
+          accentColor={settings.theme.accent}
+          particleCount={settings.background.particleCount}
+          speed={settings.background.speed}
+          opacity={settings.background.opacity}
+          blur={settings.background.blur}
+          lowEndMode={settings.lowEndMode}
+          targetFPS={settings.performance?.targetFPS ?? 60}
+          maxFPS={60}
+          inactiveFPS={10}
+        />
+      )}
 
       {/* Save Notification */}
       {saveNotification && (
@@ -1243,20 +1472,22 @@ export default function Settings() {
           {saveNotification}
         </motion.div>
       )}
-      
+
       <div className="relative z-10 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
-        <motion.header 
+        <motion.header
           className="mb-6"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <Link to={createPageUrl('Dashboard')}>
-                <NeonButton variant="ghost" size="icon">
-                  <ArrowLeft className="w-5 h-5" />
-                </NeonButton>
-              </Link>
+              {!embedded && (
+                <Link to={createPageUrl('Dashboard')}>
+                  <NeonButton variant="ghost" size="icon">
+                    <ArrowLeft className="w-5 h-5" />
+                  </NeonButton>
+                </Link>
+              )}
               <div>
                 <h1 className="text-3xl font-bold text-white">Settings</h1>
                 <p className="text-white/50">Customize your Nexus experience</p>
@@ -1286,7 +1517,7 @@ export default function Settings() {
                   </motion.div>
                 )}
               </div>
-              
+
               <div className="text-right">
                 <p className="text-xs text-white/40">Build Version</p>
                 <p className="text-sm text-white/70 font-mono">{BUILD_VERSION}</p>
@@ -1341,7 +1572,7 @@ export default function Settings() {
                         onChange={(value) => updateSetting(control.path, value)}
                       />
                     ))}
-                    
+
                     {/* Custom Schedule Editor */}
                     {settings.schedule?.enabled && (
                       <div className="mt-6 space-y-4">
@@ -1358,7 +1589,7 @@ export default function Settings() {
                               };
                               const newPeriods = [...(settings.schedule?.periods || []), newPeriod];
                               updateSetting('schedule.periods', newPeriods);
-                              
+
                               // Check for overlaps
                               const overlaps = checkPeriodsOverlap(newPeriods);
                               setPeriodValidationWarnings(overlaps);
@@ -1412,7 +1643,7 @@ export default function Settings() {
                                 <TrashIcon className="w-4 h-4" />
                               </button>
                             </div>
-                            
+
                             <div className="grid grid-cols-2 gap-3">
                               <div>
                                 <label className="text-white/60 text-sm mb-1 block">Start Time</label>
@@ -1496,7 +1727,7 @@ export default function Settings() {
           ))}
         </div>
 
-        <motion.div 
+        <motion.div
           className="mt-8 text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 
-export default function FPSMonitor({ 
-  visible = true, 
+export default function FPSMonitor({
+  visible = true,
   position = 'top-right',
-  onPerformanceChange 
+  onPerformanceChange
 }) {
   const [fps, setFps] = useState(60);
   const [status, setStatus] = useState('stable');
@@ -28,8 +28,20 @@ export default function FPSMonitor({
 
       if (frameTimesRef.current.length >= 10) {
         const avgDelta = frameTimesRef.current.reduce((a, b) => a + b, 0) / frameTimesRef.current.length;
-        const currentFPS = Math.round(1000 / avgDelta);
+        let currentFPS = Math.round(1000 / avgDelta);
+
+        // Use FPS throttler if available
+        if (window.fpsThrottler) {
+          currentFPS = window.fpsThrottler.getCurrentFPS();
+        }
+
         setFps(currentFPS);
+
+        // Expose FPS globally for other components
+        if (!window.fpsMonitor) {
+          window.fpsMonitor = {};
+        }
+        window.fpsMonitor.getCurrentFPS = () => currentFPS;
 
         if (currentFPS < 30) {
           lowFPSCountRef.current++;

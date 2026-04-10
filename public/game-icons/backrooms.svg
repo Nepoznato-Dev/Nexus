@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#00CED1"/>
+  <circle cx="90" cy="100" r="30" fill="#808080"/>
+  <circle cx="90" cy="100" r="20" fill="#000"/>
+  <circle cx="110" cy="100" r="30" fill="#808080"/>
+  <circle cx="110" cy="100" r="20" fill="#000"/>
+  <rect x="85" y="60" width="30" height="10" fill="#000"/>
+  <rect x="70" y="130" width="60" height="50" fill="#808080"/>
+  <text x="100" y="160" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="#000">VR</text>
+</svg>

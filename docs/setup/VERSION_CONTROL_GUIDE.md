@@ -11,11 +11,13 @@ The version control system allows users to select which version of Nexus they wa
 ## 🔧 How It Works
 
 ### 1. User sets version in Settings
+
 ```
 Settings → Nexus Version → Select v2.0.0 → Switch Version
 ```
 
 ### 2. Version saved to localStorage
+
 ```javascript
 // Stored via clientStorage.saveSettings()
 {
@@ -24,6 +26,7 @@ Settings → Nexus Version → Select v2.0.0 → Switch Version
 ```
 
 ### 3. App checks version on load
+
 ```javascript
 // VersionContext reads from localStorage
 const { currentVersion, isFeatureEnabled } = useVersion();
@@ -31,6 +34,7 @@ const { currentVersion, isFeatureEnabled } = useVersion();
 ```
 
 ### 4. Features enable/disable based on version
+
 ```javascript
 {isFeatureEnabled('advancedAI') && <AIDropdown ... />}
 // With v2.0.0: true → renders
@@ -42,6 +46,7 @@ const { currentVersion, isFeatureEnabled } = useVersion();
 ## 📋 Configuration
 
 ### versionConfig.json
+
 Defines all versions and their features:
 
 ```json
@@ -70,14 +75,17 @@ Defines all versions and their features:
 ```
 
 ### Add New Feature
+
 1. Add to ALL versions in versionConfig.json:
+
 ```json
 {
   "newFeature": true  // v1.0.0
 }
 ```
 
-2. In new versions set to:
+1. In new versions set to:
+
 ```json
 {
   "newFeature": true   // v2.0.0 (or false to disable)
@@ -89,6 +97,7 @@ Defines all versions and their features:
 ## 💻 Using in Components
 
 ### Option 1: useVersion Hook
+
 ```javascript
 import { useVersion } from '../contexts/VersionContext.js';
 
@@ -114,6 +123,7 @@ export default function Layout() {
 ```
 
 ### Option 2: FeatureGate Component
+
 ```javascript
 import { FeatureGate } from '../contexts/VersionContext.js';
 
@@ -136,6 +146,7 @@ export default function Dashboard() {
 ```
 
 ### Option 3: Conditional Logic
+
 ```javascript
 import { useVersion } from '../contexts/VersionContext.js';
 
@@ -157,6 +168,7 @@ export default function AIChat() {
 ## 🚀 Setup Instructions
 
 ### 1. Wrap App with VersionProvider
+
 In `src/App.js`:
 
 ```javascript
@@ -172,6 +184,7 @@ function App() {
 ```
 
 ### 2. Add Version Selector to Settings
+
 In your Settings page component:
 
 ```javascript
@@ -188,9 +201,11 @@ export default function Settings() {
 ```
 
 ### 3. Update Components with Feature Gates
+
 Find components that should differ by version and add gates:
 
 **For Simple AI vs Advanced AI:**
+
 ```javascript
 // src/Layout.js
 
@@ -210,6 +225,7 @@ Find components that should differ by version and add gates:
 ## 📝 Adding a New Version
 
 ### Step 1: Update versionConfig.json
+
 ```json
 {
   "version": "1.1.0",
@@ -226,6 +242,7 @@ Find components that should differ by version and add gates:
 ```
 
 ### Step 2: Implement Feature
+
 ```javascript
 // Create new component or feature
 // Create conditional gates in existing components
@@ -239,6 +256,7 @@ Find components that should differ by version and add gates:
 ```
 
 ### Step 3: Test
+
 ```
 1. Set version to "1.1.0" in Settings
 2. Verify new features appear
@@ -267,6 +285,7 @@ Current feature breakdown:
 ## 🔍 Debugging
 
 ### Check Current Version
+
 ```javascript
 const { currentVersion, currentFeatures } = useVersion();
 console.log('Current version:', currentVersion);
@@ -274,12 +293,14 @@ console.log('Features:', currentFeatures);
 ```
 
 ### Verify Feature Gate
+
 ```javascript
 const { isFeatureEnabled } = useVersion();
 console.log('AI Dropdown enabled?', isFeatureEnabled('aiDropdown'));
 ```
 
 ### Check localStorage
+
 ```javascript
 // In browser console
 localStorage.getItem('nexus_settings')
@@ -320,6 +341,7 @@ localStorage.getItem('nexus_settings')
 ## 🎓 Complete Example
 
 ### Before (All features always active)
+
 ```javascript
 // AIDropdown always imported and shown
 import AIDropdown from './AAS/AIDropdown.js';
@@ -334,6 +356,7 @@ export default function Layout() {
 ```
 
 ### After (Features gated by version)
+
 ```javascript
 import { useVersion } from './contexts/VersionContext.js';
 import AIDropdown from './AAS/AIDropdown.js';
