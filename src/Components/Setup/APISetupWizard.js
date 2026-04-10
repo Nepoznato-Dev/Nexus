@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, AlertCircle, Key, Sparkles, Loader2 } from 'lucide-react';
 import GlassCard from '../UI/GlassCard.js';
 import { Input } from '../UI/input.js';
-import Button from '../UI/button.js';
+import { Button } from '../UI/button.js';
 import { storage } from '../Storage/clientStorage.js';
 
 /**
