@@ -222,7 +222,7 @@ export function matchShortcut(event, shortcut) {
   const meta = parts.includes('meta');
   
   return (
-    (event.key.toLowerCase() === key || event.code.toLowerCase() === 'key' + key) &&
+    (event.key.toLowerCase() === key || event.code === ('Key' + key.toUpperCase()) || event.code.toLowerCase() === key) &&
     event.ctrlKey === ctrl &&
     event.shiftKey === shift &&
     event.altKey === alt &&

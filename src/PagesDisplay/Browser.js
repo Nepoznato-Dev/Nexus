@@ -599,16 +599,19 @@ function StickyNote({ note, onRemove, onUpdate }) {
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [editing, setEditing] = useState(false);
   const [content, setContent] = useState(note.content);
+  const posRef = useRef(pos);
+
+  useEffect(() => { posRef.current = pos; }, [pos]);
 
   const startDrag = (e) => { setDragging(true); setOffset({ x: e.clientX - pos.x, y: e.clientY - pos.y }); };
   useEffect(() => {
     if (!dragging) return;
     const onMove = (e) => setPos({ x: e.clientX - offset.x, y: e.clientY - offset.y });
-    const onUp = () => { setDragging(false); onUpdate({ ...note, x: pos.x, y: pos.y }); };
+    const onUp = () => { setDragging(false); onUpdate({ ...note, x: posRef.current.x, y: posRef.current.y }); };
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
     return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
-  }, [dragging, offset.x, offset.y, pos.x, pos.y]);
+  }, [dragging, offset.x, offset.y]);
 
   return (
     <div className="fixed z-40 rounded-lg shadow-2xl w-52" style={{ left: pos.x, top: pos.y, background: note.color }}>

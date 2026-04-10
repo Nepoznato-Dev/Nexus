@@ -157,7 +157,7 @@ export default function BrowserSettings({ settings, onUpdate, profiles, currentP
                 value={(settings.focusBlocklist || []).join('\n')}
                 onChange={e => update('focusBlocklist', e.target.value.split('\n').filter(Boolean))}
                 className="w-full bg-white/5 text-white text-xs px-2 py-1.5 rounded outline-none placeholder-white/30 font-mono h-20 resize-none"
-                placeholder="facebook.com&#10;twitter.com&#10;reddit.com"
+                placeholder={"facebook.com\ntwitter.com\nreddit.com"}
               />
               <div className="flex gap-2 mt-2">
                 <div className="flex-1">
@@ -485,7 +485,7 @@ function CSSEditor({ customCSS, onChange }) {
         value={css}
         onChange={e => setCss(e.target.value)}
         className="w-full bg-[#0a0a12] text-green-400 text-xs font-mono px-2 py-1.5 rounded outline-none h-24 resize-y border border-white/10"
-        placeholder="/* Custom CSS for this domain */&#10;body { background: #000 !important; }"
+        placeholder={"/* Custom CSS for this domain */\nbody { background: #000 !important; }"}
         spellCheck={false}
       />
       <button onClick={save} disabled={!domain} className="w-full py-1.5 text-xs bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded disabled:opacity-40">
