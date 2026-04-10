@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { RotateCcw, Play, Pause, Download } from 'lucide-react';
+import * as THREE from 'three';
 
 const DEMOS = {
   spinning_cube: {
@@ -114,18 +115,18 @@ export default function BrowserCanvas3D() {
   const [customCode, setCustomCode] = useState('');
   const [showEditor, setShowEditor] = useState(false);
 
-  // Load Three.js from CDN
+  // Use npm-installed Three.js
   useEffect(() => {
-    if (window.THREE) { setThreeLoaded(true); return; }
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js';
-    script.onload = () => { threeRef.current = window.THREE; setThreeLoaded(true); };
-    script.onerror = () => setError('Failed to load Three.js. Check your internet connection.');
-    document.head.appendChild(script);
+    if (THREE) {
+      window.THREE = THREE;
+      threeRef.current = THREE;
+      setThreeLoaded(true);
+    } else {
+      setError('Three.js could not be loaded.');
+    }
   }, []);
 
   const initScene = () => {
-    const THREE = window.THREE;
     if (!THREE || !mountRef.current) return;
 
     // Cleanup previous

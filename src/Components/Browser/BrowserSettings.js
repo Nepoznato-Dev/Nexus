@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Shield, Palette, Keyboard, User, Zap, Globe, Eye } from 'lucide-react';
-import { SEARCH_ENGINES, DEFAULT_SETTINGS } from './browserState.js';
+import { DEFAULT_SETTINGS } from './browserState.js';
+import { SEARCH_ENGINES } from './browserFilters.js';
 
 const SECTIONS = [
   { id: 'privacy', icon: Shield, label: 'Privacy' },
