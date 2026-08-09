@@ -209,9 +209,9 @@
                 }
                 const loader = document.querySelector("#loader");
                 if (!gameInstance.progress) {
-                    const progress = document.querySelector("#loader .progress");
-                    progress.style.display = "block";
-                    gameInstance.progress = progress.querySelector(".full");
+                    const progressEl = document.querySelector("#loader .progress");
+                    progressEl.style.display = "block";
+                    gameInstance.progress = progressEl.querySelector(".full");
                     loader.querySelector(".spinner").style.display = "none";
                 }
                 gameInstance.progress.style.transform = `scaleX(${progress})`;
